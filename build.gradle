@@ -1,0 +1,92 @@
+buildscript{
+    dependencies{
+        classpath "com.github.Anuken.Mindustry:core:$mindustryVersion"
+        classpath "com.squareup:javapoet:$javapoetVersion"
+        classpath "com.github.Anuken:jabel:$jabelVersion"
+    }
+
+    repositories{
+        mavenCentral()
+        maven{ url 'https://jitpack.io' }
+    }
+}
+
+allprojects{
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    group = 'com.github.AvantTeam'
+    version = modVersion
+
+    ext{
+        sdkRoot = System.getenv('ANDROID_HOME') ?: System.getenv('ANDROID_SDK_ROOT')
+        windows = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')
+        taskNames = gradle.startParameter.taskNames
+
+        assetsDir = new File(project(':main').projectDir, 'assets/')
+        assetsRawDir = new File(project(':main').projectDir, 'assets-raw/')
+        spritesDir = new File(assetsDir, 'sprites/')
+        spritesRawDir = new File(assetsRawDir, 'sprites/')
+
+        // `-Pmain.dev` will initiate a development build. Default is `false`.
+        devBuild = project.hasProperty('main.dev') && Boolean.parseBoolean(project.property('main.dev') as String)
+
+        // `-Ptools.recompile` will force the :main project to recompile. Default is `false`.
+        toolRecompile = project.hasProperty('tools.recompile') && Boolean.parseBoolean(project.property('tools.recompile') as String)
+
+        // `-Ptools.rearch` will make the .jar file resulted from :main:deploy and/or :main:deployDex also include the generated
+        // assets, without recompiling. Default is `true`.
+        // See also :tools:rearchive
+        toolRearchive = !project.hasProperty('tools.rearch') || Boolean.parseBoolean(project.property('tools.rearch') as String)
+    }
+
+    repositories{
+        mavenCentral()
+        maven{ url "https://jitpack.io" }
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes){
+        archiveClassifier.set 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts{
+        archives sourcesJar
+    }
+
+    java{
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    publishing{
+        publications{
+            maven(MavenPublication){
+                from components.java
+            }
+        }
+    }
+
+    tasks.withType(JavaCompile){
+        options.incremental = true
+        options.encoding = 'UTF-8'
+        options.compilerArgs += '-Xlint:deprecation'
+
+        options.fork = true
+        options.forkOptions.jvmArgs += [
+            '--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED',
+            '--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED',
+            '--add-opens=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED',
+            '--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED',
+            '--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED',
+            '--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED',
+            '--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED',
+            '--add-opens=java.base/sun.reflect.annotation=ALL-UNNAMED'
+        ]
+    }
+
+    tasks.withType(Javadoc){
+        options.addStringOption('Xdoclint:none', '-quiet')
+        options.addStringOption('-release', '16')
+    }
+}

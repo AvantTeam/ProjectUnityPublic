@@ -1,0 +1,15 @@
+# Build settings
+bin/
+build/
+.gradle/
+.settings/
+.project
+.classpath
+
+# Project
+main/assets/sprites/
+
+# IDE-specific
+.idea/
+.vscode/
+.kateproject

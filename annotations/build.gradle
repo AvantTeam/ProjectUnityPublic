@@ -1,0 +1,17 @@
+sourceSets.main{
+    java.srcDirs = ['src/']
+    resources.srcDirs = ['assets/']
+}
+
+sourceCompatibility = 8
+targetCompatibility = 8
+
+dependencies{
+    implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    implementation "com.squareup:javapoet:$javapoetVersion"
+}
+
+tasks.withType(JavaCompile){
+    sourceCompatibility = 8
+    targetCompatibility = 8
+}
