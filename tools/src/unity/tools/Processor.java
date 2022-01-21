@@ -26,7 +26,7 @@ public interface Processor{
                 run.run();
             }catch(Throwable t){
                 String msg = Strings.getFinalMessage(t);
-                Log.err("@: @", msg != null ? msg : Strings.getFinalCause(t));
+                Log.err("@: @", name, msg != null ? msg : Strings.getFinalCause(t).toString());
             }
         });
     }

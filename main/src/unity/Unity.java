@@ -8,6 +8,7 @@ import mindustry.game.EventType.*;
 import mindustry.mod.*;
 import mindustry.world.blocks.environment.*;
 import unity.annotations.Annotations.*;
+import unity.content.*;
 import unity.gen.*;
 import unity.mod.*;
 import unity.util.*;
@@ -82,6 +83,8 @@ public class Unity extends Mod{
     @Override
     public void loadContent(){
         Faction.init();
+
+        UnityUnitTypes.load();
 
         FactionMeta.init();
         UnityEntityMapping.init();

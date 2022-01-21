@@ -7,7 +7,6 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.noise.*;
-import mindustry.content.*;
 import mindustry.gen.*;
 import unity.gen.*;
 import unity.tools.*;
@@ -31,6 +30,8 @@ import static unity.tools.Tools.*;
  *     <li> Wreck regions. </li>
  * </ul>
  * @author GlennFolker
+ * @author Drullkus
+ * @author Anuke
  */
 public class UnitProcessor implements Processor{
     private final ObjectSet<String> outlined = new ObjectSet<>();
@@ -42,7 +43,7 @@ public class UnitProcessor implements Processor{
     }
 
     @Override
-    @SuppressWarnings("SuspiciousNameCombination") // sus
+    @SuppressWarnings("SuspiciousNameCombination") // sus :flushed:
     public void process(ExecutorService exec){
         content.units().each(type -> type instanceof UnityUnitType && !type.isHidden(), (UnityUnitType type) -> submit(exec, type.name, () -> {
             init(type);
@@ -53,12 +54,13 @@ public class UnitProcessor implements Processor{
             Seq<String> optional = Seq.with("-joint", "-joint-base", "-leg-back", "-leg-base-back", "-foot");
             Boolf<GenRegion> opt = r -> !optional.contains(e -> r.name.contains(e)) || r.found();
 
-            Cons3<GenRegion, String, Pixmap> add = (relative, name, pixmap) -> {
+            Func3<GenRegion, String, Pixmap, GenRegion> add = (relative, name, pixmap) -> {
                 if(!relative.found()) throw new IllegalArgumentException("Cannot use a non-existent region as a relative point: " + relative);
 
                 GenRegion reg = new GenRegion(name, pixmap);
                 reg.relativePath = relative.relativePath;
                 reg.save();
+                return reg;
             };
 
             Func<TextureRegion, TextureRegion> outliner = t -> {
@@ -94,10 +96,46 @@ public class UnitProcessor implements Processor{
 
             if(unit instanceof Mechc) outliner.get(type.legRegion);
 
+            if(unit instanceof Copterc){
+                for(var rotor : type.rotors){
+                    GenRegion region = conv(rotor.bladeRegion);
+
+                    outlSeparate.get(region, "outline");
+                    outliner.get(rotor.topRegion);
+
+                    if(atlas.has(rotor.name + "-blade-ghost") || !atlas.has(rotor.name + "-blade")){
+                        rotor.load();
+                        continue;
+                    }
+
+                    Pixmap bladeSprite = region.pixmap();
+
+                    // This array is to be written in the order where colors at index 0 are located towards the center,
+                    // and colors at the end of the array is located towards at the edge.
+                    int[] heightAverageColors = new int[(bladeSprite.height >> 1) + 1]; // Go one extra so it becomes transparent especially if blade is full length
+                    int bladeLength = populateColorArray(heightAverageColors, bladeSprite, bladeSprite.height >> 1);
+
+                    Pixmap ghostSprite = new Pixmap(bladeSprite.height, bladeSprite.height);
+                    drawRadial(ghostSprite, heightAverageColors, bladeLength);
+                    add.get(region, rotor.name + "-blade-ghost", ghostSprite);
+
+                    if(atlas.has(rotor.name + "-blade-shade")){
+                        rotor.load();
+                        continue;
+                    }
+
+                    Pixmap shadeSprite = new Pixmap(bladeSprite.height, bladeSprite.height);
+                    drawShade(shadeSprite, bladeLength);
+                    add.get(region, rotor.name + "-blade-shade", shadeSprite);
+
+                    rotor.load();
+                }
+            }
+
             Pixmap icon = Pixmaps.outline(new PixmapRegion(conv(type.region).pixmap()), type.outlineColor, type.outlineRadius);
             add.get(conv(type.region), type.name + "-outline", icon.copy());
 
-            icon.draw(Pixmaps.outline(new PixmapRegion(conv(type.region).pixmap()), type.outlineColor, type.outlineRadius), true);
+            //icon.draw(Pixmaps.outline(new PixmapRegion(conv(type.region).pixmap()), type.outlineColor, type.outlineRadius), true);
 
             if(unit instanceof Mechc){
                 GraphicUtils.drawCenter(icon, conv(type.baseRegion).pixmap());
@@ -110,13 +148,30 @@ public class UnitProcessor implements Processor{
                 icon.draw(conv(type.region).pixmap(), true);
             }
 
+            type.weapons.sort(w -> w.layerOffset);
             for(var weapon : type.weapons){
                 if(weapon.name.isEmpty()) continue;
 
                 GenRegion reg = conv(weapon.region);
-                add.get(reg, weapon.name + "-outline", Pixmaps.outline(new PixmapRegion(reg.pixmap()), type.outlineColor, type.outlineRadius));
+                Pixmap pix;
+                add.get(reg, weapon.name + "-outline", pix = Pixmaps.outline(new PixmapRegion(reg.pixmap()), type.outlineColor, type.outlineRadius));
 
-                // TODO since the old `bottomWeapons` are removed and now replaced with layer offsets, ...rework this.
+                if(weapon.layerOffset >= 0f) continue;
+
+                pix = pix.copy();
+                if(weapon.flipSprite){
+                    Pixmap newPix = pix.flipX();
+                    pix.dispose();
+                    pix = newPix;
+                }
+
+                icon.draw(pix,
+                    (int)(weapon.x / scl + icon.width / 2f - reg.width / 2f),
+                    (int)(-weapon.y / scl + icon.height / 2f - reg.height / 2f),
+                    true
+                );
+
+                pix.dispose();
                 weapon.load();
             }
 
@@ -130,10 +185,10 @@ public class UnitProcessor implements Processor{
             icon.draw(cell, icon.width / 2 - cell.width / 2, icon.height / 2 - cell.height / 2, true);
 
             for(var weapon : type.weapons){
-                if(weapon.name.isEmpty()) continue;
+                if(weapon.layerOffset < 0f || weapon.name.isEmpty()) continue;
 
-                GenRegion wepReg = weapon.top ? atlas.find(weapon.name + "-outline") : conv(weapon.region);
-                Pixmap pix = wepReg.pixmap().copy();
+                GenRegion reg = weapon.top ? atlas.find(weapon.name + "-outline") : conv(weapon.region);
+                Pixmap pix = reg.pixmap().copy();
 
                 if(weapon.flipSprite){
                     Pixmap newPix = pix.flipX();
@@ -142,60 +197,149 @@ public class UnitProcessor implements Processor{
                 }
 
                 icon.draw(pix,
-                    (int)(weapon.x / scl + icon.width / 2f - weapon.region.width / 2f),
-                    (int)(-weapon.y / scl + icon.height / 2f - weapon.region.height / 2f),
+                    (int)(weapon.x / scl + icon.width / 2f - reg.width / 2f),
+                    (int)(-weapon.y / scl + icon.height / 2f - reg.height / 2f),
                     true
                 );
-
-                if(weapon.mirror){
-                    Pixmap mirror = pix.flipX();
-
-                    icon.draw(mirror,
-                        (int)(-weapon.x / scl + icon.width / 2f - weapon.region.width / 2f),
-                        (int)(-weapon.y / scl + icon.height / 2f - weapon.region.height / 2f),
-                        true
-                    );
-
-                    mirror.dispose();
-                }
 
                 pix.dispose();
                 weapon.load();
             }
 
-            add.get(conv(type.region), type.name + "-full", icon);
+            if(unit instanceof Copterc){
+                Pixmap propellers = new Pixmap(icon.width, icon.height);
+                Pixmap tops = new Pixmap(icon.width, icon.height);
 
-            // Only generate wreck regions if it is larger than zenith
-            if(type.hitSize > UnitTypes.zenith.hitSize){
-                Rand rand = new Rand();
-                rand.setSeed(type.name.hashCode());
+                for(var rotor : type.rotors){
+                    Pixmap bladeSprite = conv(rotor.bladeRegion).pixmap();
 
-                int splits = 3;
-                float degrees = rand.random(360f);
-                float offsetRange = Math.max(icon.width, icon.height) * 0.15f;
-                Vec2 offset = new Vec2(1, 1).rotate(rand.random(360f)).setLength(rand.random(0, offsetRange)).add(icon.width / 2f, icon.height / 2f);
+                    float bladeSeparation = 360f / rotor.bladeCount;
 
-                Pixmap[] wrecks = new Pixmap[splits];
-                for(int i = 0; i < wrecks.length; i++){
-                    wrecks[i] = new Pixmap(icon.width, icon.height);
+                    float propXCenter = (rotor.x / scl + icon.width / 2f) - 0.5f;
+                    float propYCenter = (-rotor.y / scl + icon.height / 2f) - 0.5f;
+
+                    float bladeSpriteXCenter = bladeSprite.width / 2f - 0.5f;
+                    float bladeSpriteYCenter = bladeSprite.height / 2f - 0.5f;
+
+                    int propWidth = propellers.width;
+                    int propHeight = propellers.height;
+                    for(int x = 0; x < propWidth; x++){
+                        for(int y = 0; y < propHeight; y++){
+                            for(int blade = 0; blade < rotor.bladeCount; blade++){
+                                float deg = blade * bladeSeparation;
+                                float cos = Mathf.cosDeg(deg);
+                                float sin = Mathf.sinDeg(deg);
+                                int col = GraphicUtils.getColor(
+                                    new PixmapRegion(bladeSprite),
+                                    ((propXCenter - x) * cos + (propYCenter - y) * sin) + bladeSpriteXCenter,
+                                    ((propXCenter - x) * sin - (propYCenter - y) * cos) + bladeSpriteYCenter
+                                );
+
+                                propellers.setRaw(x, y, Pixmap.blend(
+                                    propellers.getRaw(x, y),
+                                    col
+                                ));
+                            }
+                        }
+                    }
+
+                    Pixmap topSprite = conv(rotor.topRegion).pixmap();
+                    int topXCenter = (int)(rotor.x / scl + icon.width / 2f - topSprite.width / 2f);
+                    int topYCenter = (int)(-rotor.y / scl + icon.height / 2f - topSprite.height / 2f);
+
+                    tops.draw(topSprite, topXCenter, topYCenter, true);
+
+                    if(rotor.mirror){
+                        propXCenter = (-rotor.x / scl + icon.width / 2f) - 0.5f;
+                        topXCenter = (int)(-rotor.x / scl + icon.width / 2f - topSprite.width / 2f);
+
+                        for(int x = 0; x < propWidth; x++){
+                            for(int y = 0; y < propHeight; y++){
+                                for(int blade = 0; blade < rotor.bladeCount; blade++){
+                                    float deg = blade * bladeSeparation;
+                                    float cos = Mathf.cosDeg(deg);
+                                    float sin = Mathf.sinDeg(deg);
+
+                                    int col = GraphicUtils.getColor(
+                                        new PixmapRegion(bladeSprite),
+                                        ((propXCenter - x) * cos + (propYCenter - y) * sin) + bladeSpriteXCenter,
+                                        ((propXCenter - x) * sin - (propYCenter - y) * cos) + bladeSpriteYCenter
+                                    );
+
+                                    propellers.setRaw(x, y, Pixmap.blend(
+                                        propellers.getRaw(x, y),
+                                        col
+                                    ));
+                                }
+                            }
+                        }
+
+                        tops.draw(topSprite, topXCenter, topYCenter, true);
+                    }
                 }
 
-                VoronoiNoise vn = new VoronoiNoise(type.id, true);
+                Pixmap propOutlined = Pixmaps.outline(new PixmapRegion(propellers), type.outlineColor, type.outlineRadius);
+                icon.draw(propOutlined, true);
+                icon.draw(tops, true);
 
-                icon.each((x, y) -> {
+                propellers.dispose();
+                tops.dispose();
+
+                Pixmap payloadCell = new Pixmap(baseCell.width, baseCell.height);
+                int cellCenterX = payloadCell.width / 2;
+                int cellCenterY = payloadCell.height / 2;
+                int propCenterX = propOutlined.width / 2;
+                int propCenterY = propOutlined.height / 2;
+
+                boolean collided = false;
+                for(int x = 0; x < payloadCell.width; x++){
+                    for(int y = 0; y < payloadCell.height; y++){
+                        int cellX = x - cellCenterX;
+                        int cellY = y - cellCenterY;
+
+                        int base = baseCell.getRaw(x, y);
+                        float alpha = SColor.a(propOutlined.get(cellX + propCenterX, cellY + propCenterY));
+                        if(!collided && SColor.a(base) > 0f && alpha > 0f) collided = true;
+
+                        payloadCell.setRaw(x, y, SColor.mul(base, 1f, 1f, 1f, 1f - alpha));
+                    }
+                }
+
+                propOutlined.dispose();
+                if(collided){
+                    add.get(conv(type.region), type.name + "-cell-payload", payloadCell);
+                }else{
+                    payloadCell.dispose();
+                }
+            }
+
+            add.get(conv(type.region), type.name + "-full", icon);
+
+            Rand rand = new Rand();
+            rand.setSeed(type.name.hashCode());
+
+            int splits = 3;
+            float degrees = rand.random(360f);
+            float offsetRange = Math.max(icon.width, icon.height) * 0.15f;
+            Vec2 offset = new Vec2(1, 1).rotate(rand.random(360f)).setLength(rand.random(0, offsetRange)).add(icon.width / 2f, icon.height / 2f);
+
+            Pixmap[] wrecks = new Pixmap[splits];
+            for(int i = 0; i < wrecks.length; i++){
+                wrecks[i] = new Pixmap(icon.width, icon.height);
+            }
+
+            VoronoiNoise voronoi = new VoronoiNoise(type.id, true);
+            icon.each((x, y) -> {
+                if(voronoi.noise(x, y, 1f / (14f + icon.width/40f)) <= 0.47d){
                     boolean rValue = Math.max(Ridged.noise2d(1, x, y, 3, 1f / (20f + icon.width / 8f)), 0) > 0.16f;
-                    boolean vval = vn.noise(x, y, 1f / (14f + icon.width/40f)) > 0.47;
 
                     float dst =  offset.dst(x, y);
                     float noise = (float)Noise.rawNoise(dst / (9f + icon.width / 70f)) * (60 + icon.width / 30f);
-                    int section = (int)Mathf.clamp(Mathf.mod(offset.angleTo(x, y) + noise + degrees, 360f) / 360f * splits, 0, splits - 1);
-                    if(!vval) wrecks[section].setRaw(x, y, Color.muli(icon.getRaw(x, y), rValue ? 0.7f : 1f));
-                });
-
-                for(int i = 0; i < wrecks.length; i++){
-                    add.get(conv(type.region), type.name + "-wreck" + i, wrecks[i]);
+                    wrecks[(int)Mathf.clamp(Mathf.mod(offset.angleTo(x, y) + noise + degrees, 360f) / 360f * splits, 0, splits - 1)].setRaw(x, y, Color.muli(icon.getRaw(x, y), rValue ? 0.7f : 1f));
                 }
-            }
+            });
+
+            for(int i = 0; i < wrecks.length; i++) add.get(conv(type.region), type.name + "-wreck" + i, wrecks[i]);
         }));
     }
 
@@ -254,15 +398,16 @@ public class UnitProcessor implements Processor{
                 int arrayIndex = Mathf.clamp((int)positionLength, 0, tableLimit);
                 float a = Mathf.cos(Mathf.atan2(x + spriteCenter, y + spriteCenter) * 8) * 0.05f + 0.95f;
                 a *= a;
+                a *= a;
 
-                sprite.set(x, y, SColor.mul(
+                sprite.setRaw(x, y, SColor.mul(
                     GraphicUtils.colorLerp(
                         colorTable[arrayIndex],
                         colorTable[arrayIndex + 1], positionLength % 1f
-                    ), a, a, a, a * (1 - 0.5f / (tableLimit - positionLength + 0.5f)))
+                    ), a, a, a, a * (1f - 0.5f / (tableLimit - positionLength + 0.5f)))
                 );
             }else{
-                sprite.set(x, y, 0);
+                sprite.setRaw(x, y, 0);
             }
         });
     }
@@ -280,7 +425,7 @@ public class UnitProcessor implements Processor{
             // The output values of the noise functions from the noise class are awful that
             // every integer value always result in a 0. Offsetting by 0.5 results in delicious good noise.
             // The additional offset is only that the noise values close to origin make for bad output for the sprite.
-            offsets[i] = (float)Noise.rawNoise(i + 2.5f);
+            offsets[i] = (float)Noise.rawNoise(i + 3.5d);
         }
 
         sprite.each((x, y) -> {
