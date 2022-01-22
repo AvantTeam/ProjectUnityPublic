@@ -33,19 +33,6 @@ public class UnityUnitType extends UnitType{
     }
 
     @Override
-    public void drawCell(Unit unit){
-        if(unit.isAdded()){
-            super.drawCell(unit);
-        }else{
-            applyColor(unit);
-
-            Draw.color(cellColor(unit));
-            Draw.rect(payloadCellRegion, unit.x, unit.y, unit.rotation - 90);
-            Draw.reset();
-        }
-    }
-
-    @Override
     public void init(){
         super.init();
 
@@ -63,6 +50,19 @@ public class UnityUnitType extends UnitType{
             }
         }
         rotors.set(mapped);
+    }
+
+    @Override
+    public void drawCell(Unit unit){
+        if(unit.isAdded()){
+            super.drawCell(unit);
+        }else{
+            applyColor(unit);
+
+            Draw.color(cellColor(unit));
+            Draw.rect(payloadCellRegion, unit.x, unit.y, unit.rotation - 90);
+            Draw.reset();
+        }
     }
 
     @Override

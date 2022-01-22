@@ -12,7 +12,6 @@ import unity.type.*;
 import static mindustry.Vars.*;
 
 /**
- * Helicopter entity component.
  * @author GlennFolker
  * @author MEEPofFaith
  */

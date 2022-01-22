@@ -11,7 +11,7 @@ import unity.*;
  * @author GlennFolker
  */
 @SuppressWarnings("unused")
-public interface MusicHandler extends Disposable{
+public interface MusicHandler{
     /** Called in {@link Unity#init()}. */
     default void init(){}
 
@@ -31,8 +31,4 @@ public interface MusicHandler extends Disposable{
      * played by finding the data with the maximum players.
      */
     default void play(String name, Boolp predicate){}
-
-    /** Override. Should clear all registered music loops. */
-    @Override
-    default void dispose(){}
 }

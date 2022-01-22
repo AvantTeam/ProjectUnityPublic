@@ -19,7 +19,9 @@ public final class JSBridge{
     public static ImporterTopLevel defaultScope;
     public static ImporterTopLevel unityScope;
 
-    private JSBridge(){}
+    private JSBridge(){
+        throw new AssertionError();
+    }
 
     /** Initializes the JS bridge. Call this in the main thread only! */
     public static void init(){

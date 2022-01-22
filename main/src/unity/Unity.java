@@ -84,6 +84,8 @@ public class Unity extends Mod{
     public void loadContent(){
         Faction.init();
 
+        UnityStatusEffects.load();
+        UnityBullets.load();
         UnityUnitTypes.load();
 
         FactionMeta.init();

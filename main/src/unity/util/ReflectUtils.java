@@ -7,6 +7,10 @@ import static mindustry.Vars.*;
 /** @author GlennFolker */
 @SuppressWarnings("unchecked")
 public final class ReflectUtils{
+    private ReflectUtils(){
+        throw new AssertionError();
+    }
+
     public static Class<?> box(Class<?> type){
         if(type == boolean.class) return Boolean.class;
         if(type == byte.class) return Byte.class;

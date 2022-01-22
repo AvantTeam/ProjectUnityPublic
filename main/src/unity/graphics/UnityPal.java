@@ -5,7 +5,7 @@ import mindustry.graphics.*;
 
 import static arc.graphics.Color.*;
 
-public class UnityPal{
+public final class UnityPal{
     public static Color
 
     monolithLight = valueOf("c0ecff"),
@@ -16,4 +16,8 @@ public class UnityPal{
     outline = Pal.darkerMetal,
     darkOutline = valueOf("38383d"),
     darkerOutline = valueOf("2e3142");
+
+    private UnityPal(){
+        throw new AssertionError();
+    }
 }

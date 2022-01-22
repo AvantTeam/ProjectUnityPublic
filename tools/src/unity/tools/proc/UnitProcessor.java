@@ -12,6 +12,7 @@ import unity.gen.*;
 import unity.tools.*;
 import unity.tools.GenAtlas.*;
 import unity.type.*;
+import unity.type.weapons.*;
 import unity.util.*;
 
 import java.util.concurrent.*;
@@ -135,8 +136,6 @@ public class UnitProcessor implements Processor{
             Pixmap icon = Pixmaps.outline(new PixmapRegion(conv(type.region).pixmap()), type.outlineColor, type.outlineRadius);
             add.get(conv(type.region), type.name + "-outline", icon.copy());
 
-            //icon.draw(Pixmaps.outline(new PixmapRegion(conv(type.region).pixmap()), type.outlineColor, type.outlineRadius), true);
-
             if(unit instanceof Mechc){
                 GraphicUtils.drawCenter(icon, conv(type.baseRegion).pixmap());
                 GraphicUtils.drawCenter(icon, conv(type.legRegion).pixmap());
@@ -150,28 +149,65 @@ public class UnitProcessor implements Processor{
 
             type.weapons.sort(w -> w.layerOffset);
             for(var weapon : type.weapons){
-                if(weapon.name.isEmpty()) continue;
-
                 GenRegion reg = conv(weapon.region);
-                Pixmap pix;
-                add.get(reg, weapon.name + "-outline", pix = Pixmaps.outline(new PixmapRegion(reg.pixmap()), type.outlineColor, type.outlineRadius));
+                Pixmap pix = weapon.name.isEmpty() ? null : add.get(reg, weapon.name + "-outline", Pixmaps.outline(new PixmapRegion(reg.pixmap()), type.outlineColor, type.outlineRadius)).pixmap();
+                if(pix != null && weapon.flipSprite) pix = pix.flipX();
 
-                if(weapon.layerOffset >= 0f) continue;
+                if(weapon instanceof MultiBarrelWeapon w){
+                    if(pix != null){
+                        icon.draw(pix,
+                            (int)(weapon.x / scl + icon.width / 2f - pix.width / 2f),
+                            (int)(-weapon.y / scl + icon.height / 2f - pix.height / 2f),
+                            true
+                        );
+                    }
 
-                pix = pix.copy();
-                if(weapon.flipSprite){
-                    Pixmap newPix = pix.flipX();
-                    pix.dispose();
-                    pix = newPix;
+                    GenRegion barrelReg = conv(w.barrelRegion);
+                    Pixmap barrelPix = add.get(barrelReg, barrelReg.name + "-outline", Pixmaps.outline(new PixmapRegion(barrelReg.pixmap()), type.outlineColor, type.outlineRadius)).pixmap(), pixFlip = barrelPix.flipX();
+
+                    for(int i = w.flipSprite ? w.barrels - 1 : 0; w.flipSprite ? i >= 0 : i < w.barrels; i += Mathf.sign(!w.flipSprite)){
+                        float offset = i * w.barrelSpacing - (w.barrels - 1) * w.barrelSpacing / 2f;
+                        boolean s = (!w.mirrorBarrels || offset < 0) != w.flipSprite;
+
+                        icon.draw(w.flipSprite ^ s ? pixFlip : barrelPix,
+                            (int)((weapon.x + offset) / scl + icon.width / 2f - w.barrelRegion.width / 2f),
+                            (int)((-weapon.y - w.barrelOffset) / scl + icon.height / 2f - w.barrelRegion.width / 2f),
+                            true
+                        );
+                    }
+
+                    if(reg.found()){
+                        icon.draw(reg.pixmap(),
+                            (int)(weapon.x / scl + icon.width / 2f - pix.width / 2f),
+                            (int)(-weapon.y / scl + icon.height / 2f - pix.height / 2f),
+                            true
+                        );
+                    }
+
+                    pixFlip.dispose();
+                }else if(pix != null && weapon instanceof LimitedAngleWeapon w && !Mathf.equal(w.defaultAngle, 0f)){
+                    PixmapRegion pixReg = new PixmapRegion(pix);
+                    float mountX = (w.x / scl + icon.width / 2f) - 0.5f;
+                    float mountY = (-w.y / scl + icon.height / 2f) - 0.5f;
+                    float spriteX = pixReg.width / 2f - 0.5f;
+                    float spriteY = pixReg.height / 2f - 0.5f;
+
+                    float angle = w.defaultAngle * Mathf.sign(w.flipSprite);
+                    float cos = Mathf.cosDeg(angle);
+                    float sin = Mathf.sinDeg(angle);
+                    icon.each((x, y) -> icon.setRaw(x, y, Pixmap.blend(icon.getRaw(x, y), GraphicUtils.getColor(pixReg,
+                        spriteX + ((mountX - x) * cos + (mountY - y) * sin),
+                        spriteY - ((mountX - x) * sin - (mountY - y) * cos)
+                    ))));
+                }else if(pix != null){
+                    icon.draw(pix,
+                        (int)(weapon.x / scl + icon.width / 2f - pix.width / 2f),
+                        (int)(-weapon.y / scl + icon.height / 2f - pix.height / 2f),
+                        true
+                    );
                 }
 
-                icon.draw(pix,
-                    (int)(weapon.x / scl + icon.width / 2f - reg.width / 2f),
-                    (int)(-weapon.y / scl + icon.height / 2f - reg.height / 2f),
-                    true
-                );
-
-                pix.dispose();
+                if(pix != null && weapon.flipSprite) pix.dispose();
                 weapon.load();
             }
 
@@ -185,25 +221,66 @@ public class UnitProcessor implements Processor{
             icon.draw(cell, icon.width / 2 - cell.width / 2, icon.height / 2 - cell.height / 2, true);
 
             for(var weapon : type.weapons){
-                if(weapon.layerOffset < 0f || weapon.name.isEmpty()) continue;
+                if(weapon.layerOffset < 0f) continue;
 
-                GenRegion reg = weapon.top ? atlas.find(weapon.name + "-outline") : conv(weapon.region);
-                Pixmap pix = reg.pixmap().copy();
+                Pixmap pix = weapon.name.isEmpty() ? null : conv(weapon.top ? weapon.outlineRegion : weapon.region).pixmap();
+                if(pix != null && weapon.flipSprite) pix = pix.flipX();
 
-                if(weapon.flipSprite){
-                    Pixmap newPix = pix.flipX();
-                    pix.dispose();
-                    pix = newPix;
+                if(weapon instanceof MultiBarrelWeapon w){
+                    if(pix != null){
+                        icon.draw(pix,
+                            (int)(weapon.x / scl + icon.width / 2f - pix.width / 2f),
+                            (int)(-weapon.y / scl + icon.height / 2f - pix.height / 2f),
+                            true
+                        );
+                    }
+
+                    Pixmap barrelPix = conv(w.top ? w.barrelOutlineRegion : w.barrelRegion).pixmap(), pixFlip = barrelPix.flipX();
+
+                    for(int i = w.flipSprite ? w.barrels - 1 : 0; w.flipSprite ? i >= 0 : i < w.barrels; i += Mathf.sign(!w.flipSprite)){
+                        float offset = i * w.barrelSpacing - (w.barrels - 1) * w.barrelSpacing / 2f;
+                        boolean s = (!w.mirrorBarrels || offset < 0) != w.flipSprite;
+
+                        icon.draw(w.flipSprite ^ s ? pixFlip : barrelPix,
+                            (int)((weapon.x + offset) / scl + icon.width / 2f - w.barrelRegion.width / 2f),
+                            (int)((-weapon.y - w.barrelOffset) / scl + icon.height / 2f - w.barrelRegion.width / 2f),
+                            true
+                        );
+                    }
+
+                    if(weapon.region.found()){
+                        Pixmap over = conv(weapon.region).pixmap();
+                        icon.draw(over,
+                            (int)(weapon.x / scl + icon.width / 2f - over.width / 2f),
+                            (int)(-weapon.y / scl + icon.height / 2f - over.height / 2f),
+                            true
+                        );
+                    }
+
+                    pixFlip.dispose();
+                }else if(pix != null && weapon instanceof LimitedAngleWeapon w && !Mathf.equal(w.defaultAngle, 0f)){
+                    PixmapRegion pixReg = new PixmapRegion(pix);
+                    float mountX = (w.x / scl + icon.width / 2f) - 0.5f;
+                    float mountY = (-w.y / scl + icon.height / 2f) - 0.5f;
+                    float spriteX = pixReg.width / 2f - 0.5f;
+                    float spriteY = pixReg.height / 2f - 0.5f;
+
+                    float angle = w.defaultAngle * Mathf.sign(w.flipSprite);
+                    float cos = Mathf.cosDeg(angle);
+                    float sin = Mathf.sinDeg(angle);
+                    icon.each((x, y) -> icon.setRaw(x, y, Pixmap.blend(icon.getRaw(x, y), GraphicUtils.getColor(pixReg,
+                        spriteX + ((mountX - x) * cos + (mountY - y) * sin),
+                        spriteY - ((mountX - x) * sin - (mountY - y) * cos)
+                    ))));
+                }else if(pix != null){
+                    icon.draw(pix,
+                        (int)(weapon.x / scl + icon.width / 2f - pix.width / 2f),
+                        (int)(-weapon.y / scl + icon.height / 2f - pix.height / 2f),
+                        true
+                    );
                 }
 
-                icon.draw(pix,
-                    (int)(weapon.x / scl + icon.width / 2f - reg.width / 2f),
-                    (int)(-weapon.y / scl + icon.height / 2f - reg.height / 2f),
-                    true
-                );
-
-                pix.dispose();
-                weapon.load();
+                if(pix != null && weapon.flipSprite) pix.dispose();
             }
 
             if(unit instanceof Copterc){
@@ -212,6 +289,7 @@ public class UnitProcessor implements Processor{
 
                 for(var rotor : type.rotors){
                     Pixmap bladeSprite = conv(rotor.bladeRegion).pixmap();
+                    PixmapRegion bladeRegion = new PixmapRegion(bladeSprite);
 
                     float bladeSeparation = 360f / rotor.bladeCount;
 
@@ -221,26 +299,15 @@ public class UnitProcessor implements Processor{
                     float bladeSpriteXCenter = bladeSprite.width / 2f - 0.5f;
                     float bladeSpriteYCenter = bladeSprite.height / 2f - 0.5f;
 
-                    int propWidth = propellers.width;
-                    int propHeight = propellers.height;
-                    for(int x = 0; x < propWidth; x++){
-                        for(int y = 0; y < propHeight; y++){
-                            for(int blade = 0; blade < rotor.bladeCount; blade++){
-                                float deg = blade * bladeSeparation;
-                                float cos = Mathf.cosDeg(deg);
-                                float sin = Mathf.sinDeg(deg);
-                                int col = GraphicUtils.getColor(
-                                    new PixmapRegion(bladeSprite),
-                                    ((propXCenter - x) * cos + (propYCenter - y) * sin) + bladeSpriteXCenter,
-                                    ((propXCenter - x) * sin - (propYCenter - y) * cos) + bladeSpriteYCenter
-                                );
+                    for(int blade = 0; blade < rotor.bladeCount; blade++){
+                        float deg = blade * bladeSeparation;
+                        float cos = Mathf.cosDeg(deg);
+                        float sin = Mathf.sinDeg(deg);
 
-                                propellers.setRaw(x, y, Pixmap.blend(
-                                    propellers.getRaw(x, y),
-                                    col
-                                ));
-                            }
-                        }
+                        propellers.each((x, y) -> propellers.setRaw(x, y, Pixmap.blend(propellers.getRaw(x, y), GraphicUtils.getColor(bladeRegion,
+                            ((propXCenter - x) * cos + (propYCenter - y) * sin) + bladeSpriteXCenter,
+                            ((propXCenter - x) * sin - (propYCenter - y) * cos) + bladeSpriteYCenter
+                        ))));
                     }
 
                     Pixmap topSprite = conv(rotor.topRegion).pixmap();
@@ -248,34 +315,6 @@ public class UnitProcessor implements Processor{
                     int topYCenter = (int)(-rotor.y / scl + icon.height / 2f - topSprite.height / 2f);
 
                     tops.draw(topSprite, topXCenter, topYCenter, true);
-
-                    if(rotor.mirror){
-                        propXCenter = (-rotor.x / scl + icon.width / 2f) - 0.5f;
-                        topXCenter = (int)(-rotor.x / scl + icon.width / 2f - topSprite.width / 2f);
-
-                        for(int x = 0; x < propWidth; x++){
-                            for(int y = 0; y < propHeight; y++){
-                                for(int blade = 0; blade < rotor.bladeCount; blade++){
-                                    float deg = blade * bladeSeparation;
-                                    float cos = Mathf.cosDeg(deg);
-                                    float sin = Mathf.sinDeg(deg);
-
-                                    int col = GraphicUtils.getColor(
-                                        new PixmapRegion(bladeSprite),
-                                        ((propXCenter - x) * cos + (propYCenter - y) * sin) + bladeSpriteXCenter,
-                                        ((propXCenter - x) * sin - (propYCenter - y) * cos) + bladeSpriteYCenter
-                                    );
-
-                                    propellers.setRaw(x, y, Pixmap.blend(
-                                        propellers.getRaw(x, y),
-                                        col
-                                    ));
-                                }
-                            }
-                        }
-
-                        tops.draw(topSprite, topXCenter, topYCenter, true);
-                    }
                 }
 
                 Pixmap propOutlined = Pixmaps.outline(new PixmapRegion(propellers), type.outlineColor, type.outlineRadius);
