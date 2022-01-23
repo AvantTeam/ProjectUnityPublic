@@ -6,9 +6,9 @@
 
 A work-in-progress mega-collaboration [Mindustry](https://github.com/Anuken/Mindustry/) mod, created by the Avant Team.
 
-As the repository description says, this is not a fully publicized workspace of the mod. Most contents that are finished or
-worth showing are released here, while the critically secret or completely unfinished ones remains private. Not intended to
-be played by the average player-base; this only aims for additional developing hands, suggestions, and balancing feedback.
+As the repository description says, this is not a fully published workspace of the mod. Most of the content that is finished or
+worth showing is released here, while the critically secret or completely unfinished one remains private. This mod is not intended to
+be played by the average player-base as of now; this only aims for additional developing hands, suggestions, and balancing feedback.
 
 ## Compiling
 
