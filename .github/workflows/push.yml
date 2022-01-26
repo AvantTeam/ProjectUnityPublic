@@ -26,9 +26,3 @@ jobs:
       run: |
         chmod +x gradlew
         ./gradlew main:deploy main:dex tools:proc
-
-    - name: Upload built mod jar file
-      uses: actions/upload-artifact@v2.2.1
-      with:
-        name: ProjectUnity (zipped)
-        path: main/build/libs/ProjectUnity.jar
