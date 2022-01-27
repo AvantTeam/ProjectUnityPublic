@@ -13,6 +13,8 @@ public final class UnityPal{
     monolithDark = valueOf("6586b0"),
     monolithAtmosphere = valueOf("001e6360"),
 
+    coldColor = valueOf("6bc7ff"),
+
     outline = Pal.darkerMetal,
     darkOutline = valueOf("38383d"),
     darkerOutline = valueOf("2e3142");

@@ -92,9 +92,13 @@ public class Unity extends Mod{
         UnityStatusEffects.load();
         UnityBullets.load();
         UnityUnitTypes.load();
+        UnityBlocksYoungcha.load();
 
+
+        //below has to be done after all things with faction tags are loaded.
         FactionMeta.init();
         UnityEntityMapping.init();
+
 
         logContent();
     }

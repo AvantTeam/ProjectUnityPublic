@@ -10,6 +10,7 @@ import static mindustry.Vars.*;
 @FactionBase
 public enum Faction{
     koruh("koruh", Color.valueOf("61caff")),
+    youngcha("youngcha", Color.valueOf("a69f95")),
     monolith("monolith", UnityPal.monolith);
 
     public static final Faction[] all = values();
