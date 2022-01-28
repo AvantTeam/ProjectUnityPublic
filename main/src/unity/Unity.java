@@ -87,8 +87,10 @@ public class Unity extends Mod{
 
     @Override
     public void loadContent(){
-        Faction.init();
 
+
+        Faction.init();
+        UnityItems.load();
         UnityStatusEffects.load();
         UnityBullets.load();
         UnityUnitTypes.load();

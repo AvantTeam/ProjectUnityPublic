@@ -8,6 +8,8 @@ import arc.math.geom.*;
 import arc.util.*;
 import mindustry.graphics.*;
 
+import static mindustry.Vars.tilesize;
+
 public final class UnityDrawf{
     private final static float[] v = new float[6];
     private final static TextureRegion nRegion = new TextureRegion();
@@ -120,5 +122,13 @@ public final class UnityDrawf{
         s1 = Mathf.map(s1, -1f, 1f, y - h / 2f, y + h / 2f);
         s2 = Mathf.map(s2, -1f, 1f, y - h / 2f, y + h / 2f);
         Draw.rect(nRegion, x, (s1 + s2) * 0.5f, w, s2 - s1, w * 0.5f, y - s1, rot);
+    }
+
+    public static void line(Color color, float x, float y, float x2, float y2){
+        Lines.stroke(3f, Pal.gray);
+        Lines.line(x, y, x2, y2);
+        Lines.stroke(1f, color);
+        Lines.line(x, y, x2, y2);
+        Draw.reset();
     }
 }

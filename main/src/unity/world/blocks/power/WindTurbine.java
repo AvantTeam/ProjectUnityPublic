@@ -9,7 +9,9 @@ import unity.world.graph.*;
 
 import static arc.Core.atlas;
 
-public class WindTurbine extends GraphBlock{
+public class WindTurbine extends GenericGraphBlock{
+
+
     public final TextureRegion[] overlayRegions = new TextureRegion[2], baseRegions = new TextureRegion[4], rotorRegions = new TextureRegion[2];
     public TextureRegion topRegion, movingRegion, bottomRegion, mbaseRegion;
 
@@ -36,26 +38,22 @@ public class WindTurbine extends GraphBlock{
         }
     }
     public static class WindTurbineTorqueNode extends GraphTorqueNode{
-        public WindTurbineTorqueNode(float friction, float inertia, IGraphBuild build){
-            super(friction, inertia, build);
-        }
 
-        public WindTurbineTorqueNode(IGraphBuild build){
-            super(build);
+        public WindTurbineTorqueNode(float friction, float inertia, float maxTorque, float maxSpeed, GraphBuild build){
+            super(friction, inertia, maxTorque, maxSpeed, build);
         }
 
         @Override
-        public float getForce(){
+        public void update(){
             float x = Time.time * 0.001f;
             float mul = 0.4f * Math.max(
                 0f,
                 Mathf.sin(x) + 0.5f * Mathf.sin(2f * x + 50f) + 0.2f * Mathf.sin(7f * x + 90f) + 0.1f * Mathf.sin(23f * x + 10f) + 0.55f
             ) + 0.15f;
-
-            return mul;
+            baseForce = mul;
         }
     }
-    public class WindTurbineBuild extends GraphBuild{
+    public class WindTurbineBuildGeneric extends GenericGraphBuild{
         GraphConnector<TorqueGraph> torqueConn;
         public GraphConnector<TorqueGraph> getTorqueConn(){
             if(torqueConn ==null){

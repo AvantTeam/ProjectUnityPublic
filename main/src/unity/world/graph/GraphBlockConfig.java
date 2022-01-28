@@ -3,11 +3,12 @@ package unity.world.graph;
 import arc.func.*;
 import arc.struct.*;
 import mindustry.world.*;
-import unity.world.blocks.GraphBlock.*;
 
-//the uh block part of graphs ig
+import java.lang.reflect.*;
+
+//the uh block settings part of graphs ig
 public class GraphBlockConfig{
-    public ObjectMap<Class<? extends Graph>,Func<IGraphBuild,GraphNode<?>>> nodeConfig = new ObjectMap<>();
+    public ObjectMap<Class<? extends Graph>,Func<GraphBuild,GraphNode<?>>> nodeConfig = new ObjectMap<>();
     public Seq<ConnectionConfig> connections = new Seq<>();
     Block block;
 
@@ -24,8 +25,17 @@ public class GraphBlockConfig{
         cfg.setConfig(this);
     }
 
-    public <T extends Graph> void addFixedConnectionConfig( Class<T> tClass,Prov<T> newGraph, int... connectionIndexes){
-        addConnectionConfig(new FixedConnectionConfig(tClass,newGraph,connectionIndexes));
+    public <T extends Graph> void fixedConnection(Class<T> tClass, int... connectionIndexes){
+        try{
+            var constructor = tClass.getConstructor();
+            addConnectionConfig(new FixedConnectionConfig(tClass,()-> {
+                try{ return constructor.newInstance(); } catch(Exception e) { e.printStackTrace(); }
+                return null;
+            },connectionIndexes));
+        }catch(Exception e){
+            throw new IllegalStateException("Graph doesn't have a empty constructor or constructor is invalid/inaccessible");
+        }
+
     }
 
     public static abstract class ConnectionConfig<T extends Graph>{
@@ -49,6 +59,7 @@ public class GraphBlockConfig{
         }
     }
 
+    //for connections on the sides, most probably the most common type.
     public static class FixedConnectionConfig<T extends Graph>  extends ConnectionConfig<T>{
         int[] connectionIndexes;
         public FixedConnectionConfig( Class<T> tClass,Prov<T> newGraph, int... connectionIndexes){

@@ -3,18 +3,21 @@ package unity.world.graph;
 import arc.struct.*;
 import mindustry.gen.*;
 import mindustry.world.*;
-import unity.world.blocks.*;
 
+//orginally GraphModule
 public class GraphNode<T extends Graph>{
-    public final GraphBlock.IGraphBuild build;
+    public final GraphBuild build;
     public Seq<GraphConnector<T>> connector = new Seq<>();
     public final int id = idAccum++;
     private static int idAccum = 0;
 
-    public GraphNode(GraphBlock.IGraphBuild build){
+    public GraphNode(GraphBuild build){
         this.build = build;
     }
 
+    public void update(){
+
+    }
 
     public void onPlace(){
         for(GraphConnector gc:connector){
@@ -24,12 +27,16 @@ public class GraphNode<T extends Graph>{
 
     public void onRotate(){
         for(GraphConnector gc:connector){
+            gc.disconnect();
+            gc.recalcPorts();
             gc.recalcNeighbours();
         }
     }
 
     public void onRemove(){
-
+        for(GraphConnector gc:connector){
+            gc.disconnect();
+        }
     }
 
     public void removeEdge(GraphNode g){
@@ -56,6 +63,7 @@ public class GraphNode<T extends Graph>{
 
 
     public void removeSelf(){
+        onRemove();
     }
 
     //convenience

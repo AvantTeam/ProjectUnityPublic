@@ -5,7 +5,6 @@ import arc.struct.*;
 import mindustry.*;
 import mindustry.gen.*;
 import mindustry.world.*;
-import unity.world.blocks.GraphBlock.*;
 
 import static arc.math.geom.Geometry.*;
 
@@ -51,7 +50,7 @@ public abstract class GraphConnector<T extends Graph>{
         }
         return false;
     }
-    public boolean isConnected(IGraphBuild t){
+    public boolean isConnected(GraphBuild t){
         for(GraphEdge edge:connections){
             if(edge.other(this).node.build==t){
                 return true;
@@ -61,10 +60,8 @@ public abstract class GraphConnector<T extends Graph>{
     }
 
     public void disconnect(){
-        graph.vertexes.remove(this);
-        for(GraphEdge graphEdge:connections){
-            //todo graph.edges.
-        }
+        if(connections.isEmpty()){return;} // nothing to disconnect from.
+        graph.removeVertex(this);
     }
 
     public void triggerConnectionChanged(){
@@ -82,6 +79,9 @@ public abstract class GraphConnector<T extends Graph>{
         }
 
         @Override public void recalcPorts(){
+            if(connections.size>0){
+                throw new IllegalStateException("graph connector must have no connections before port recalc");
+            }
             connectionPoints = surfaceConnectionsOf(this,connectionPointIndexes);
         }
 
@@ -99,7 +99,7 @@ public abstract class GraphConnector<T extends Graph>{
                 //for each connection point get the relevant tile it connects to. If its a connection point, then attempt a connection.
                 temp.set(intrl.x,intrl.y).add(cp.relpos).add(cp.dir);
                 Building building = Vars.world.build(temp.x,temp.y);
-                if(building!=null && building instanceof IGraphBuild igraph){
+                if(building!=null && building instanceof GraphBuild igraph){
                     var extnode = igraph.getGraphNode(graph.getClass());
                     for(var extconnector: extnode.connector){
                         if(extconnector.canConnect(cp.relpos.cpy().add(cp.dir),(GraphConnector)this)){

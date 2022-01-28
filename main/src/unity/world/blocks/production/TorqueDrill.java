@@ -3,24 +3,19 @@ package unity.world.blocks.production;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
-import arc.scene.ui.layout.*;
 import arc.struct.*;
-import arc.util.io.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
-import mindustry.world.blocks.production.Drill.*;
 import unity.graphics.*;
-import unity.world.blocks.*;
-import unity.world.blocks.GraphBlock.*;
 import unity.world.graph.*;
 
 import static arc.Core.atlas;
 
-public class TorqueDrill extends Drill implements IGraphBlock{
+public class TorqueDrill extends Drill implements GraphBlock{
     public GraphBlockConfig config = new GraphBlockConfig(this);
-    public float maxSpeed = 60;
-    public float maxEfficiency = 4;
+    public float maxSpeed = 50;
+    public float maxEfficiency = 2.5f;
 
     public final TextureRegion[] bottomRegions = new TextureRegion[2], topRegions = new TextureRegion[2], oreRegions = new TextureRegion[2];
     public TextureRegion rotorRegion, rotorRotateRegion, mbaseRegion, wormDrive, gearRegion, rotateRegion, overlayRegion;
@@ -28,9 +23,6 @@ public class TorqueDrill extends Drill implements IGraphBlock{
     public TorqueDrill(String name){
         super(name);
         rotate = true;
-        hasLiquids = false;
-        liquidBoostIntensity = 1f;
-
     }
     @Override
     public TextureRegion[] icons(){
@@ -85,9 +77,10 @@ public class TorqueDrill extends Drill implements IGraphBlock{
     }
 
 
-    public class TorqueDrillBuild extends DrillBuild implements IGraphBuild{
+    public class TorqueDrillBuild extends DrillBuild implements GraphBuild{
         OrderedMap<Class<? extends Graph>,GraphNode> graphNodes = new OrderedMap<>();
         int prevTileRotation = -1;
+        boolean placed = false;
 
         @Override
         public void created(){
@@ -97,6 +90,7 @@ public class TorqueDrill extends Drill implements IGraphBlock{
         @Override
         public void placed(){
             super.placed();
+            placed = true;
             reconnectToGraph();
         }
 
@@ -104,11 +98,14 @@ public class TorqueDrill extends Drill implements IGraphBlock{
         public void onRemoved(){
             disconnectFromGraph();
             super.onRemoved();
-
         }
 
         @Override
         public void updateTile(){
+            if(!placed){
+                placed = true;
+                reconnectToGraph();
+            }
             super.updateTile();
             updateGraphs();
         }

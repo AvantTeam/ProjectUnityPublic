@@ -1,18 +1,34 @@
 package unity.world.graph;
 
-import unity.world.blocks.*;
-
 public class GraphTorqueNode extends GraphNode<TorqueGraph>{
-    public float baseFriction, baseInertia, baseForce;
+    public float baseFriction, baseInertia, baseForce=0;
+    public float maxTorque,maxSpeed;
+    public boolean torqueProvider = false;
 
-    public GraphTorqueNode(float friction, float inertia, GraphBlock.IGraphBuild build){
+    public boolean torqueConsumer = false;
+
+    public GraphTorqueNode(float friction, float inertia, GraphBuild build){
         super(build);
         baseFriction = friction;
         baseInertia = inertia;
     }
 
-    public GraphTorqueNode(GraphBlock.IGraphBuild build){
+    public GraphTorqueNode(float friction, float inertia, float maxTorque, float maxSpeed, GraphBuild build){
+        super(build);
+        torqueProvider = true;
+        baseFriction = friction;
+        baseInertia = inertia;
+        this.maxTorque = maxTorque;
+        this.maxSpeed = maxSpeed;
+    }
+
+    public GraphTorqueNode(GraphBuild build){
         this(0.1f, 10f,build);
+    }
+
+    public float getSpeedRatio(float maxSpeed){
+        if(!connector.any()){return 0;}
+        return 1f-(connector.first().graph.lastVelocity/maxSpeed);
     }
 
 
@@ -49,6 +65,11 @@ public class GraphTorqueNode extends GraphNode<TorqueGraph>{
     }
 
     public float getForce(){
-       return baseForce;
+        if(torqueProvider){
+            return baseForce*maxTorque*getSpeedRatio(maxSpeed);
+        }else{
+            return baseForce;
+        }
     }
+
 }
