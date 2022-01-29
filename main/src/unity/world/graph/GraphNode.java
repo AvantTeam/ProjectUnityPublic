@@ -1,6 +1,9 @@
 package unity.world.graph;
 
+import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.util.*;
+import arc.util.io.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 
@@ -39,6 +42,8 @@ public class GraphNode<T extends Graph>{
         }
     }
 
+    public void displayBars(Table table){}
+
     public void removeEdge(GraphNode g){
     }
 
@@ -55,10 +60,23 @@ public class GraphNode<T extends Graph>{
     public void isGraphSaver(){
 
     }
-    public void saveGraph(){
+    public void write(Writes write){
+        connector.each(con->{
+            if(con.getGraph().firstVertex()==con){
+                write.bool(true);
+                con.graph.write(write);
+            }else{
+                write.bool(false);
+            }
+        });
     }
 
-    public void loadGraph(){
+    public void read(Reads read){
+        connector.each(con->{
+            if(read.bool()){
+                con.graph.read(read);
+            }
+        });
     }
 
 

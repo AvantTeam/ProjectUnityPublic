@@ -1,7 +1,9 @@
 package unity.world.graph;
 
 import arc.func.*;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.util.io.*;
 import mindustry.gen.*;
 
 public interface GraphBuild{
@@ -54,13 +56,28 @@ public interface GraphBuild{
         }
     }
 
-    default void reconnectToGraph(){
+    default void connectToGraph(){
+        for(var entry : getNodes()){
+            entry.value.onPlace();
+        }
+    }
+    default void onRotate(){
         for(var entry : getNodes()){
             entry.value.onRotate();
         }
     }
 
     default void updateGraphs(){
+        if(getPrevRotation()==-1){
+            setPrevRotation(getBuild().rotation);
+            connectToGraph();
+        }
+
+        if(getPrevRotation() != getBuild().rotation && getBuild().block.rotate){
+            setPrevRotation(getBuild().rotation);
+            onRotate();
+        }
+
         getNodes().each((cls, graphNode) -> {
             //change later.
             graphNode.update();
@@ -68,18 +85,37 @@ public interface GraphBuild{
                 ((GraphConnector)graphConn).getGraph().update();
             }
         });
-        if(getPrevRotation() != getBuild().rotation){
-            setPrevRotation(getBuild().rotation);
-            disconnectFromGraph();
-            reconnectToGraph();
-        }
+    }
+
+    default void displayGraphBars(Table table){
+        getNodes().each((cls, graphNode) -> {
+            graphNode.displayBars(table);
+        });
     }
 
     default void onConnectionChanged(GraphConnector g){
     }
 
+    ///I pray they are in the same order.
+    default void writeGraphs(Writes write){
+        getNodes().each((cls, graphNode) -> {
+            graphNode.write(write);
+        });
+    }
+
+    default void readGraphs(Reads read){
+        getNodes().each((cls, graphNode) -> {
+            graphNode.read(read);
+        });
+    }
+
     //conv for js
     default GraphNode<TorqueGraph> torqueNode(){
         return getGraphNode(TorqueGraph.class);
+    }
+
+    //conv for drawing
+    default float getCorrectRotation(){
+        return (getBuild().rotdeg() + 90f) % 180f - 90f;
     }
 }

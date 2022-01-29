@@ -5,12 +5,16 @@ import arc.func.*;
 import arc.math.*;
 import arc.struct.*;
 import arc.util.*;
+import arc.util.io.*;
 
 public abstract class Graph<T extends Graph>{
     protected OrderedSet<GraphConnector<T>> vertexes = new OrderedSet<>();
     protected LongMap<GraphEdge> edges = new LongMap<>();
     public final int id;
     private static int lastId;
+    //graphs recently read from save, and will override any graph mergers until the next update.
+    public boolean authoritative = false;
+    public int authoritativeUntil = 0;
 
     public Graph(){}
 
@@ -23,9 +27,16 @@ public abstract class Graph<T extends Graph>{
         onGraphChanged();
     }
 
-    public abstract <U extends Graph<T>> U createFromThis();
+    public abstract <U extends Graph<T>> U copy();
+    public <U extends Graph<T>> U createFromThis(){
+        var c = copy();
+        c.authoritative = authoritative;
+        c.authoritativeUntil = authoritativeUntil;
+        return (U)c;
+    }
 
-    public abstract <U extends Graph<T>> void onMergeBegin(T g);
+    public abstract void onMergeBegin(T g);
+    public abstract void authoritativeOverride(T g);
     public void addEdge(GraphEdge edge){
 
         edges.put(edge.id,edge);
@@ -51,6 +62,13 @@ public abstract class Graph<T extends Graph>{
         if(vertex.getGraph()!=this){return;}
         if(vertex.connections.size==0){
             //trivial case 1, node has no connections anyway
+            if(vertexes.size>1){
+                //somehow disconnected but still in the graph?
+                Graph<T> ngraph = createFromThis();
+                ngraph.addVertex(vertex);
+                vertexes.remove(vertex);
+               onGraphChanged();
+            }
             return;
         }
         else if(vertex.connections.size==1){
@@ -69,14 +87,16 @@ public abstract class Graph<T extends Graph>{
                 if(vertex.getGraph()!=this){
                     vertex.getGraph().removeVertex(vertex);
                     if(vertexes.contains(vertex)){
-                        throw new IllegalStateException("Graph still contains deleted vertex after splitting? bug.");
+                        throw new IllegalStateException("Graph still contains deleted vertex after splitting.");
                     }
                     return;
                 }else{
                     removeEdge(vconn);
                 }
             }
-            vertexes.remove(vertex);
+            if(vertexes.size>1){
+                vertexes.remove(vertex);
+            }
             onGraphChanged();
         }
 
@@ -151,9 +171,11 @@ public abstract class Graph<T extends Graph>{
         return flood.contains(v2);
     }
 
+    //whether its allowed to join the graph :3
     public boolean canConnect(GraphConnector<T> v1, GraphConnector<T> v2){
         return true;
     }
+
     public void onVertexAdded(GraphConnector<T> vertex){}
     public void addVertex(GraphConnector<T> vertex){
         vertexes.add(vertex);
@@ -163,7 +185,15 @@ public abstract class Graph<T extends Graph>{
     }
 
     public void mergeGraph(Graph<T> graph){
-        onMergeBegin((T)graph);
+        if(!graph.authoritative && !authoritative){
+            onMergeBegin((T)graph);
+        }else{
+            if(graph.authoritative){
+                graph.authoritativeOverride((T)this);
+                this.authoritative = true;
+                this.authoritativeUntil = graph.authoritativeUntil;
+            }
+        }
         for(var vertex : graph.vertexes){
             addVertex(vertex);
         }
@@ -180,6 +210,9 @@ public abstract class Graph<T extends Graph>{
         }
         lastFrameUpdated = Core.graphics.getFrameId();
         onUpdate();
+        if(authoritative && lastFrameUpdated>authoritativeUntil){
+            authoritative = false;
+        }
     }
     public abstract void onUpdate();
 
@@ -191,6 +224,12 @@ public abstract class Graph<T extends Graph>{
     public void eachEdge(Cons<GraphEdge> cons){
         edges.forEach((e)->cons.get(e.value));
     }
+
+    //used for saving.
+    public GraphConnector<T> firstVertex(){
+        return vertexes.first();
+    }
+
     public GraphConnector<T> randomVertex(){
         int skip = Mathf.random((int)vertexes.size);
         for(var vertex : vertexes){
@@ -200,6 +239,14 @@ public abstract class Graph<T extends Graph>{
             }
         }
         return vertexes.isEmpty()?null:vertexes.first();
+    }
+
+    public void write(Writes write){
+    }
+
+    public void read(Reads read){
+        authoritative = true;
+        authoritativeUntil = (int)(Core.graphics.getFrameId()+1);
     }
 
 }

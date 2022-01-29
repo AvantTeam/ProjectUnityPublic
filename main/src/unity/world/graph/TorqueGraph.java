@@ -1,22 +1,30 @@
 package unity.world.graph;
 
 import arc.util.*;
+import arc.util.io.*;
 
 //rotGraph
 public class TorqueGraph extends Graph<TorqueGraph>{
     public float lastInertia, lastGrossForceApplied, lastNetForceApplied, lastVelocity, lastFrictionCoefficient;
     public float rotation = 0;
     @Override
-    public TorqueGraph createFromThis(){
+    public TorqueGraph copy(){
         var t = new TorqueGraph();
         t.lastVelocity = lastVelocity;
+        t.rotation = rotation;
         return t;
     }
 
-    @Override public <U extends Graph<TorqueGraph>> void onMergeBegin(TorqueGraph graph){
+    @Override public void onMergeBegin(TorqueGraph graph){
         float momentumA = lastVelocity * lastInertia;
         float mementumB = graph.lastVelocity * graph.lastInertia;
         lastVelocity = (momentumA + mementumB) / (lastInertia + graph.lastInertia);
+    }
+
+    @Override
+    public void authoritativeOverride(TorqueGraph g){
+        g.lastVelocity = lastVelocity;
+        g.rotation = rotation;
     }
 
     @Override
@@ -66,5 +74,18 @@ public class TorqueGraph extends Graph<TorqueGraph>{
     public void injectInertia(float iner){
         float inerSum = lastInertia + iner;
         lastVelocity *= inerSum == 0f ? 0f : lastInertia / inerSum;
+    }
+
+    @Override
+    public void read(Reads read){
+        super.read(read);
+        lastVelocity = read.f();
+        rotation = read.f();
+    }
+
+    @Override
+    public void write(Writes write){
+        write.f(lastVelocity);
+        write.f(rotation);
     }
 }

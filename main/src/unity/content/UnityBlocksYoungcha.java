@@ -10,6 +10,7 @@ import unity.world.blocks.*;
 import unity.world.blocks.distribution.*;
 import unity.world.blocks.envrionment.*;
 import unity.world.blocks.power.*;
+import unity.world.blocks.power.WindTurbine.*;
 import unity.world.blocks.production.*;
 import unity.world.graph.*;
 
@@ -24,7 +25,7 @@ public class UnityBlocksYoungcha{
     //non environmental
     public static @FactionDef("youngcha") Block
     //transmission
-    driveShaft,shaftRouter,smallTransmission,
+    driveShaft,shaftRouter,smallTransmission,torqueMeter,
     //power
     windTurbine, rotaryWaterExtractor,
     //production
@@ -62,14 +63,30 @@ public class UnityBlocksYoungcha{
             config.nodeConfig.put(TorqueGraph.class, b->new GraphTorqueNode(0.05f,4f,b));
             config.fixedConnection(TorqueGraph.class,1, 1, 1 ,1);
         }};
+        smallTransmission  = new SimpleTransmission("small-transmission"){{
+           requirements(Category.distribution, with(UnityItems.nickel, 20, Items.copper, 20, Items.lead, 20));
+           health = 700;
+           size = 2;
+           config.nodeConfig.put(TorqueGraph.class, b->new TransmissionTorqueNode(0.05f,8f,b));
+           config.fixedConnection(TorqueGraph.class,0,1,  0,0,  1,0 , 0,0);
+           config.fixedConnection(TorqueGraph.class,1,0,  0,0,  0,1 , 0,0);
+        }};
+        torqueMeter = new TorqueMeter("torque-meter"){{
+            requirements(Category.distribution, with(UnityItems.nickel, 20, Items.lead, 30));
+            health = 150;
+            rotate = true;
+
+            config.nodeConfig.put(TorqueGraph.class, b->new TorqueMeterNode(0.02f,5f,b));
+            config.fixedConnection(TorqueGraph.class, 1,0,1,0);
+
+        }};
         windTurbine = new WindTurbine("wind-turbine"){{
+            requirements(Category.power, with(Items.titanium, 20, Items.lead, 80, Items.copper, 70));
             health = 1750;
             size=3;
 
             config.nodeConfig.put(TorqueGraph.class, b->new WindTurbineTorqueNode(0.03f,20f,1f,20f,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,   0, 0, 0,   0, 0, 0,  0, 0, 0);
-
-            requirements(Category.power, with(Items.titanium, 20, Items.lead, 80, Items.copper, 70));
         }};
         rotaryWaterExtractor = new RotaryWaterExtractor("rotary-water-extractor"){{
             health = 1750;
@@ -97,14 +114,7 @@ public class UnityBlocksYoungcha{
             config.nodeConfig.put(TorqueGraph.class, b->new GraphTorqueNode(0.1f,50f,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,   0, 0, 0,   0, 1, 0,  0, 0, 0);
         }};
-        smallTransmission  = new SimpleTransmission("small-transmission"){{
-            requirements(Category.distribution, with(UnityItems.nickel, 20, Items.copper, 20, Items.lead, 20));
-            health = 700;
-            size = 2;
-            config.nodeConfig.put(TorqueGraph.class, b->new TransmissionTorqueNode(0.05f,8f,b));
-            config.fixedConnection(TorqueGraph.class,0,1,  0,0,  1,0 , 0,0);
-            config.fixedConnection(TorqueGraph.class,1,0,  0,0,  0,1 , 0,0);
-        }};
+
 
 
 

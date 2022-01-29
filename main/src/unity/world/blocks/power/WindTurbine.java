@@ -3,6 +3,8 @@ package unity.world.blocks.power;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.util.*;
+import mindustry.content.*;
+import mindustry.gen.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
 import unity.world.graph.*;
@@ -45,12 +47,14 @@ public class WindTurbine extends GenericGraphBlock{
 
         @Override
         public void update(){
+            //todo weather
+            float weather = Groups.weather.contains(w->w.weather== Weathers.sandstorm || w.weather== Weathers.sporestorm)?2:1;
             float x = Time.time * 0.001f;
-            float mul = 0.4f * Math.max(
+            float mul = 0.2f * Math.max(
                 0f,
                 Mathf.sin(x) + 0.5f * Mathf.sin(2f * x + 50f) + 0.2f * Mathf.sin(7f * x + 90f) + 0.1f * Mathf.sin(23f * x + 10f) + 0.55f
-            ) + 0.15f;
-            baseForce = mul;
+            ) + 0.3f;
+            baseForce = mul*weather;
         }
     }
     public class WindTurbineBuildGeneric extends GenericGraphBuild{

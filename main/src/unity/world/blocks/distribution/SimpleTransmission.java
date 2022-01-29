@@ -45,7 +45,10 @@ public class SimpleTransmission extends GenericGraphBlock{
             if(connector.size!=2){return;}
             TorqueGraph t1 = connector.get(0).getGraph();
             TorqueGraph t2 = connector.get(1).getGraph();
-
+            if(t1.authoritative || t2.authoritative){
+                //in middle of save flood
+                return;
+            }
             if(t1==t2){
                 var build = t1.randomVertex().getNode().build();
                 build.damage(Mathf.random(t1.lastVelocity*50));

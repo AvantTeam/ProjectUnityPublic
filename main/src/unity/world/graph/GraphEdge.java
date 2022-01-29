@@ -9,6 +9,9 @@ public class GraphEdge{
         this.n1 = n1;
         this.n2 = n2;
         id = getId(n1,n2);
+        if(n1==n2){
+            throw new IllegalStateException("vertexes cant self connect");
+        }
     }
 
     public GraphConnector other(Graph current){
@@ -20,5 +23,14 @@ public class GraphEdge{
 
     public static long getId(GraphConnector n1, GraphConnector n2){
         return n1.id<n2.id? Pack.longInt(n1.id,n2.id) : Pack.longInt(n2.id,n1.id);
+    }
+
+    @Override
+    public String toString(){
+        return "GraphEdge{" +
+        "n1=" + n1 +
+        ", n2=" + n2 +
+        ", id=" + id +
+        '}';
     }
 }

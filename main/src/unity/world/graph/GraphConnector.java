@@ -60,7 +60,6 @@ public abstract class GraphConnector<T extends Graph>{
     }
 
     public void disconnect(){
-        if(connections.isEmpty()){return;} // nothing to disconnect from.
         graph.removeVertex(this);
     }
 
@@ -226,7 +225,13 @@ public abstract class GraphConnector<T extends Graph>{
     //______________________________________________________________________________
 
 
-
+    @Override
+    public String toString(){
+        return "GraphConnector{" +
+        "id=" + id +
+        ", node=" + node.build().block +
+        '}';
+    }
 
     public T getGraph(){
         return graph;

@@ -50,7 +50,7 @@ public class GenericGraphBlock extends Block implements GraphBlock{
         public void placed(){
             super.placed();
             placed = true;
-            reconnectToGraph();
+            connectToGraph();
         }
 
         @Override public void onRemoved(){ disconnectFromGraph();super.onRemoved(); }
@@ -58,7 +58,7 @@ public class GenericGraphBlock extends Block implements GraphBlock{
 
         @Override
         public void updateTile(){
-            if(!placed){  placed = true; reconnectToGraph(); }
+            if(!placed){  placed = true; connectToGraph(); }
             super.updateTile();
             updateGraphs();
         }
@@ -66,7 +66,9 @@ public class GenericGraphBlock extends Block implements GraphBlock{
         @Override public Building getBuild(){ return this; }
         @Override public int getPrevRotation(){ return prevTileRotation; }
         @Override public void setPrevRotation(int t){ prevTileRotation = t; }
-
+        @Override public void displayBars(Table table){ super.displayBars(table); displayGraphBars(table); }
+        @Override public void write(Writes write){ super.write(write);writeGraphs(write); }
+        @Override public void read(Reads read, byte revision){ super.read(read, revision); readGraphs(read); }
         ///
 
         @Override
@@ -79,20 +81,7 @@ public class GenericGraphBlock extends Block implements GraphBlock{
             super.display(table);
         }
 
-        @Override
-        public void displayBars(Table table){
-            super.displayBars(table);
-        }
 
-        @Override
-        public void write(Writes write){
-            super.write(write);
-        }
-
-        @Override
-        public void read(Reads read, byte revision){
-            super.read(read, revision);
-        }
 
         @Override
         public void drawSelect(){

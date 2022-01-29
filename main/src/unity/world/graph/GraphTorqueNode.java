@@ -1,5 +1,12 @@
 package unity.world.graph;
 
+import arc.*;
+import arc.math.*;
+import arc.scene.ui.layout.*;
+import arc.util.*;
+import mindustry.graphics.*;
+import mindustry.ui.*;
+
 public class GraphTorqueNode extends GraphNode<TorqueGraph>{
     public float baseFriction, baseInertia, baseForce=0;
     public float maxTorque,maxSpeed;
@@ -31,7 +38,12 @@ public class GraphTorqueNode extends GraphNode<TorqueGraph>{
         return 1f-(connector.first().graph.lastVelocity/maxSpeed);
     }
 
-
+    @Override
+    public void displayBars(Table table){
+        var n1 = connector.first();
+        table.row();
+        table.add(new Bar(() -> Core.bundle.format("bar.unity-torquespeed", Strings.fixed(n1.graph.lastVelocity/6f, 1)), () -> Pal.ammo, () -> Mathf.clamp(n1.graph.lastVelocity)));
+    }
     /*
     table.row().left();
     table.add("Torque system").color(Pal.accent).fillX();

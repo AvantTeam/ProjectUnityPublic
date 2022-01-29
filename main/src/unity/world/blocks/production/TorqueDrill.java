@@ -3,7 +3,9 @@ package unity.world.blocks.production;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.util.io.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
@@ -86,12 +88,15 @@ public class TorqueDrill extends Drill implements GraphBlock{
         public void created(){
             init();
         }
+        @Override public void displayBars(Table table){ super.displayBars(table); displayGraphBars(table); }
+        @Override public void write(Writes write){ super.write(write);writeGraphs(write); }
+        @Override public void read(Reads read, byte revision){ super.read(read, revision); readGraphs(read); }
 
         @Override
         public void placed(){
             super.placed();
             placed = true;
-            reconnectToGraph();
+            connectToGraph();
         }
 
         @Override
@@ -104,7 +109,7 @@ public class TorqueDrill extends Drill implements GraphBlock{
         public void updateTile(){
             if(!placed){
                 placed = true;
-                reconnectToGraph();
+                connectToGraph();
             }
             super.updateTile();
             updateGraphs();
