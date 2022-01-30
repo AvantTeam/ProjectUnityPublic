@@ -1,4 +1,4 @@
-package unity.world.blocks.power;
+package unity.world.blocks.production;
 
 
 import arc.graphics.g2d.*;
@@ -78,9 +78,7 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         int prevTileRotation = -1;
         boolean placed = false;
 
-        @Override public void created(){
-            init();
-        }
+        @Override public void created(){ if(!placed){ init(); } }
 
         @Override
         public void placed(){
@@ -124,8 +122,8 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
             float rot = getGraph(TorqueGraph.class).rotation;
             Draw.rect(bottomRegions[rotation % 2], x, y);
             if(liquids.total() > 0.001f) Drawf.liquid(liquidRegions[rotation % 2], x, y, liquids.total() / liquidCapacity, liquids.current().color);
-            Drawf.shadow(rotorRegion, x - size / 2f, y - size / 2f, rot);
-            Draw.rect(rotorRegion, x, y, rot);
+            Drawf.shadow(rotorRegion, x - size / 2f, y - size / 2f, rot*0.2f);
+            Draw.rect(rotorRegion, x, y, rot*0.2f);
             Draw.rect(topRegions[rotation], x, y);
             drawTeamTop();
         }

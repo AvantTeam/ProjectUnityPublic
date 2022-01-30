@@ -24,7 +24,6 @@ public abstract class Graph<T extends Graph>{
     }
     public Graph(GraphConnector<T> gc){
         addVertex(gc);
-        onGraphChanged();
     }
 
     public abstract <U extends Graph<T>> U copy();
@@ -103,12 +102,13 @@ public abstract class Graph<T extends Graph>{
     }
     public void removeEdgeNonSplit(GraphEdge edge){
         edges.remove(edge.id);
-        edge.n1.connections.remove(edge);
-        edge.n2.connections.remove(edge);
+        edge.n1.removeEdge(edge);
+        edge.n2.removeEdge(edge);
     }
     protected OrderedSet<GraphConnector<T>> floodTemp = new OrderedSet<>();
     public void removeEdge(GraphEdge edge){
         removeEdgeNonSplit(edge);
+        onGraphChanged();
         if(!isConnected(edge.n1,edge.n2,floodTemp)){
             //OHNO
             if(floodTemp.size<= vertexes.size-floodTemp.size){

@@ -7,20 +7,20 @@ import arc.util.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
 
-public class GraphTorqueNode extends GraphNode<TorqueGraph>{
+public class TorqueGraphNode extends GraphNode<TorqueGraph>{
     public float baseFriction, baseInertia, baseForce=0;
     public float maxTorque,maxSpeed;
     public boolean torqueProvider = false;
 
     public boolean torqueConsumer = false;
 
-    public GraphTorqueNode(float friction, float inertia, GraphBuild build){
+    public TorqueGraphNode(float friction, float inertia, GraphBuild build){
         super(build);
         baseFriction = friction;
         baseInertia = inertia;
     }
 
-    public GraphTorqueNode(float friction, float inertia, float maxTorque, float maxSpeed, GraphBuild build){
+    public TorqueGraphNode(float friction, float inertia, float maxTorque, float maxSpeed, GraphBuild build){
         super(build);
         torqueProvider = true;
         baseFriction = friction;
@@ -29,7 +29,7 @@ public class GraphTorqueNode extends GraphNode<TorqueGraph>{
         this.maxSpeed = maxSpeed;
     }
 
-    public GraphTorqueNode(GraphBuild build){
+    public TorqueGraphNode(GraphBuild build){
         this(0.1f, 10f,build);
     }
 

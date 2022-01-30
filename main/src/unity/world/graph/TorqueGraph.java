@@ -43,7 +43,7 @@ public class TorqueGraph extends Graph<TorqueGraph>{
         float fricCoeff = 0f;
         float iner = 0f;
         for(var module : vertexes){//building, GraphTorqueModule
-            if(module.getNode() instanceof GraphTorqueNode torqueNode){
+            if(module.getNode() instanceof TorqueGraphNode torqueNode){
                 forceApply += torqueNode.getForce();
                 fricCoeff += torqueNode.getFriction();
                 iner += torqueNode.getInertia();

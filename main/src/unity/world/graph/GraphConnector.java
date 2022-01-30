@@ -63,6 +63,12 @@ public abstract class GraphConnector<T extends Graph>{
         graph.removeVertex(this);
     }
 
+    public void removeEdge(GraphEdge ge){
+        if(connections.remove(ge)){
+            triggerConnectionChanged();
+        }
+    }
+
     public void triggerConnectionChanged(){
         this.node.build.onConnectionChanged(this);
     }
@@ -100,6 +106,9 @@ public abstract class GraphConnector<T extends Graph>{
                 Building building = Vars.world.build(temp.x,temp.y);
                 if(building!=null && building instanceof GraphBuild igraph){
                     var extnode = igraph.getGraphNode(graph.getClass());
+                    if(extnode==null){
+                        continue;
+                    }
                     for(var extconnector: extnode.connector){
                         if(extconnector.canConnect(cp.relpos.cpy().add(cp.dir),(GraphConnector)this)){
                             long edgeid = GraphEdge.getId(this,extconnector);
@@ -221,8 +230,6 @@ public abstract class GraphConnector<T extends Graph>{
         }
     }
 
-    //related single use classes
-    //______________________________________________________________________________
 
 
     @Override

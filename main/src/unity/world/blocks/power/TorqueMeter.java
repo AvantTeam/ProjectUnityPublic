@@ -17,8 +17,8 @@ public class TorqueMeter extends GenericGraphBlock{
     public TorqueMeter(String name){
         super(name);
     }
-    public static class TorqueMeterNode extends GraphTorqueNode {
-        public TorqueMeterNode(float friction, float inertia, GraphBuild build){
+    public static class TorqueMeterGraphNode extends TorqueGraphNode{
+        public TorqueMeterGraphNode(float friction, float inertia, GraphBuild build){
             super(friction, inertia, build);
         }
 
@@ -39,7 +39,7 @@ public class TorqueMeter extends GenericGraphBlock{
         @Override
         public void draw(){
             var graph = getGraph(TorqueGraph.class);
-            float t = Mathf.clamp(Mathf.map(graph.lastVelocity,0,50,0,1) * Mathf.random(0.95f,1.05f));
+            float t = Mathf.clamp(Mathf.map(graph.lastVelocity,0,90,0,1) * Mathf.random(0.95f,1.05f));
             Draw.rect(this.block.region, this.x, this.y, this.getCorrectRotation());
             col.set(1f,0.5f,0.5f);
             col.lerp(Pal.heal,t);

@@ -74,7 +74,7 @@ public final class UnityDrawf{
         }else{
             a = 1f - Mathf.clamp(temp / 273.15f);
             if(a < 0.01f) return;
-            Draw.color(UnityPal.coldColor, a);
+            Draw.color(UnityPal.coldcolor, a);
         }
         Draw.blend(Blending.additive);
         Draw.rect(reg, x, y, rot);

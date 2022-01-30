@@ -84,10 +84,7 @@ public class TorqueDrill extends Drill implements GraphBlock{
         int prevTileRotation = -1;
         boolean placed = false;
 
-        @Override
-        public void created(){
-            init();
-        }
+        @Override public void created(){ if(!placed){ init(); } }
         @Override public void displayBars(Table table){ super.displayBars(table); displayGraphBars(table); }
         @Override public void write(Writes write){ super.write(write);writeGraphs(write); }
         @Override public void read(Reads read, byte revision){ super.read(read, revision); readGraphs(read); }

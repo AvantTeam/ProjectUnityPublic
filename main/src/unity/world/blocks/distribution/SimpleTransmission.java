@@ -30,13 +30,13 @@ public class SimpleTransmission extends GenericGraphBlock{
         mbaseRegion = atlas.find(name + "-mbase");
     }
 
-    public static class TransmissionTorqueNode extends GraphTorqueNode{
+    public static class TransmissionTorqueGraphNode extends TorqueGraphNode{
         float ratio = 2;
-        public TransmissionTorqueNode(float friction, float inertia, GraphBuild build){
+        public TransmissionTorqueGraphNode(float friction, float inertia, GraphBuild build){
             super(friction, inertia, build);
         }
 
-        public TransmissionTorqueNode(GraphBuild build){
+        public TransmissionTorqueGraphNode(GraphBuild build){
             super(build);
         }
 
@@ -69,7 +69,7 @@ public class SimpleTransmission extends GenericGraphBlock{
     public class SimpleTransmissionBuildGeneric extends GenericGraphBuild{
         @Override
         public void draw(){
-            GraphTorqueNode torqueNode = (GraphTorqueNode)getGraphNode(TorqueGraph.class);
+            TorqueGraphNode torqueNode = (TorqueGraphNode)getGraphNode(TorqueGraph.class);
             float graphRot0 = torqueNode.connector.get(0).getGraph().rotation;
             float graphRot1 = torqueNode.connector.get(1).getGraph().rotation;
             float fixedRot = (rotdeg() + 90f) % 180f - 90f;

@@ -31,7 +31,6 @@ public interface GraphBuild{
         setPrevRotation(getBuild().rotation);
         if(getBuild().block instanceof GraphBlock graphBlock){
             var cfg = graphBlock.getConfig();
-            //generics make me cry
             //fishes all relevant things from GraphBlockConfig in the GraphBlock
             //and populates the build using the settings.
             for(var connectionConfig : cfg.connections){
@@ -110,8 +109,11 @@ public interface GraphBuild{
     }
 
     //conv for js
-    default GraphNode<TorqueGraph> torqueNode(){
-        return getGraphNode(TorqueGraph.class);
+    default TorqueGraphNode torqueNode(){
+        return (TorqueGraphNode)getGraphNode(TorqueGraph.class);
+    }
+    default HeatGraphNode heatNode(){
+        return (HeatGraphNode)getGraphNode(HeatGraph.class);
     }
 
     //conv for drawing

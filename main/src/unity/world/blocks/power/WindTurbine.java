@@ -39,9 +39,9 @@ public class WindTurbine extends GenericGraphBlock{
             rotorRegions[i] = atlas.find(name + "-rotor" + (i + 1));
         }
     }
-    public static class WindTurbineTorqueNode extends GraphTorqueNode{
+    public static class WindTurbineTorqueGraphNode extends TorqueGraphNode{
 
-        public WindTurbineTorqueNode(float friction, float inertia, float maxTorque, float maxSpeed, GraphBuild build){
+        public WindTurbineTorqueGraphNode(float friction, float inertia, float maxTorque, float maxSpeed, GraphBuild build){
             super(friction, inertia, maxTorque, maxSpeed, build);
         }
 

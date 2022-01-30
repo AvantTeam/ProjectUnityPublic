@@ -13,6 +13,7 @@ import unity.world.graph.*;
 import static mindustry.Vars.*;
 
 public class GenericGraphBlock extends Block implements GraphBlock{
+    public static boolean debugGraph = false;
     public GraphBlockConfig config = new GraphBlockConfig(this);
     public GenericGraphBlock(String name){
         super(name);
@@ -42,15 +43,16 @@ public class GenericGraphBlock extends Block implements GraphBlock{
         int prevTileRotation = -1;
         boolean placed = false;
 
-        @Override public void created(){
-            init();
-        }
+        @Override public void created(){ if(!placed){ init(); } }
 
         @Override
         public void placed(){
+
             super.placed();
-            placed = true;
-            connectToGraph();
+            if(!placed){
+                placed = true;
+                connectToGraph();
+            }
         }
 
         @Override public void onRemoved(){ disconnectFromGraph();super.onRemoved(); }
@@ -86,21 +88,24 @@ public class GenericGraphBlock extends Block implements GraphBlock{
         @Override
         public void drawSelect(){
             //temp for debug
-            getNodes().each((cls, graphNode) -> {
-                for(var con:graphNode.connector){
-                    var cong = (GraphConnector)con;
-                    cong.getGraph().each((c)->{
-                        GraphConnector extcon = (GraphConnector)c;
-                        Draw.color(Pal.accent);
-                        Drawf.circles(extcon.getNode().build().x, extcon.getNode().build().y, tilesize*0.3f);
-                    });
-                    cong.getGraph().eachEdge(e->{
-                        GraphEdge edge = (GraphEdge)e;
-                        UnityDrawf.line(Pal.accent,edge.n1.getNode().build().x, edge.n1.getNode().build().y, edge.n2.getNode().build().x, edge.n2.getNode().build().y);
-                    });
-                }
-            });
-            Draw.reset();
+            super.drawSelect();
+            if(debugGraph){
+                getNodes().each((cls, graphNode) -> {
+                    for(var con : graphNode.connector){
+                        var cong = (GraphConnector)con;
+                        cong.getGraph().each((c) -> {
+                            GraphConnector extcon = (GraphConnector)c;
+                            Draw.color(Pal.accent);
+                            Drawf.circles(extcon.getNode().build().x, extcon.getNode().build().y, tilesize * 0.3f);
+                        });
+                        cong.getGraph().eachEdge(e -> {
+                            GraphEdge edge = (GraphEdge)e;
+                            UnityDrawf.line(Pal.accent, edge.n1.getNode().build().x, edge.n1.getNode().build().y, edge.n2.getNode().build().x, edge.n2.getNode().build().y);
+                        });
+                    }
+                });
+                Draw.reset();
+            }
         }
 
 
