@@ -52,6 +52,11 @@ public class Unity extends Mod{
         if(!headless){
             // Load assets once they're added into `Vars.tree`.
             Events.on(FileTreeInitEvent.class, e -> Core.app.post(UnitySounds::load));
+
+            // Disclaimer, because apparently we're stupid enough to need this
+            Events.on(ClientLoadEvent.class, e -> {
+                ui.showOkText("@mod.disclaimer.title", "@mod.disclaimer.text", () -> {});
+            });
         }
 
         Utils.init();
