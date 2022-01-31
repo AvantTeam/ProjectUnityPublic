@@ -5,8 +5,7 @@ import arc.math.*;
 import arc.util.*;
 import mindustry.entities.bullet.*;
 import mindustry.gen.*;
-import mindustry.graphics.*;
-import unity.content.fx.*;
+import unity.content.effects.*;
 import unity.util.*;
 
 /**
@@ -30,10 +29,22 @@ public class SlowRailBulletType extends BasicBulletType{
     public void init(){
         super.init();
         drawSize = Math.max(drawSize, (Math.max(height, width) + (speed * lifetime * 0.75f)) * 2f);
+        trailColor = backColor;
+        trailLength = Math.max((int)(lifetime), 2);
+    }
+
+    @Override
+    public void init(Bullet b){
+        super.init(b);
+        RailData data = new RailData();
+        data.x = b.x;
+        data.y = b.y;
+        b.data = data;
     }
 
     @Override
     public void update(Bullet b){
+        updateTrail(b);
         hit = false;
         Utils.collideLineRawEnemy(b.team, b.lastX, b.lastY, b.x, b.y, collisionWidth, collisionWidth, (building, direct) -> {
             if(direct && collidesGround && !b.collided.contains(building.id)){
@@ -61,15 +72,12 @@ public class SlowRailBulletType extends BasicBulletType{
             }
             hit(b, x, y);
         }, true);
-        float len = b.deltaLen();
-        b.fdata += Mathf.dst(b.lastX, b.lastY, b.x, b.y);
-        if(b.fdata >= trailSpacing){
-            while(b.fdata >= trailSpacing){
-                Tmp.v1.trns(b.rotation(), speed).add(b.lastX, b.lastY);
-                float ex = Mathf.lerp(b.lastX, Tmp.v1.x, 1f - (b.fdata / len));
-                float ey = Mathf.lerp(b.lastY, Tmp.v1.y, 1f - (b.fdata / len));
-                trailEffect.at(ex, ey, b.rotation(), trailColor);
-                b.fdata -= trailSpacing;
+        if(b.data instanceof RailData data){
+            data.lastLen += Mathf.dst(b.lastX, b.lastY, b.x, b.y);
+            while(data.len < data.lastLen){
+                Tmp.v1.trns(b.rotation(), data.len).add(data.x, data.y);
+                trailEffect.at(Tmp.v1.x, Tmp.v1.y, b.rotation(), trailColor);
+                data.len += trailSpacing;
             }
         }
     }
@@ -81,7 +89,6 @@ public class SlowRailBulletType extends BasicBulletType{
         float width = (this.width * ((1f - shrinkX) + shrinkX * b.fout())) / 1.5f;
         Tmp.v1.trns(b.rotation(), height / 2f);
         Draw.color(backColor);
-        Drawf.tri(b.x, b.y, width, speed * lifetime * 0.75f * b.fin(), b.rotation() + 180f);
         for(int s : Mathf.signs){
             Tmp.v2.trns(b.rotation() - 90f, width * s, -height);
             Draw.color(backColor);
@@ -89,5 +96,9 @@ public class SlowRailBulletType extends BasicBulletType{
             Draw.color(frontColor);
             Fill.tri(Tmp.v1.x / 2f + b.x, Tmp.v1.y / 2f + b.y, -Tmp.v1.x / 2f + b.x, -Tmp.v1.y / 2f + b.y, Tmp.v2.x / 2f + b.x, Tmp.v2.y / 2f + b.y);
         }
+    }
+
+    static class RailData{
+        float x, y, len, lastLen;
     }
 }

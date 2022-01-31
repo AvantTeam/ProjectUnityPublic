@@ -34,8 +34,6 @@ public final class Utils{
     private static final IntSet collidedBlocks = new IntSet();
     private static final Rect rect = new Rect(), rectAlt = new Rect(), hitRect = new Rect();
     private static final BoolGrid collideLineCollided = new BoolGrid();
-    private static final Seq<Point2> collideLineCast = new Seq<>();
-    private static final Seq<Point2> collideLineCastNext = new Seq<>();
     private static final IntSeq lineCast = new IntSeq(), lineCastNext = new IntSeq();
     private static final Seq<Hit> hitEffects = new Seq<>();
     private static boolean hit, hitB;
@@ -289,6 +287,11 @@ public final class Utils{
     }
 
     /** @author EyeOfDarkness */
+    public static void collideLineRawEnemy(Team team, float x, float y, float x2, float y2, float width, boolean hitTiles, boolean hitUnits, boolean stopSort, HitHandler handler){
+        collideLineRaw(x, y, x2, y2, width, width, b -> b.team != team, u -> u.team != team, hitTiles, hitUnits, h -> h.dst2(x, y), handler, stopSort);
+    }
+
+    /** @author EyeOfDarkness */
     public static void collideLineRawEnemy(Team team, float x, float y, float x2, float y2, Boolf2<Building, Boolean> buildingCons, Cons<Unit> unitCons, Floatc2 effectHandler, boolean stopSort){
         collideLineRaw(x, y, x2, y2, 3f, b -> b.team != team, u -> u.team != team, buildingCons, unitCons, healthc -> healthc.dst2(x, y), effectHandler, stopSort);
     }
@@ -316,6 +319,10 @@ public final class Utils{
     /** @author EyeOfDarkness */
     public static void collideLineRawEnemy(Team team, float x, float y, float x2, float y2, Boolf2<Building, Boolean> buildingCons, Cons<Unit> unitCons, Floatf<Healthc> sort, Floatc2 effectHandler){
         collideLineRaw(x, y, x2, y2, 3f, b -> b.team != team, u -> u.team != team, buildingCons, unitCons, sort, effectHandler);
+    }
+
+    public static void collideLineRawEnemy(Team team, float x, float y, float x2, float y2, float width, Boolf<Healthc> pred, Boolf2<Building, Boolean> buildingCons, Boolf<Unit> unitCons, Floatc2 effectHandler, boolean stopSort){
+        collideLineRaw(x, y, x2, y2, width, width, b -> b.team != team && pred.get(b), u -> u.team != team && pred.get(u), buildingCons, unitCons, healthc -> healthc.dst2(x, y), effectHandler, stopSort);
     }
 
     /** @author EyeOfDarkness */
@@ -348,7 +355,7 @@ public final class Utils{
                     hit = buildingCons.get((Building)ent, direct);
                 }
 
-                if(effectHandler != null) effectHandler.get(ex, ey);
+                if(effectHandler != null && direct) effectHandler.get(ex, ey);
                 return hit;
             }, stopSort
         );

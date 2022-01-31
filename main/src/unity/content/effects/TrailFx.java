@@ -1,4 +1,4 @@
-package unity.content.fx;
+package unity.content.effects;
 
 import arc.graphics.g2d.*;
 import arc.math.*;

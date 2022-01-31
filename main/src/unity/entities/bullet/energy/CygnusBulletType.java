@@ -14,7 +14,7 @@ import unity.graphics.*;
 
 /** @author EyeOfDarkness */
 public class CygnusBulletType extends EmpBulletType{
-    public float size = 18f;
+    public float size = 8f;
     public float allyStatusDuration = 60f * 2f;
     public StatusEffect allyStatus = StatusEffects.overclock;
 
@@ -41,9 +41,9 @@ public class CygnusBulletType extends EmpBulletType{
     public void draw(Bullet b){
         drawTrail(b);
         Draw.color(backColor);
-        for(int s : Mathf.signs){
-            float r = b.rotation() + (90f * s);
-            Drawf.tri(b.x + Angles.trnsx(r, size - 2f), b.y + Angles.trnsy(r, size - 2f), size * 0.6f, (size * 2f) + Mathf.sin(Time.time, 15f, size / 2f), r);
+        for(int i = 0; i < 2; i++){
+            float r = b.rotation() + (180f * i);
+            Drawf.tri(b.x + Angles.trnsx(r, size - 2f), b.y + Angles.trnsy(r, size - 2f), size, (size * 1.5f) + Mathf.sin(Time.time, 15f, size / 2f), r);
         }
         UnityDrawf.shiningCircle(b.id, Time.time, b.x, b.y, size, 7, 30f, 17f, 12f, 180f);
         Draw.color(Color.white);
