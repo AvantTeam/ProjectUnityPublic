@@ -3,12 +3,14 @@ package unity.type;
 import arc.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.math.geom.*;
 import arc.struct.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import unity.entities.*;
 import unity.entities.Rotor.*;
 import unity.gen.*;
+import unity.util.*;
 
 public class UnityUnitType extends UnitType{
     // Common.
@@ -72,6 +74,23 @@ public class UnityUnitType extends UnitType{
         if(unit instanceof Copterc) drawRotors((Unit & Copterc)unit);
     }
 
+    @Override
+    public void drawOutline(Unit unit){
+        //if(unit instanceof M){
+        //
+        //};
+        super.drawOutline(unit);
+    }
+
+    @Override
+    public void drawBody(Unit unit){
+        if(unit instanceof ModularUnitc){
+            drawModularBody((Unit & ModularUnitc)unit);
+            return;
+        }
+        super.drawBody(unit);
+    }
+
     public <T extends Unit & Copterc> void drawRotors(T unit){
         applyColor(unit);
 
@@ -123,5 +142,18 @@ public class UnityUnitType extends UnitType{
         }
 
         Draw.reset();
+    }
+
+    public <T extends Unit & ModularUnitc> void drawModularBody(T unit){
+        applyColor(unit);
+        DrawTransform dt = new DrawTransform(new Vec2(unit.x,unit.y),unit.rotation);
+        var construct = unit.construct();
+        if(construct!=null){
+            construct.partlist.each((p) -> {
+                p.type.draw(dt, p);
+            });
+        }
+        Draw.reset();
+        //UnityUnitTypes.modularUnit.spawn(275*8,347*8)
     }
 }

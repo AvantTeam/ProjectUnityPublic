@@ -1,10 +1,13 @@
 package unity.util;
 
+import mindustry.ctype.*;
+//import sun.misc.*;
+
 import java.lang.reflect.*;
 
 import static mindustry.Vars.*;
 
-/** @author GlennFolker */
+/** @author GlennFolker  Xelo was here */
 @SuppressWarnings("unchecked")
 public final class ReflectUtils{
     private ReflectUtils(){
@@ -51,7 +54,8 @@ public final class ReflectUtils{
             try{
                 type.getDeclaredField(field);
                 break;
-            }catch(NoSuchFieldException ignored){}
+            }catch(NoSuchFieldException ignored){
+            }
         }
 
         return type;
@@ -63,7 +67,8 @@ public final class ReflectUtils{
             try{
                 type.getDeclaredMethod(method, args);
                 break;
-            }catch(NoSuchMethodException ignored){}
+            }catch(NoSuchMethodException ignored){
+            }
         }
 
         return type;
@@ -75,7 +80,8 @@ public final class ReflectUtils{
             try{
                 type.getDeclaredConstructor(args);
                 break;
-            }catch(NoSuchMethodException ignored){}
+            }catch(NoSuchMethodException ignored){
+            }
         }
 
         return type;
@@ -108,6 +114,23 @@ public final class ReflectUtils{
         }catch(Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    /** Sets a field of an model without throwing exceptions. */
+    public static void setStaticField(Field field, Object value){
+        setField(null, field, value);
+    }
+
+    /** Sets a field of an model without throwing exceptions. Scary danger variant */
+    public static void setStaticFinalField(Field field, Object value){
+        try{
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
+        setField(null, field, value);
     }
 
     /** Gets a value from a field of an model without throwing exceptions. */
@@ -170,4 +193,5 @@ public final class ReflectUtils{
             return null;
         }
     }
+
 }

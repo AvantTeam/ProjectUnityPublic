@@ -65,7 +65,7 @@ public class HeatPipe extends GenericGraphBlock{
                         intensity*=0.2;
                     }
                     unit.damage(intensity * 50f);
-                }else if(temp > HeatGraphNode.celsiusZero-100){
+                }else if(temp < HeatGraphNode.celsiusZero-100){
                     float intensity = Mathf.clamp(Mathf.map(temp, HeatGraphNode.celsiusZero - 100, 0, 0f, 1f));
                     unit.apply(StatusEffects.freezing, intensity * 40f + 7f);
                     if(unit.isImmune(StatusEffects.freezing)){

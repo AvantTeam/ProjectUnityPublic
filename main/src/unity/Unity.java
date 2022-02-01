@@ -3,6 +3,7 @@ package unity;
 import arc.*;
 import arc.struct.*;
 import arc.util.*;
+import com.sun.management.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
@@ -11,9 +12,15 @@ import unity.annotations.Annotations.*;
 import unity.content.*;
 import unity.gen.*;
 import unity.mod.*;
+import unity.parts.*;
 import unity.util.*;
 
+import java.lang.management.*;
+import java.lang.reflect.*;
+import java.util.*;
+
 import static mindustry.Vars.*;
+import static unity.util.ReflectUtils.*;
 
 /**
  * The mod's main mod class. Contains static references to other modules.
@@ -56,6 +63,11 @@ public class Unity extends Mod{
             // Disclaimer, because apparently we're stupid enough to need this
             Events.on(ClientLoadEvent.class, e -> {
                 ui.showOkText("@mod.disclaimer.title", "@mod.disclaimer.text", () -> {});
+
+                //bc its not a contentType
+                for(var en: ModularPartType.partMap){
+                    en.value.load();
+                }
             });
         }
 
@@ -95,7 +107,7 @@ public class Unity extends Mod{
         UnityBullets.load();
         UnityUnitTypes.load();
         UnityBlocksYoungcha.load();
-
+        UnityParts.load();
 
         //below has to be done after all things with faction tags are loaded.
         FactionMeta.init();

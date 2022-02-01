@@ -70,6 +70,7 @@ public class UnityBlocksYoungcha{
         shaftRouter = new GenericGraphBlock("shaft-router"){{
             requirements(Category.distribution, with(Items.copper, 20, Items.lead, 20));
             health = 150;
+            solid = true;
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.04f, 4f, b));
             config.fixedConnection(TorqueGraph.class, 1, 1, 1, 1);
@@ -86,6 +87,7 @@ public class UnityBlocksYoungcha{
             requirements(Category.distribution, with(UnityItems.nickel, 20, Items.lead, 30));
             health = 150;
             rotate = true;
+            solid = true;
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueMeterGraphNode(0.02f, 5f, b));
             config.fixedConnection(TorqueGraph.class, 1, 0, 1, 0);
@@ -139,7 +141,7 @@ public class UnityBlocksYoungcha{
             size = 3;
             rotate = true;
             health = 2350;
-
+            solid = true;
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.05f, 1000f, 30f,5,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0);
         }};
@@ -149,6 +151,7 @@ public class UnityBlocksYoungcha{
             size = 3;
             rotate = true;
             health = 1300;
+            solid = true;
             consumes.liquid(Liquids.water, 0.1f);
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1200 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 0,0,0, 0,0,0 ,0,1,0 ,0,0,0);
@@ -159,7 +162,8 @@ public class UnityBlocksYoungcha{
             size = 2;
             rotate = true;
             health = 700;
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.1f));
+            solid = true;
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.05f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
         }};
         //
