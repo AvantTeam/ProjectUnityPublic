@@ -3,14 +3,22 @@ package unity.parts;
 import arc.struct.*;
 
 public class ModularConstructBuilder{
-    ModularPart [][] parts;
-    int w, h;
+    public ModularPart [][] parts;
+    public int w, h;
 
     public ModularConstructBuilder(int w, int h){
         this.w = w;
         this.h = h;
+        parts = new ModularPart[w][h];
     }
 
+
+    public void set(byte[] data){
+        ModularConstruct design = new ModularConstruct(data);
+        parts = design.parts;
+        w = parts.length;
+        h = parts[0].length;
+    }
 
     public byte[] export(){
         OrderedSet<ModularPart> partsList = new OrderedSet<>();

@@ -2,6 +2,8 @@ package unity.mod;
 
 import arc.*;
 import arc.graphics.*;
+import arc.graphics.g2d.*;
+import arc.scene.style.*;
 import unity.annotations.Annotations.*;
 import unity.graphics.*;
 
@@ -19,12 +21,17 @@ public enum Faction{
     public String localizedName;
 
     public final Color color;
+    public TextureRegion icon;
 
     public static void init(){
         if(headless) return;
         for(Faction faction : all){
             faction.localizedName = Core.bundle.format("faction." + faction.name, faction.color);
         }
+    }
+
+    public void load(){
+        icon = Core.atlas.find("unity-faction-"+name+"-icon");
     }
 
     Faction(String name, Color color){

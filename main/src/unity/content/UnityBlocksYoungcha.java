@@ -11,11 +11,12 @@ import unity.world.blocks.distribution.*;
 import unity.world.blocks.envrionment.*;
 import unity.world.blocks.power.*;
 import unity.world.blocks.production.*;
+import unity.world.blocks.units.*;
 import unity.world.graph.*;
 
 import static mindustry.type.ItemStack.with;
 
-//frankly i do not wish to have my ide lag from an enormous unavigatable UnityBlocks file
+//frankly i do not wish to have my ide lag from an enormous unnavigable UnityBlocks file
 public class UnityBlocksYoungcha{
     ///environmental
     public static @FactionDef("youngcha")
@@ -36,7 +37,9 @@ public class UnityBlocksYoungcha{
         //transmission
         heatPipe, steamPiston,
         //power
-        combustionHeater;
+        combustionHeater,
+    //other
+        monomialAssembler; // binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
     public static void load(){
         oreNickel = new UnityOreBlock(UnityItems.nickel){{
@@ -125,12 +128,12 @@ public class UnityBlocksYoungcha{
             consumes.liquid(Liquids.water, 0.08f).boost();
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 50f, b));
-            config.fixedConnection(TorqueGraph.class, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0);
+            config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
         }};
 
         heatPipe = new HeatPipe("heat-pipe"){{
             requirements(Category.distribution, with(UnityItems.nickel, 5, Items.copper, 10));
-            health = 180;
+            health = 250;
             solid = false;
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.005f, 0.4f, 2500 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 1, 1, 1, 1);
@@ -166,6 +169,16 @@ public class UnityBlocksYoungcha{
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.05f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
         }};
+
+        monomialAssembler = new ModularUnitAssembler("monomial-assembler"){{
+            requirements(Category.units, with(UnityItems.nickel, 100, Items.graphite, 50, Items.copper, 100, Items.lead, 100));
+            size = 3;
+            solid = false;
+            rotate = true;
+            health = 1700;
+            configurable = true;
+        }};
+
         //
     }
 }

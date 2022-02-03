@@ -5,11 +5,13 @@ import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import unity.entities.*;
 import unity.entities.Rotor.*;
 import unity.gen.*;
+import unity.parts.*;
 import unity.util.*;
 
 public class UnityUnitType extends UnitType{
@@ -155,5 +157,14 @@ public class UnityUnitType extends UnitType{
         }
         Draw.reset();
         //UnityUnitTypes.modularUnit.spawn(275*8,347*8)
+    }
+
+
+    public Unit spawn(Team t, float x, float y,byte[] data){
+        var unit = this.create(t);
+        unit.set(x, y);
+        ModularConstruct.cache.put(unit,data);
+        unit.add();
+        return unit;
     }
 }

@@ -110,37 +110,43 @@ public final class ReflectUtils{
     /** Sets a field of an model without throwing exceptions. */
     public static void setField(Object object, Field field, Object value){
         try{
+            field.setAccessible(true);
             field.set(object, value);
         }catch(Exception e){
             throw new RuntimeException(e);
         }
     }
 
-    /** Sets a field of an model without throwing exceptions. */
-    public static void setStaticField(Field field, Object value){
-        setField(null, field, value);
-    }
-
-    /** Sets a field of an model without throwing exceptions. Scary danger variant */
-    public static void setStaticFinalField(Field field, Object value){
-        try{
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-        }catch(Exception e){
-            throw new RuntimeException(e);
-        }
-        setField(null, field, value);
-    }
-
     /** Gets a value from a field of an model without throwing exceptions. */
-    public static <T> T getField(Object object, Field field){
+    public static <T> T getFieldValue(Object object, Field field){
         try{
+            field.setAccessible(true);
             return (T)field.get(object);
         }catch(Exception e){
             throw new RuntimeException(e);
         }
     }
+
+    /** Gets a value from a field of an model without throwing exceptions. */
+    public static <T, F extends U, U> T getFieldValue(F object, Class<U> subclass, String fieldname){
+        try{
+            Field field = subclass.getDeclaredField(fieldname);
+            field.setAccessible(true);
+            return (T)field.get(object);
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** Gets a field of an model without throwing exceptions. */
+    public static Field getField(Object object, String field){
+        try{
+            return object.getClass().getDeclaredField(field);
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /** A utility function to find a method without throwing exceptions. */
     public static Method findMethod(Class<?> type, String methodName, boolean access, Class<?>... args){

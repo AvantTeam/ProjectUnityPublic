@@ -52,6 +52,9 @@ public class ModularConstruct implements Serializable{
                     }
                 }
             }
+            for(ModularPart mp:partlist){
+                mp.type.setupPanellingIndex(mp,parts);
+            }
             this.data = data;
         }catch(Exception e){
             Log.err(e.toString());

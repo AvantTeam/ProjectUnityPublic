@@ -163,7 +163,7 @@ public final class GraphicUtils{
      * @param w The amount of regions horizontally.
      * @param h The amount of regions vertically.
      */
-    public static TextureRegion[] getRegions(TextureRegion region, int w, int h){
+    public static TextureRegion[] getRegions(TextureRegion region, int w, int h, int tilesize){
         int size = w * h;
         TextureRegion[] regions = new TextureRegion[size];
 
@@ -182,10 +182,17 @@ public final class GraphicUtils{
             reg.u2 = reg.u + tileW * 0.98f;
             reg.v2 = reg.v + tileH * 0.98f;
 
-            reg.width = reg.height = 32;
+            reg.width = reg.height = tilesize;
 
             regions[i] = reg;
         }
         return regions;
     }
+
+    public static TextureRegion[] getRegions(TextureRegion region, int w, int h){
+        return getRegions(region,w,h,32);
+    }
+
+
+    //
 }

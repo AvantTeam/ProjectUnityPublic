@@ -4,6 +4,7 @@ import arc.*;
 import arc.struct.*;
 import arc.util.*;
 import com.sun.management.*;
+import mindustry.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
@@ -13,6 +14,7 @@ import unity.content.*;
 import unity.gen.*;
 import unity.mod.*;
 import unity.parts.*;
+import unity.ui.*;
 import unity.util.*;
 
 import java.lang.management.*;
@@ -44,6 +46,9 @@ public class Unity extends Mod{
     @ListPackages
     public static Seq<String> packages = Seq.with();
 
+    /**UI**/
+    public static UnityUI ui= new UnityUI();
+
     /** Default constructor for Mindustry mod loader to instantiate. */
     public Unity(){
         this(false);
@@ -62,11 +67,15 @@ public class Unity extends Mod{
 
             // Disclaimer, because apparently we're stupid enough to need this
             Events.on(ClientLoadEvent.class, e -> {
-                ui.showOkText("@mod.disclaimer.title", "@mod.disclaimer.text", () -> {});
+                Vars.ui.showOkText("@mod.disclaimer.title", "@mod.disclaimer.text", () -> {});
 
-                //bc its not a contentType
+                //bc they are not a contentType
+                ModularPartType.loadStatic();
                 for(var en: ModularPartType.partMap){
                     en.value.load();
+                }
+                for(Faction faction : Faction.all){
+                    faction.load();
                 }
             });
         }
@@ -95,6 +104,7 @@ public class Unity extends Mod{
     public void init(){
         dev.init();
         music.init();
+        ui.init();
     }
 
     @Override

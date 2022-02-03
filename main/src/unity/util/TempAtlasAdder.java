@@ -6,6 +6,7 @@ import arc.graphics.g2d.*;
 import arc.struct.*;
 
 //force textures into the atlas, can be used dynamically at any point, slow
+//UNFINiSHED.
 public class TempAtlasAdder{
     public float[][] minmax;
     Pixmap pixmap;

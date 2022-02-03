@@ -40,7 +40,7 @@ public class DrawTransform{
 
     public void drawRect(TextureRegion t,float x,float y){
         transform(temp.set(x,y));
-        Draw.rect(t,temp.x,temp.y,rot);
+        Draw.rect(t,temp.x,temp.y,rot-90);
     }
 
 }

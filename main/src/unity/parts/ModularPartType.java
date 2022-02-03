@@ -1,19 +1,30 @@
 package unity.parts;
 
 import arc.*;
+import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.scene.ui.*;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mindustry.core.*;
 import mindustry.ctype.*;
+import mindustry.game.EventType.*;
+import mindustry.gen.*;
+import mindustry.type.*;
+import mindustry.ui.*;
+import mindustry.world.meta.*;
 import unity.parts.stat.*;
 import unity.util.*;
 
+import static mindustry.Vars.*;
+
 //like Block, this is a singleton
-public class ModularPartType{
+public class ModularPartType implements Displayable{
     public static IntMap<ModularPartType> partMap = new IntMap<>();
 
-    public static final float partSize = 8;
+    public static final float partSize = 4;
 
     public static final int TURRET_TYPE = 1;
     public static final int UNIT_TYPE = 2;
@@ -23,15 +34,21 @@ public class ModularPartType{
     public final int id = idAcc++;
 
     public String name;
+    public String category;
     public int w=1,h=1;
 
     //graphics
     public TextureRegion icon;
     /**if true will not have paneling**/
     public boolean open = false;
+    public static TextureRegion[] panelling;
     /** texture will/may have three variants for the front middle and back **/
     public TextureRegion[] top;
     public TextureRegion[] shadow;
+    //cost
+    public float constructTimeMultiplier = 1; // base time based on item cost
+    public ItemStack[] cost = {};
+    //module cost..
 
     //stats
     protected Seq<ModularPartStat> stats = new Seq<>();
@@ -50,19 +67,36 @@ public class ModularPartType{
         partMap.put(id,this);
     }
 
+    public static void loadStatic(){
+        panelling = GraphicUtils.getRegions(Core.atlas.find("unity-panel"), 12, 4,16);
+    }
+
     public void load(){
         ///
-        icon = Core.atlas.find("router");
+        icon = Core.atlas.find("unity-part-"+name+"-icon");
+    }
+
+    public void requirements(String category,ItemStack[] itemcost){
+        this.category = category;
+        this.cost = itemcost;
     }
 
     public boolean canBeUsedIn(int type){
         return (type & partType) > 0;
     }
 
+    public void setupPanellingIndex(ModularPart part, ModularPart[][] grid){
+        if(part.type!=this){Log.err("part with type "+ part.type.name+" is incorrectly using type "+this.name);return;}
+        for(int x = 0;x<w;x++){
+            for(int y = 0;y<h;y++){
+                part.panelingIndexes[x+y*w]=TilingUtils.getTilingIndex(grid,part.x+x,part.y+y,b -> b!=null && !b.type.open);
+            }
+        }
+    }
+
     public void draw(DrawTransform transform, ModularPart part){
         //something
-
-        transform.drawRect(icon,part.ax*partSize,part.ay*partSize);
+        transform.drawRect(panelling[part.panelingIndexes[0]],part.ax*partSize,part.ay*partSize);
     }
 
     public static ModularPartType getPartFromId(int id){
@@ -95,6 +129,28 @@ public class ModularPartType{
     }
 
 
+    @Override
+    public void display(Table table){
+        table.table(header->{
+            //copied from blocks xd
+            header.left();
+            header.add(new Image(icon)).size(8 * 4);
+            header.labelWrap(() -> Core.bundle.get("part."+name))
+            .left().width(190f).padLeft(5);
+            header.add().growX();
+            header.button("?", Styles.clearPartialt, () -> {
+                //Unity.ui.partinfo.show(this);
+            }).size(8 * 5).padTop(-5).padRight(-5).right().grow().name("blockinfo");
+        });
+        table.row();
+        table.table(req -> {
+            req.top().left();
+            req.add("[lightgray]" + Stat.buildCost.localized() + ":[] ").left().top();
+            for(ItemStack stack : cost){
+                req.add(new ItemDisplay(stack.item, stack.amount, false)).padRight(5);
+            }
+        }).growX().left().margin(3);
+    }
 }
 
 
