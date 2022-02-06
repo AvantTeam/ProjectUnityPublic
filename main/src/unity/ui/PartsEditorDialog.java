@@ -2,64 +2,86 @@ package unity.ui;
 
 import arc.*;
 import arc.func.*;
+import arc.graphics.*;
+import arc.math.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
+import arc.struct.*;
 import arc.util.*;
-import mindustry.content.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
+import mindustry.world.meta.*;
 import unity.parts.*;
+import unity.util.*;
 
-import static mindustry.Vars.control;
+import java.util.*;
+
+import static mindustry.Vars.*;
 
 public class PartsEditorDialog extends BaseDialog{
     public ModularConstructBuilder builder;
     Cons<byte[]> consumer;
     public PartsEditorElement editorElement;
     ModularPartType hoveredPart = null;
+    public Cons2<ModularConstructBuilder, Table> infoViewer;
+
+    public ObjectMap<String,Seq<ModularPartType>> avalibleParts = new ObjectMap<>();
+    boolean info = false;
+
     //part select
     Cons<Table> partSelectBuilder = table -> {
         table.clearChildren();
         table.top();
         table.add(Core.bundle.get("ui.parts.select")).growX().left().color(Pal.gray);
-        table.row();
 
-
-        table.add("insert name").growX().left().color(Pal.accent);
-        table.row();
-        table.image().growX().pad(5).padLeft(0).padRight(0).height(3).color(Pal.accent);
-        table.row();
-        table.table(list -> {
-            for(var part: ModularPartType.partMap){
-                ModularPartType mpt = part.value;
-                list.left();
-                ImageButton partbutton = list.button(new TextureRegionDrawable(mpt.icon),Styles.selecti,()->{
-                    if(editorElement.selected == mpt){
-                        editorElement.deselect();
-                    }else{
-                        editorElement.select(mpt);
+        for(var category: avalibleParts){
+            table.row();
+            table.add(Core.bundle.get("ui.parts.category."+category.key)).growX().left().color(Pal.accent);
+            table.row();
+            table.image().growX().pad(5).padLeft(0).padRight(0).height(3).color(Pal.accent);
+            table.row();
+            table.table(list -> {
+                int i = 0;
+                for(var part : category.value){
+                    if(i!=0 && i%5==0){
+                        list.row();
                     }
-                }).pad(3).size(46f).name("part-" + mpt.name).get();
-                //on hover display stats in box below
-                partbutton.hovered(()->{
-                    hoveredPart = mpt;
-                });
-                // unselect if another one got selected
-                partbutton.update(()->{
-                    partbutton.setChecked(editorElement.selected == mpt);
-                    //possibly set gray if disallowed.
-                });
-                //deselect hover
-                partbutton.exited(()->{
-                    if(hoveredPart == mpt){
-                        hoveredPart = null;
-                    }
-                });
-            }
-        }).growX().left().padBottom(10);
+                    list.left();
+                    ImageButton partbutton = list.button(new TextureRegionDrawable(part.icon), Styles.selecti, () -> {
+                        if(editorElement.selected == part){
+                            editorElement.deselect();
+                        }else{
+                            editorElement.select(part);
+                        }
+                    }).pad(3).size(46f).name("part-" + part.name).get();
+                    partbutton.resizeImage(iconMed);
+                    //on hover display stats in box below
+                    partbutton.hovered(() -> {
+                        hoveredPart = part;
+                    });
+                    // unselect if another one got selected
+                    partbutton.update(() -> {
+                        partbutton.setChecked(editorElement.selected == part);
+                        //possibly set gray if disallowed.
+                        partbutton.forEach(elem -> elem.setColor(Color.white));
+                        if(builder.root==null && !part.root){
+                            partbutton.forEach(elem -> elem.setColor(Color.darkGray));
+                        }
+                    });
+                    //deselect hover
+                    partbutton.exited(() -> {
+                        if(hoveredPart == part){
+                            hoveredPart = null;
+                        }
+                    });
+                    i++;
+                }
+            }).growX().left().padBottom(10);
+        }
     };
     //part select & info container
     Cons<Table> leftSideBuilder = table -> {
@@ -71,10 +93,17 @@ public class PartsEditorDialog extends BaseDialog{
         ImageButton partsSelectMenuButton = new ImageButton(Icon.box, Styles.clearPartiali);
         partsSelectMenuButton.clicked(()->{
             partSelectBuilder.get(content);
+            builder.onChange = ()->{};
         });
         tabs.add(partsSelectMenuButton).size(64).pad(8);
 
         ImageButton infoMenuButton = new ImageButton(Icon.info, Styles.clearPartiali);
+        infoMenuButton.clicked(()->{
+            infoViewer.get(builder,content);
+            builder.onChange = ()->{
+                infoViewer.get(builder,content);
+            };
+        });
         tabs.add(infoMenuButton).size(64);
 
         //middle
@@ -116,6 +145,21 @@ public class PartsEditorDialog extends BaseDialog{
         editorElement = new PartsEditorElement(this.builder);
         clearChildren();
         buttons.defaults().size(160f, 64f);
+        buttons.button(Icon.flipX,Styles.clearTogglei,()->{
+            editorElement.mirror = !editorElement.mirror;
+        }).update(i->{i.setChecked(editorElement.mirror);}).tooltip("mirror").width(64);
+        buttons.button(Icon.file,()->{
+            builder.clear();
+        }).tooltip("clear").width(64);
+        buttons.button(Icon.copy,()->{
+            Core.app.setClipboardText(Base64.getEncoder().encodeToString(builder.exportCompressed()));
+        }).tooltip("copy").width(64);
+        buttons.button(Icon.paste,()->{
+            ModularConstructBuilder test = new ModularConstructBuilder(3,3);
+            test.set(Base64.getDecoder().decode(Core.app.getClipboardText().trim()));
+            builder.clear();
+            builder.paste(test);
+        }).tooltip("paste").width(64);
         buttons.button("@back", Icon.left, this::hide).name("back");
 
         ///
@@ -135,16 +179,68 @@ public class PartsEditorDialog extends BaseDialog{
         hidden(() -> consumer.get(builder.export()));
     }
 
-    public void show(byte[] data, Cons<byte[]> modified){
+    public void show(byte[] data, Cons<byte[]> modified,Cons2<ModularConstructBuilder, Table> viewer){
         this.builder.set(data);
         leftSideBuilder.get(selectSide);
         editorElement.setBuilder(this.builder);
-        this.consumer = result -> {
-           if(!new String(result).equals(new String(builder.export()))){
-               modified.get(result);
-           }
-        };
+        this.consumer = modified::get;
+        this.infoViewer = viewer;
         show();
+
+        //todo: temp
+        avalibleParts.clear();
+        for(var part: ModularPartType.partMap){
+            if(!avalibleParts.containsKey(part.value.category)){
+                avalibleParts.put(part.value.category, new Seq<>());
+            }
+            avalibleParts.get(part.value.category).add(part.value);
+        }
     }
+
+
+    public static Cons2<ModularConstructBuilder, Table> unitInfoViewer = (construct,table)->{
+        table.clearChildren();
+        var statmap = new ModularUnitStatMap();
+        var itemcost = construct.itemRequirements();
+        ModularConstructBuilder.getStats(construct.parts, statmap);
+        table.top();
+        table.add(Core.bundle.get("ui.parts.info")).growX().left().color(Pal.gray);
+
+        /// cost
+        table.row();
+        table.add("[lightgray]" + Stat.buildCost.localized() + ":[] ").left().top();
+        table.row();
+        table.table(req -> {
+            req.top().left();
+            for(ItemStack stack : itemcost){
+                req.add(new ItemDisplay(stack.item, stack.amount, false)).padRight(5);
+            }
+        }).growX().left().margin(3);
+        table.row();
+        table.add("[lightgray]" + Stat.health.localized() + ":[accent] "+ statmap.getValue("health")).left().top();
+        table.row();
+        float eff = statmap.getValue("power")/statmap.getValue("powerusage");
+        String color = "[green]";
+        if(eff<0.7){
+            color = "[red]";
+        }else if(eff<1){
+            color = "[yellow]";
+        }
+
+
+        table.add("[lightgray]" + Stat.powerUse.localized() + ": "+color+statmap.getValue("powerusage") + "/"+ statmap.getValue("power")).left().top();
+        table.row();
+        table.add("[lightgray]" + Core.bundle.get("ui.parts.stat.efficiency") + ": "+color+Strings.fixed(Mathf.clamp(eff)*100,1)+"%").left().top();
+        table.row();
+        table.add("[lightgray]" + Core.bundle.get("ui.parts.stat.weight") + ":[accent] "+ statmap.getValue("mass")).left().top();
+
+        float mass = statmap.getValue("mass");
+        float wcap = statmap.getValue("wheel","weight capacity");
+        float speed = eff *  Mathf.clamp(wcap/mass,0,1) * statmap.getValue("wheel","nominal speed");
+        table.row();
+        table.add("[lightgray]" + Stat.speed.localized()  + ":[accent] "+ Core.bundle.format("ui.parts.stat.speed",Strings.fixed(speed*8,1))).left().top();
+    };
+
+
 
 }

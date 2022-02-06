@@ -1,24 +1,17 @@
 package unity.parts;
 
 import arc.*;
-import arc.graphics.*;
 import arc.graphics.g2d.*;
-import arc.math.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import mindustry.core.*;
-import mindustry.ctype.*;
-import mindustry.game.EventType.*;
-import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.meta.*;
 import unity.parts.stat.*;
+import unity.parts.stat.AdditiveStat.*;
 import unity.util.*;
-
-import static mindustry.Vars.*;
 
 //like Block, this is a singleton
 public class ModularPartType implements Displayable{
@@ -44,7 +37,8 @@ public class ModularPartType implements Displayable{
     public static TextureRegion[] panelling;
     /** texture will/may have three variants for the front middle and back **/
     public TextureRegion[] top;
-    public TextureRegion[] shadow;
+    public TextureRegion[] outline;
+    public boolean hasExtraDecal = false;
     //cost
     public float constructTimeMultiplier = 1; // base time based on item cost
     public ItemStack[] cost = {};
@@ -73,7 +67,25 @@ public class ModularPartType implements Displayable{
 
     public void load(){
         ///
-        icon = Core.atlas.find("unity-part-"+name+"-icon");
+        String prefix = "unity-part-"+name;
+        icon = Core.atlas.find(prefix+"-icon");
+        top = new TextureRegion[]{
+            getPartSprite(prefix+"-front"),
+            getPartSprite(prefix+"-mid"),
+            getPartSprite(prefix+"-back"),
+        };
+        outline = new TextureRegion[]{
+            getPartSprite(prefix+"-front-outline"),
+            getPartSprite(prefix+"-mid-outline"),
+            getPartSprite(prefix+"-back-outline"),
+        };
+    }
+    public static TextureRegion getPartSprite(String e){
+        var f = Core.atlas.find(e);
+        if(f == Core.atlas.find("error")){
+            f = Core.atlas.find( "unity-part-empty");
+        }
+        return f;
     }
 
     public void requirements(String category,ItemStack[] itemcost){
@@ -93,10 +105,16 @@ public class ModularPartType implements Displayable{
             }
         }
     }
-
+    public void drawTop(DrawTransform transform, ModularPart part){
+        if(hasExtraDecal)
+            transform.drawRect(top[part.front],part.ax*partSize,part.ay*partSize);
+    }
     public void draw(DrawTransform transform, ModularPart part){
-        //something
         transform.drawRect(panelling[part.panelingIndexes[0]],part.ax*partSize,part.ay*partSize);
+    }
+    public void drawOutline(DrawTransform transform, ModularPart part){
+        if(hasExtraDecal)
+            transform.drawRect(outline[part.front], part.ax*partSize,part.ay*partSize);
     }
 
     public static ModularPartType getPartFromId(int id){
@@ -123,6 +141,15 @@ public class ModularPartType implements Displayable{
 
     public void health(float amount){
         stats.add(new HealthStat(amount));
+    }
+    public void mass(float amount){
+        stats.add(new MassStat(amount));
+    }
+    public void producesPower(float amount){
+        stats.add(new EngineStat(amount));
+    }
+    public void usesPower(float amount){
+        stats.add(new PowerUsedStat(amount));
     }
     public void healthMul(float amount){
         stats.add(new HealthStat(amount));

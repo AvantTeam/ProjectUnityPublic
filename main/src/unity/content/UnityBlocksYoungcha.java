@@ -39,7 +39,7 @@ public class UnityBlocksYoungcha{
         //power
         combustionHeater,
     //other
-        monomialAssembler; // binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
+    sandboxAssembler; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
     public static void load(){
         oreNickel = new UnityOreBlock(UnityItems.nickel){{
@@ -170,13 +170,10 @@ public class UnityBlocksYoungcha{
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
         }};
 
-        monomialAssembler = new ModularUnitAssembler("monomial-assembler"){{
+        sandboxAssembler = new ModularUnitAssembler("sandbox-assembler"){{
             requirements(Category.units, with(UnityItems.nickel, 100, Items.graphite, 50, Items.copper, 100, Items.lead, 100));
             size = 3;
-            solid = false;
-            rotate = true;
             health = 1700;
-            configurable = true;
         }};
 
         //

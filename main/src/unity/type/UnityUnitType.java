@@ -12,6 +12,7 @@ import unity.entities.*;
 import unity.entities.Rotor.*;
 import unity.gen.*;
 import unity.parts.*;
+import unity.parts.types.*;
 import unity.util.*;
 
 public class UnityUnitType extends UnitType{
@@ -92,6 +93,15 @@ public class UnityUnitType extends UnitType{
         }
         super.drawBody(unit);
     }
+    @Override
+    public void drawSoftShadow(Unit unit, float alpha){
+        if(unit instanceof ModularUnitc){
+            drawModularBodySoftShadow((Unit & ModularUnitc)unit,alpha);
+            return;
+        }
+        super.drawSoftShadow(unit,alpha);
+
+    }
 
     public <T extends Unit & Copterc> void drawRotors(T unit){
         applyColor(unit);
@@ -146,17 +156,37 @@ public class UnityUnitType extends UnitType{
         Draw.reset();
     }
 
+    public <T extends Unit & ModularUnitc> void drawModularBodySoftShadow(T unit, float alpha){
+        Draw.color(0, 0, 0, 0.4f * alpha);
+        float rad = 1.6f;
+        float size = unit.hitSize;
+        Draw.rect(softShadowRegion, unit, size * rad * Draw.xscl, size * rad * Draw.yscl, unit.rotation - 90);
+        Draw.color();
+    }
+
     public <T extends Unit & ModularUnitc> void drawModularBody(T unit){
         applyColor(unit);
         DrawTransform dt = new DrawTransform(new Vec2(unit.x,unit.y),unit.rotation);
         var construct = unit.construct();
         if(construct!=null){
+            ModularWheelType.rollDistance = unit.driveDist();
+            unit.doodadlist().each(d->{
+                d.drawOutline(dt);
+            });
+            construct.partlist.each((p) -> {
+                p.type.drawOutline(dt, p);
+            });
             construct.partlist.each((p) -> {
                 p.type.draw(dt, p);
             });
+            unit.doodadlist().each(d->{
+                d.drawTop(dt);
+            });
+            construct.partlist.each((p) -> {
+                p.type.drawTop(dt, p);
+            });
         }
         Draw.reset();
-        //UnityUnitTypes.modularUnit.spawn(275*8,347*8)
     }
 
 

@@ -1519,6 +1519,7 @@ public final class UnityUnitTypes{
 
         modularUnit = new UnityUnitType("modularUnit"){{
             rotateShooting = false;
+            omniMovement = false;
             //stats? what stats? :D
         }};
     }

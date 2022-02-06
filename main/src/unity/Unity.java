@@ -77,6 +77,7 @@ public class Unity extends Mod{
                 for(Faction faction : Faction.all){
                     faction.load();
                 }
+                UnityParts.loadDoodads();
             });
         }
 

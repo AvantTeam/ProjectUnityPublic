@@ -2,6 +2,7 @@ package unity.ui;
 
 import arc.*;
 import arc.input.*;
+import arc.scene.*;
 import arc.scene.event.*;
 import arc.scene.event.InputEvent.*;
 import arc.scene.style.*;
@@ -40,18 +41,19 @@ public class UnityUI{
             }
             Table top = ReflectUtils.getFieldValue(Vars.ui.hudfrag.blockfrag,ReflectUtils.getField(Vars.ui.hudfrag.blockfrag,"topTable"));
             if(top!=null){
-                //hasInfoBox()
+                ///needs to be triggered in this manner, otherwise hovered blocks will not display stats.
                 var method = ReflectUtils.findMethod(Vars.ui.hudfrag.blockfrag.getClass(),"hasInfoBox",true);
                 top.visible(()->ReflectUtils.invokeMethod(Vars.ui.hudfrag.blockfrag,method)==Boolean.TRUE || 1==one);
                 if(top.find("faction table")!=null){
                     return;
                 }
                 top.row();
-                top.image().growX().pad(5).padLeft(0).padRight(0).height(3).color(Pal.gray);
+                top.image().growX().padTop(5).padLeft(0).padRight(0).height(3).color(Pal.gray); //top divider
                 top.row();
                 var pane = top.add(new ScrollPane(
                     new Table((tbl)->{
                         tbl.left();
+                        ///add the vanilla button, with sharded as the icon?
                         var vanillaCheck = tbl.button(new TextureRegionDrawable(Core.atlas.find("team-sharded")), Styles.selecti,()->{
                             includeVanilla = !includeVanilla;
                             reloadBlocks();
@@ -60,8 +62,8 @@ public class UnityUI{
                         vanillaCheck.update(()->{
                             vanillaCheck.setChecked(includeVanilla);
                         });
+                        ///add the faction buttons
                         for(Faction f:Faction.all){
-
                             var factionCheck =tbl.button(new TextureRegionDrawable(f.icon), Styles.selecti,()->{
                                 if(included.contains(f)){
                                     included.remove(f);
@@ -77,9 +79,18 @@ public class UnityUI{
                             });
                         }
                     })
-                )).left().growX().pad(3).get();
+                )).left().growX().get();
                 pane.name = "faction table";
                 pane.setScrollingDisabledY(true);
+                ///needs to be done so click doesn't remove scroll focus from the game zoom
+                pane.update(()->{
+                    if(pane.hasScroll()){
+                        Element result = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                        if(result == null || !result.isDescendantOf(pane)){
+                            Core.scene.setScrollFocus(null);
+                        }
+                    }
+                });
             }
         });
     }
@@ -93,7 +104,7 @@ public class UnityUI{
                 b.placeablePlayer = included.contains(FactionMeta.map(b));
             }
         }
-        //fuckery
+        //fuckery (updates the blocks)
         var b = (ImageButton)table.find("category-"+ Vars.ui.hudfrag.blockfrag.currentCategory.name());
         b.fireClick();
 

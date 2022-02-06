@@ -13,6 +13,7 @@ import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.world.*;
+import org.json.*;
 
 import static mindustry.Vars.*;
 
@@ -487,5 +488,18 @@ public final class Utils{
 
     public interface HitHandler{
         boolean get(float x, float y, Healthc ent, boolean direct);
+    }
+
+
+    public static void add(JSONObject o,String key, float f){
+        if(!o.has(key)){
+            o.put(key,f);
+            return;
+        }
+        o.put(key,o.getFloat(key)+f);
+    }
+    public static float getFloat(JSONObject o,String key, float defaultVal){
+        if(!o.has(key)){return defaultVal;}
+        return o.getFloat(key);
     }
 }

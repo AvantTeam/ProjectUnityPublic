@@ -22,15 +22,10 @@ public class WeaponMountStat extends ModularPartStat{
             var weaponsarr = id.stats.getJSONArray("weapons");
             JSONObject weapon = new JSONObject();
             weapon.put("part", part);
-            weapon.put("name", baseweapon.name);
-            weapon.put("reload", baseweapon.reload);
-            weapon.put("shots", baseweapon.shots);
-            weapon.put("shotDelay", baseweapon.shotDelay);
-            weapon.put("shootX", baseweapon.shootX);
-            weapon.put("shootY", baseweapon.shootY);
-            weapon.put("rotate", baseweapon.rotate);
-            weapon.put("x", part.getAx()*ModularPartType.partSize);
-            weapon.put("y", part.getAy()*ModularPartType.partSize);
+            Weapon copy = baseweapon.copy();
+            copy.x = part.getCx()*ModularPartType.partSize;
+            copy.y = part.getCy()*ModularPartType.partSize;
+            weapon.put("weapon", copy);
             weaponsarr.put(weapon);
         }
     }

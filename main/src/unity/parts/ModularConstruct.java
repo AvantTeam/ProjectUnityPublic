@@ -4,6 +4,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.gen.*;
+import unity.parts.PanelDoodadType.*;
 
 import java.io.*;
 import java.lang.reflect.*;
@@ -45,6 +46,8 @@ public class ModularConstruct implements Serializable{
                 partlist.add(part);
                 part.ax = x-w*0.5f + 0.5f;
                 part.ay = y-h*0.5f + 0.5f;
+                part.cx = x-w*0.5f + part.type.w*0.5f;
+                part.cy = y-h*0.5f + part.type.h*0.5f;
 
                 for(int px = 0; px < part.type.w; px++){
                     for(int py = 0; py < part.type.h; py++){
@@ -64,6 +67,9 @@ public class ModularConstruct implements Serializable{
             }
         }
     }
+
+    ///todo: have the top decal be relatively light, the panel decal be made of a collage of different things pf various sizes seeded by the 1st 4 bits of the array.
+
     public static int getID(byte[] data, int s){
         if(idSize==1){
             return ub(data[s]);
