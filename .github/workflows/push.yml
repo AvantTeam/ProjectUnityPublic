@@ -22,7 +22,9 @@ jobs:
         java --version
         d8 --version
 
-    - name: Build and dexify mod jar file
-      run: |
-        chmod +x gradlew
-        ./gradlew main:deploy main:dex tools:proc
+    - name: Build mod jar
+      run: ./gradlew deploy
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.event.repository.name }}
+        path: build/libs/${{ github.event.repository.name }}.jar
