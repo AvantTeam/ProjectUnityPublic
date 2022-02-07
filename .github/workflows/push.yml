@@ -24,6 +24,7 @@ jobs:
 
     - name: Build mod jar
       run: ./gradlew deploy
+    - name: Upload built jar file
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}
