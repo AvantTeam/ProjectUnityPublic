@@ -5,8 +5,8 @@ import mindustry.content.*;
 import mindustry.entities.bullet.*;
 import mindustry.gen.*;
 import mindustry.type.*;
-import org.json.*;
 import unity.parts.*;
+import unity.util.*;
 
 public class WeaponMountStat extends ModularPartStat{
     Weapon baseweapon;
@@ -19,14 +19,14 @@ public class WeaponMountStat extends ModularPartStat{
     @Override
     public void merge(ModularPartStatMap id, ModularPart part){
         if(id.has("weapons")){
-            var weaponsarr = id.stats.getJSONArray("weapons");
-            JSONObject weapon = new JSONObject();
+            var weaponsarr = id.stats.getList("weapons");
+            ValueMap weapon = new ValueMap();
             weapon.put("part", part);
             Weapon copy = baseweapon.copy();
             copy.x = part.getCx()*ModularPartType.partSize;
             copy.y = part.getCy()*ModularPartType.partSize;
             weapon.put("weapon", copy);
-            weaponsarr.put(weapon);
+            weaponsarr.add(weapon);
         }
     }
 

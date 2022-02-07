@@ -24,6 +24,7 @@ public class UnityParts{
             requirements(PartCategories.miscUnit,ItemStack.with(Items.titanium,10,UnityItems.nickel,10));
             health(50);
             mass(20);
+            armor(1);
         }};
         smallRoot = new ModularPartType("root-small"){{
             requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,10));

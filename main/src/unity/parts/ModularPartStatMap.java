@@ -2,28 +2,27 @@ package unity.parts;
 
 import arc.struct.*;
 import arc.util.serialization.*;
-import org.json.*;
 import unity.util.*;
 
 
 public class ModularPartStatMap{
-    public JSONObject stats = new JSONObject();
+    public ValueMap stats = new ValueMap();
 
-    public JSONObject getOrCreate(String name){
-        if(stats.get(name)==null){
-            stats.put(name,new JSONObject());
+    public ValueMap getOrCreate(String name){
+        if(!stats.has(name)){
+            stats.put(name,new ValueMap());
         }
-        return stats.getJSONObject(name);
+        return stats.getValueMap(name);
     }
     public boolean has(String name){
         return stats.has(name);
     }
 
     public float getValue(String name){
-        return stats.getJSONObject(name).getFloat("value");
+        return stats.getValueMap(name).getFloat("value");
     }
     public float getValue(String name,String subfield){
-        return Utils.getFloat(stats.getJSONObject(name),subfield,0);
+        return Utils.getFloat(stats.getValueMap(name),subfield,0);
     }
 
 }

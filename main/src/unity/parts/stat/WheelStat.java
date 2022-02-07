@@ -1,6 +1,5 @@
 package unity.parts.stat;
 
-import org.json.*;
 import unity.parts.*;
 import unity.util.*;
 
@@ -19,7 +18,7 @@ public class WheelStat extends ModularPartStat{
     @Override
     public void merge(ModularPartStatMap id, ModularPart part){
         if(id.has("wheel")){
-            JSONObject wheelstat = id.getOrCreate("wheel");
+            ValueMap wheelstat = id.getOrCreate("wheel");
             Utils.add(wheelstat,"total strength",wheelStrength);
             Utils.add(wheelstat,"total speedpower",wheelStrength*maxSpeed);
             Utils.add(wheelstat,"weight capacity", nominalWeight);
@@ -29,7 +28,7 @@ public class WheelStat extends ModularPartStat{
     @Override
     public void mergePost(ModularPartStatMap id, ModularPart part){
         if(id.has("wheel")){
-            JSONObject wheelstat = id.getOrCreate("wheel");
+            ValueMap wheelstat = id.getOrCreate("wheel");
             if(wheelstat.has("nominal speed")){
                 return;
             }

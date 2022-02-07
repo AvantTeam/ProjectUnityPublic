@@ -39,16 +39,18 @@ public class PartsEditorDialog extends BaseDialog{
         table.add(Core.bundle.get("ui.parts.select")).growX().left().color(Pal.gray);
 
         for(var category: avalibleParts){
+            ///Title!
             table.row();
             table.add(Core.bundle.get("ui.parts.category."+category.key)).growX().left().color(Pal.accent);
             table.row();
             table.image().growX().pad(5).padLeft(0).padRight(0).height(3).color(Pal.accent);
             table.row();
+            ///Table of the parts in the category
             table.table(list -> {
                 int i = 0;
                 for(var part : category.value){
                     if(i!=0 && i%5==0){
-                        list.row();
+                        list.row(); //row size i 5
                     }
                     list.left();
                     ImageButton partbutton = list.button(new TextureRegionDrawable(part.icon), Styles.selecti, () -> {
@@ -78,6 +80,7 @@ public class PartsEditorDialog extends BaseDialog{
                             hoveredPart = null;
                         }
                     });
+
                     i++;
                 }
             }).growX().left().padBottom(10);
@@ -219,7 +222,7 @@ public class PartsEditorDialog extends BaseDialog{
         table.row();
         table.add("[lightgray]" + Stat.health.localized() + ":[accent] "+ statmap.getValue("health")).left().top();
         table.row();
-        float eff = statmap.getValue("power")/statmap.getValue("powerusage");
+        float eff =  Mathf.clamp(statmap.getValue("power")/statmap.getValue("powerusage"));
         String color = "[green]";
         if(eff<0.7){
             color = "[red]";
@@ -236,9 +239,9 @@ public class PartsEditorDialog extends BaseDialog{
 
         float mass = statmap.getValue("mass");
         float wcap = statmap.getValue("wheel","weight capacity");
-        float speed = eff *  Mathf.clamp(wcap/mass,0,1) * statmap.getValue("wheel","nominal speed");
+        float speed = eff *  Mathf.clamp(wcap/mass) * statmap.getValue("wheel","nominal speed");
         table.row();
-        table.add("[lightgray]" + Stat.speed.localized()  + ":[accent] "+ Core.bundle.format("ui.parts.stat.speed",Strings.fixed(speed*8,1))).left().top();
+        table.add("[lightgray]" + Stat.speed.localized()  + ":[accent] "+ Core.bundle.format("ui.parts.stat.speed",Strings.fixed(speed * 60f / tilesize,1))).left().top();
     };
 
 
