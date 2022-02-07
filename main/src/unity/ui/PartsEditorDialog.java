@@ -26,7 +26,6 @@ public class PartsEditorDialog extends BaseDialog{
     public ModularConstructBuilder builder;
     Cons<byte[]> consumer;
     public PartsEditorElement editorElement;
-    ModularPartType hoveredPart = null;
     public Cons2<ModularConstructBuilder, Table> infoViewer;
 
     public ObjectMap<String,Seq<ModularPartType>> avalibleParts = new ObjectMap<>();
@@ -57,12 +56,49 @@ public class PartsEditorDialog extends BaseDialog{
                         }else{
                             editorElement.select(part);
                         }
-                    }).pad(3).size(46f).name("part-" + part.name).get();
+                    }).pad(3).size(46f).name("part-" + part.name)
+                    .tooltip(tip -> {
+                        // TODO move this to ModularPartType?
+                        // display part stats in tooltip
+                        tip.setBackground(Tex.button);
+                        tip.table(t -> {
+                            t.table(header -> {
+                                header.top().left();
+                                header.image(part.icon).size(8 * 4);
+
+                                header.label(() -> Core.bundle.get("part." + part.name))
+                                .left().padLeft(5);
+                            }).top().left();
+                            t.row();
+                            t.image(Tex.whiteui).color(Pal.darkishGray).center().growX().height(5).padTop(5); // separator
+                        }).growX().padBottom(5);
+                        tip.row();
+                        tip.table(desc -> {
+                            desc.labelWrap(Core.bundle.get("part." + part.name + ".description")).minWidth(200).grow();
+                            desc.row();
+                            desc.image(Tex.whiteui).color(Pal.darkishGray).center().growX().height(5).padTop(5);
+                        }).top().left().minWidth(300).padBottom(5);
+                        /*
+                        tip.row();
+                        tip.table(stats -> {
+
+                        });
+                        */
+                        tip.row();
+                        tip.table(req -> {
+                            req.top().left();
+                            req.add("[lightgray]" + Stat.buildCost.localized() + ":[] ").left().top();
+                            req.row();
+                            req.table(reqlist -> {
+                                reqlist.top().left();
+                                for(ItemStack stack : part.cost){
+                                    reqlist.add(new ItemDisplay(stack.item, stack.amount, false)).padRight(5);
+                                }
+                            }).grow();
+                        }).growX();
+                    }).get();
                     partbutton.resizeImage(iconMed);
-                    //on hover display stats in box below
-                    partbutton.hovered(() -> {
-                        hoveredPart = part;
-                    });
+
                     // unselect if another one got selected
                     partbutton.update(() -> {
                         partbutton.setChecked(editorElement.selected == part);
@@ -73,11 +109,6 @@ public class PartsEditorDialog extends BaseDialog{
                         }
                     });
                     //deselect hover
-                    partbutton.exited(() -> {
-                        if(hoveredPart == part){
-                            hoveredPart = null;
-                        }
-                    });
                     i++;
                 }
             }).growX().left().padBottom(10);
@@ -115,15 +146,8 @@ public class PartsEditorDialog extends BaseDialog{
         stats.update(()->{
             stats.clear();
             stats.top().left().margin(5);
-            ModularPartType selected = null;
             if(editorElement.selected!=null){
-                selected = editorElement.selected;
-            }
-            if(hoveredPart!=null){
-                selected = hoveredPart;
-            }
-            if(selected!=null){
-                selected.display(stats);
+                editorElement.selected.display(stats);
             }
         });
 
@@ -226,7 +250,6 @@ public class PartsEditorDialog extends BaseDialog{
         }else if(eff<1){
             color = "[yellow]";
         }
-
 
         table.add("[lightgray]" + Stat.powerUse.localized() + ": "+color+statmap.getValue("powerusage") + "/"+ statmap.getValue("power")).left().top();
         table.row();
