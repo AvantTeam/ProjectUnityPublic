@@ -22,10 +22,8 @@ jobs:
         java --version
         d8 --version
         
-    - name: Build mod jar
-      run: ./gradlew deploy
-
-    - uses: actions/upload-artifact@v2
+    - name: Upload built mod jar file
+      uses: actions/upload-artifact@v2.2.1
       with:
-        name: ${{ github.event.repository.name }}
-        path: build/libs/${{ github.event.repository.name }}.jar
+        name: ProjectUnity (zipped)
+        path: main/build/libs/ProjectUnity.jar
