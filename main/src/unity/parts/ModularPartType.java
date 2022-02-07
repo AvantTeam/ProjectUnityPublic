@@ -138,7 +138,9 @@ public class ModularPartType implements Displayable{
             stat.mergePost(statmap,part);
         }
     }
-
+    public void armor(float amount){
+           stats.add(new ArmourStat(amount));
+       }
     public void health(float amount){
         stats.add(new HealthStat(amount));
     }

@@ -12,7 +12,7 @@ import mindustry.entities.bullet.*;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.type.*;
-import org.json.*;
+import mindustry.world.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
 import unity.parts.*;
@@ -36,7 +36,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     @Import
     boolean dead;
     @Import
-    float health, maxHealth, rotation;
+    float health, maxHealth, rotation,armor;
     @Import
     int id;
     @Import
@@ -60,6 +60,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public transient float speed = 0;
     public transient float rotateSpeed = 0;
     public transient float massStat = 0;
+    public transient float weaponrange = 0;
 
     @Override
     public void add(){
@@ -261,13 +262,16 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         float hratio = Mathf.clamp(this.health / this.maxHealth);
         this.maxHealth = statmap.getOrCreate("health").getFloat("value");
         this.health = hratio * this.maxHealth;
-        var weapons = statmap.stats.getJSONArray("weapons");
+        var weapons = statmap.stats.getList("weapons");
         mounts = new WeaponMount[weapons.length()];
+        weaponrange = 0;
         for(int i = 0; i < weapons.length(); i++){
-            var weapon = getWeaponFromStat(weapons.getJSONObject(i));
+            var weapon = getWeaponFromStat(weapons.getMap(i));
             weapon.reload *= 1f/eff;
             weapon.load();
             mounts[i] = weapon.mountType.get(weapon);
+            ModularPart mpart =  weapons.getMap(i).get("part");
+            weaponrange = Math.max(weaponrange,weapon.bullet.range() +Mathf.dst(mpart.cx,mpart.cy)*ModularPartType.partSize);
         }
         this.massStat = statmap.getOrCreate("mass").getFloat("value");
 
@@ -277,13 +281,15 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         speed = eff *  Mathf.clamp(wheelcap/this.massStat,0,1) * wheelspd;
         rotateSpeed = Mathf.clamp(10f*speed/(float)Math.max(construct.parts.length,construct.parts[0].length),0,5);
 
+        armor = statmap.getValue("armour","realValue");
+
     }
 
     public void initWeapon(Weapon w){
         if(w.recoilTime < 0) w.recoilTime = w.reload;
     }
 
-    public Weapon getWeaponFromStat(JSONObject weaponstat){
+    public Weapon getWeaponFromStat(ValueMap weaponstat){
         Weapon weapon = (Weapon)weaponstat.get("weapon");
         initWeapon(weapon);
         return weapon;
@@ -353,13 +359,25 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
                     pos.set(part.cx*ModularPartType.partSize,part.ay*ModularPartType.partSize);
                     dt.transform(pos);
                     nvt.set(nv.x + Mathf.range(3) ,nv.y + Mathf.range(3));
-                    dust.at(pos.x,pos.y, 0,Vars.world.tileWorld(pos.x,pos.y).floor().mapColor,nvt);
+                    Tile t = Vars.world.tileWorld(pos.x,pos.y);
+                    if(t!=null){
+                        dust.at(pos.x,pos.y, 0,t.floor().mapColor,nvt);
+                    }
+
                 }
             });
 
         }
         moving = false;
     }
+
+    @Replace
+    public boolean hasWeapons() {
+            return mounts.length>0;
+        }
+
+    @Replace
+    public float range(){ return weaponrange; }
 
 
 }

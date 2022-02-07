@@ -1,5 +1,6 @@
 package unity.parts;
 
+import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.type.*;
@@ -38,8 +39,10 @@ public class ModularConstructBuilder{
         w = parts.length;
         h = parts[0].length;
         valid = new boolean[w][h];
+        root = null;
         findRoot();
         onChange.run();
+        rebuildValid();
     }
     public void paste(ModularConstructBuilder e){
         int ox = (w-e.w)/2;
@@ -58,6 +61,7 @@ public class ModularConstructBuilder{
                 }
             }
         }
+        rebuildValid();
     }
 
     public boolean isIn(int x,int y){
@@ -80,6 +84,42 @@ public class ModularConstructBuilder{
             }
         }
         return partsList.asArray();
+    }
+
+    public void rebuildValid(){
+        for(int i =0 ;i<w;i++){
+            for(int j =0 ;j<h;j++){
+                valid[i][j] = false;
+            }
+        }
+        if(root==null){
+            return;
+        }
+
+        OrderedSet<Point2> front = new OrderedSet<>();
+        front.add(new Point2(root.x,root.y));
+        valid[root.x][root.y] = true;
+        while(!front.isEmpty()){
+            var pt = front.removeIndex(0);
+
+            if(pt.x>0 && parts[pt.x-1][pt.y]!=null && !valid[pt.x-1][pt.y]){
+                valid[pt.x-1][pt.y] = true;
+                front.add(new Point2(pt.x-1,pt.y));
+            }
+            if(pt.y>0 && parts[pt.x][pt.y-1]!=null && !valid[pt.x][pt.y-1]){
+                valid[pt.x][pt.y-1] = true;
+                front.add(new Point2(pt.x,pt.y-1));
+            }
+
+            if(pt.x<w-1 && parts[pt.x+1][pt.y]!=null && !valid[pt.x+1][pt.y]){
+                valid[pt.x+1][pt.y] = true;
+                front.add(new Point2(pt.x+1,pt.y));
+            }
+            if(pt.y<h-1 && parts[pt.x][pt.y+1]!=null && !valid[pt.x][pt.y+1]){
+                valid[pt.x][pt.y+1] = true;
+                front.add(new Point2(pt.x,pt.y+1));
+            }
+        }
     }
 
     public ItemSeq itemRequirements(){
@@ -114,7 +154,7 @@ public class ModularConstructBuilder{
 
         for(int j = 0; j < h; j++){
             for(int i = 0; i < w; i++){
-                if(parts[i][j] != null){
+                if(valid[i][j] && parts[i][j] != null){
                     maxx = Math.max(i,maxx);
                     minx = Math.min(i,minx);
                     maxy = Math.max(j,maxy);
@@ -124,7 +164,7 @@ public class ModularConstructBuilder{
         }
         for(int i =minx ;i<=maxx;i++){
             for(int j =miny ;j<=maxy;j++){
-                if(parts[i][j]!=null && !partsList.contains(parts[i][j])){
+                if(valid[i][j] && parts[i][j]!=null && !partsList.contains(parts[i][j])){
                     partsList.add(parts[i][j]);
                 }
             }
@@ -219,6 +259,7 @@ public class ModularConstructBuilder{
             root = part;
         }
         onChange.run();
+        rebuildValid();
         return true;
     }
 
@@ -235,5 +276,6 @@ public class ModularConstructBuilder{
             }
         }
         onChange.run();
+        rebuildValid();
     }
 }

@@ -4,6 +4,8 @@ import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.scene.style.*;
+import mindustry.game.*;
+import mindustry.graphics.*;
 import unity.annotations.Annotations.*;
 import unity.graphics.*;
 
@@ -11,9 +13,17 @@ import static mindustry.Vars.*;
 
 @FactionBase
 public enum Faction{
-    koruh("koruh", Color.valueOf("61caff")),
+    vanilla("vanilla", Team.sharded.color),
     youngcha("youngcha", Color.valueOf("a69f95")),
-    monolith("monolith", UnityPal.monolith);
+    koruh("koruh", Color.valueOf("61caff")),
+    light("light", Color.valueOf("fffde8")),
+    monolith("monolith", UnityPal.monolith),
+    dark("dark", Color.valueOf("fc6203")),
+    scar("scar", Pal.remove),
+    advance("advance", Color.sky),
+    imber("imber", Pal.surge),
+    plague("plague", Color.valueOf("a3f080")),
+    end("end", Color.gray);
 
     public static final Faction[] all = values();
 

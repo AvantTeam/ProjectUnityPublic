@@ -2,6 +2,7 @@ package unity.world.blocks.units;
 
 import arc.scene.ui.layout.*;
 import arc.util.*;
+import arc.util.io.*;
 import mindustry.*;
 import mindustry.game.*;
 import mindustry.gen.*;
@@ -64,6 +65,22 @@ public class ModularUnitAssembler extends PayloadBlock{
         @Override
         public void configured(Unit builder, Object value){
             super.configured(builder, value);
+        }
+
+        @Override
+        public void write(Writes write){
+            super.write(write);
+            var data  =blueprint.export();
+            write.i(data.length);
+            write.b(data);
+        }
+
+        @Override
+        public void read(Reads read, byte revision){
+            super.read(read, revision);
+            byte[] data = new byte[read.i()];
+            read.b(data);
+            blueprint.set(data);
         }
     }
 }

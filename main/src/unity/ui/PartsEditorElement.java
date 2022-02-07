@@ -198,7 +198,7 @@ public class PartsEditorElement extends Element{
                 }
                 Draw.color(bgCol);
                 rectCorner(gx+i*32,gy+j*32, part.type.w*32, part.type.h*32);
-                Draw.color(Color.white);
+                Draw.color(builder.valid[i][j]?Color.white:Color.red);
                 rectCorner(part.type.icon,gx+i*32,gy+j*32, part.type.w*32, part.type.h*32);
             }
         }

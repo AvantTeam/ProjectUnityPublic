@@ -1,5 +1,8 @@
 package unity.parts.stat;
 
+import arc.*;
+import arc.scene.ui.layout.*;
+import mindustry.world.meta.*;
 import unity.parts.*;
 
 public class AdditiveStat extends ModularPartStat{
@@ -16,6 +19,11 @@ public class AdditiveStat extends ModularPartStat{
             jo.put("value", jo.getFloat("value") + value);
         }
 
+    }
+
+    public void display(Table table){
+        table.row();
+        table.add("[lightgray]" + Core.bundle.get("ui.parts.stattype."+name) + ": "+value).left().top();
     }
 
     @Override
