@@ -3,14 +3,18 @@ package unity;
 import arc.*;
 import arc.struct.*;
 import arc.util.*;
+import mindustry.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
 import mindustry.world.blocks.environment.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
+import unity.content.blocks.*;
 import unity.gen.*;
 import unity.mod.*;
+import unity.parts.*;
+import unity.ui.*;
 import unity.util.*;
 
 import static mindustry.Vars.*;
@@ -37,6 +41,9 @@ public class Unity extends Mod{
     @ListPackages
     public static Seq<String> packages = Seq.with();
 
+    /**UI**/
+    public static UnityUI ui= new UnityUI();
+
     /** Default constructor for Mindustry mod loader to instantiate. */
     public Unity(){
         this(false);
@@ -55,7 +62,17 @@ public class Unity extends Mod{
 
             // Disclaimer, because apparently we're stupid enough to need this
             Events.on(ClientLoadEvent.class, e -> {
-                ui.showOkText("@mod.disclaimer.title", "@mod.disclaimer.text", () -> {});
+                Vars.ui.showOkText("@mod.disclaimer.title", "@mod.disclaimer.text", () -> {});
+
+                //bc they are not a contentType
+                ModularPartType.loadStatic();
+                for(var en: ModularPartType.partMap){
+                    en.value.load();
+                }
+                for(Faction faction : Faction.all){
+                    faction.load();
+                }
+                UnityParts.loadDoodads();
             });
         }
 
@@ -83,18 +100,25 @@ public class Unity extends Mod{
     public void init(){
         dev.init();
         music.init();
+        ui.init();
     }
 
     @Override
     public void loadContent(){
-        Faction.init();
 
+
+        Faction.init();
+        UnityItems.load();
         UnityStatusEffects.load();
         UnityBullets.load();
         UnityUnitTypes.load();
+        YoungchaBlocks.load();
+        UnityParts.load();
 
+        //below has to be done after all things with faction tags are loaded.
         FactionMeta.init();
         UnityEntityMapping.init();
+
 
         logContent();
     }

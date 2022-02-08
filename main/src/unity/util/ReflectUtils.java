@@ -1,10 +1,13 @@
 package unity.util;
 
+import mindustry.ctype.*;
+//import sun.misc.*;
+
 import java.lang.reflect.*;
 
 import static mindustry.Vars.*;
 
-/** @author GlennFolker */
+/** @author GlennFolker  Xelo was here */
 @SuppressWarnings("unchecked")
 public final class ReflectUtils{
     private ReflectUtils(){
@@ -51,7 +54,8 @@ public final class ReflectUtils{
             try{
                 type.getDeclaredField(field);
                 break;
-            }catch(NoSuchFieldException ignored){}
+            }catch(NoSuchFieldException ignored){
+            }
         }
 
         return type;
@@ -63,7 +67,8 @@ public final class ReflectUtils{
             try{
                 type.getDeclaredMethod(method, args);
                 break;
-            }catch(NoSuchMethodException ignored){}
+            }catch(NoSuchMethodException ignored){
+            }
         }
 
         return type;
@@ -75,7 +80,8 @@ public final class ReflectUtils{
             try{
                 type.getDeclaredConstructor(args);
                 break;
-            }catch(NoSuchMethodException ignored){}
+            }catch(NoSuchMethodException ignored){
+            }
         }
 
         return type;
@@ -104,6 +110,7 @@ public final class ReflectUtils{
     /** Sets a field of an model without throwing exceptions. */
     public static void setField(Object object, Field field, Object value){
         try{
+            field.setAccessible(true);
             field.set(object, value);
         }catch(Exception e){
             throw new RuntimeException(e);
@@ -111,13 +118,35 @@ public final class ReflectUtils{
     }
 
     /** Gets a value from a field of an model without throwing exceptions. */
-    public static <T> T getField(Object object, Field field){
+    public static <T> T getFieldValue(Object object, Field field){
         try{
+            field.setAccessible(true);
             return (T)field.get(object);
         }catch(Exception e){
             throw new RuntimeException(e);
         }
     }
+
+    /** Gets a value from a field of an model without throwing exceptions. */
+    public static <T, F extends U, U> T getFieldValue(F object, Class<U> subclass, String fieldname){
+        try{
+            Field field = subclass.getDeclaredField(fieldname);
+            field.setAccessible(true);
+            return (T)field.get(object);
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** Gets a field of an model without throwing exceptions. */
+    public static Field getField(Object object, String field){
+        try{
+            return object.getClass().getDeclaredField(field);
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /** A utility function to find a method without throwing exceptions. */
     public static Method findMethod(Class<?> type, String methodName, boolean access, Class<?>... args){
@@ -170,4 +199,5 @@ public final class ReflectUtils{
             return null;
         }
     }
+
 }

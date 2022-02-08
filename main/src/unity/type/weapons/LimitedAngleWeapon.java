@@ -32,6 +32,7 @@ public class LimitedAngleWeapon extends Weapon{
     public void update(Unit unit, WeaponMount mount){
         boolean can = unit.canShoot();
         mount.reload = Math.max(mount.reload - Time.delta * unit.reloadMultiplier, 0);
+        mount.recoil = Mathf.approachDelta(mount.recoil, 0f, (Math.abs(recoil) * unit.reloadMultiplier) / recoilTime);
 
         float
         weaponRotation = unit.rotation - 90 + (rotate ? mount.rotation : 0),

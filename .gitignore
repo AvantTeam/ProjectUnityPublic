@@ -13,3 +13,4 @@ main/assets/sprites/
 .idea/
 .vscode/
 .kateproject
+build.bat
