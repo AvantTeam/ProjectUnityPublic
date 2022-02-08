@@ -1,11 +1,19 @@
 package unity.graphics;
 
+import arc.*;
+import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.math.geom.*;
 import arc.util.*;
+import mindustry.graphics.*;
+
+import static mindustry.Vars.tilesize;
 
 public final class UnityDrawf{
     private final static float[] v = new float[6];
+    private final static TextureRegion nRegion = new TextureRegion();
+    private final static Vec2 vector = new Vec2();
 
     private UnityDrawf(){
         throw new AssertionError();
@@ -49,5 +57,117 @@ public final class UnityDrawf{
                 Fill.tri(v[0], v[1], v[2], v[3], v[4], v[5]);
             }
         }
+    }
+
+    public static void drawHeat(TextureRegion reg, float x, float y, float rot, float temp){
+        float a;
+        if(temp > 273.15f){
+            a = Math.max(0f, (temp - 498f) * 0.001f);
+            if(a < 0.01f) return;
+            if(a > 1f){
+                Color fCol = Pal.turretHeat.cpy().add(0, 0, 0.01f * a);
+                fCol.mul(a);
+                Draw.color(fCol, a);
+            }else{
+                Draw.color(Pal.turretHeat, a);
+            }
+        }else{
+            a = 1f - Mathf.clamp(temp / 273.15f);
+            if(a < 0.01f) return;
+            Draw.color(UnityPal.coldcolor, a);
+        }
+        Draw.blend(Blending.additive);
+        Draw.rect(reg, x, y, rot);
+        Draw.blend();
+        Draw.color();
+    }
+
+    public static void drawSlideRect(TextureRegion region, float x, float y, float w, float h, float tw, float th, float rot, int step, float offset){
+        if(region == null) return;
+        nRegion.set(region);
+
+        float scaleX = w / tw;
+        float texW = nRegion.u2 - nRegion.u;
+
+        nRegion.u += Mathf.map(offset % 1, 0f, 1f, 0f, texW * step / tw);
+        nRegion.u2 = nRegion.u + scaleX * texW;
+        Draw.rect(nRegion, x, y, w, h, w * 0.5f, h * 0.5f, rot);
+    }
+
+    static float getypos(float d,float r, float h){
+        float c1 = Mathf.pi*r;
+        if(d<c1){
+            return r*(1f-Mathf.sinDeg(180*d/c1));
+        }else if(d>c1+h-r){
+            return (h-r) + r*(Mathf.sinDeg(180*(d-(c1+h-r))/c1));
+        }else{
+            return d-c1+r;
+        }
+    }
+
+    public static void drawTread(TextureRegion region, float x, float y, float w, float h, float r, float rot, float d1, float d2){
+        float c1 = Mathf.pi*r;
+        float cut1 = c1*0.5f;
+        float cut2 = c1*1.5f + h-r*2;
+        if(d1<cut1 && d2< cut1){ return;}//cant be seen
+        if(d1>cut2 && d2> cut2){ return;}//cant be seen
+
+        float y1 = getypos(d1,r,h) - h*0.5f;
+        float y2 = getypos(d2,r,h) - h*0.5f;
+        TextureRegion reg = region;
+        if(d1<cut1){
+            y1 =  - h*0.5f;
+            nRegion.set(region);
+            nRegion.v = Mathf.map(cut1,d1,d2,nRegion.v,nRegion.v2);
+            reg = nRegion;
+        }
+
+        if(d2>cut2){
+            y2 = h*0.5f;
+            nRegion.set(region);
+            nRegion.v2 = Mathf.map(cut2,d1,d2,nRegion.v,nRegion.v2);
+            reg = nRegion;
+        }
+
+        Draw.rect(reg, x, y + (y1 + y2) * 0.5f, w, y2 - y1, w * 0.5f,  - y1, rot);
+
+    }
+
+    public static void drawRotRect(TextureRegion region, float x, float y, float w, float h, float th, float rot, float ang1, float ang2){
+        if(region == null || !Core.settings.getBool("effects")) return;
+        float amod1 = Mathf.mod(ang1, 360f);
+        float amod2 = Mathf.mod(ang2, 360f);
+        if(amod1 >= 180f && amod2 >= 180f) return;
+
+        nRegion.set(region);
+        float uy1 = nRegion.v;
+        float uy2 = nRegion.v2;
+        float uCenter = (uy1 + uy2) / 2f;
+        float uSize = (uy2 - uy1) * h / th * 0.5f;
+        uy1 = uCenter - uSize;
+        uy2 = uCenter + uSize;
+        nRegion.v = uy1;
+        nRegion.v2 = uy2;
+
+        float s1 = -Mathf.cos(ang1 * Mathf.degreesToRadians);
+        float s2 = -Mathf.cos(ang2 * Mathf.degreesToRadians);
+        if(amod1 > 180f){
+            nRegion.v2 = Mathf.map(0f, amod1 - 360f, amod2, uy2, uy1);
+            s1 = -1f;
+        }else if(amod2 > 180f){
+            nRegion.v = Mathf.map(180f, amod1, amod2, uy2, uy1);
+            s2 = 1f;
+        }
+        s1 = Mathf.map(s1, -1f, 1f, y - h / 2f, y + h / 2f);
+        s2 = Mathf.map(s2, -1f, 1f, y - h / 2f, y + h / 2f);
+        Draw.rect(nRegion, x, (s1 + s2) * 0.5f, w, s2 - s1, w * 0.5f, y - s1, rot);
+    }
+
+    public static void line(Color color, float x, float y, float x2, float y2){
+        Lines.stroke(3f, Pal.gray);
+        Lines.line(x, y, x2, y2);
+        Lines.stroke(1f, color);
+        Lines.line(x, y, x2, y2);
+        Draw.reset();
     }
 }

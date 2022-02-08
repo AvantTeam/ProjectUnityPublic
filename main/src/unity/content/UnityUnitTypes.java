@@ -51,6 +51,11 @@ public final class UnityUnitTypes{
     public static @EntityPoint(UnitWaterMove.class)
     UnitType fin, blue;
 
+
+    // Youngcha {unit, modular}.
+    public static @EntityDef({Unitc.class, ModularUnitc.class})
+    UnitType modularUnit;
+
     private UnityUnitTypes(){
         throw new AssertionError();
     }
@@ -1530,6 +1535,13 @@ public final class UnityUnitTypes{
                     collisionWidth = 12f;
                 }};
             }});
+        }};
+
+        modularUnit = new UnityUnitType("modularUnit"){{
+            rotateShooting = false;
+            omniMovement = false;
+            weapons.add(new Weapon("gun")); //blank weapon so mobile doesn't die
+            //stats? what stats? :D
         }};
     }
 }
