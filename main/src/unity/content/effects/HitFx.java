@@ -1,4 +1,4 @@
-package unity.content.fx;
+package unity.content.effects;
 
 import arc.graphics.*;
 import arc.graphics.g2d.*;
@@ -24,6 +24,30 @@ public final class HitFx{
         randLenVectors(e.id, 5, e.fin() * 15f, (x, y) -> lineAngle(e.x + x, e.y + y, Mathf.angle(x, y), e.fout() * 3f + 1f));
     }),
 
+    empHit = new Effect(50f, 100f, e -> {
+        float rad = 70f;
+        e.scaled(7f, b -> {
+            color(Pal.heal, b.fout());
+            Fill.circle(e.x, e.y, rad);
+        });
+
+        color(Pal.heal);
+        stroke(e.fout() * 3f);
+        Lines.circle(e.x, e.y, rad);
+
+        int points = 10;
+        float offset = Mathf.randomSeed(e.id, 360f);
+        for(int i = 0; i < points; i++){
+            float angle = i* 360f / points + offset;
+            Drawf.tri(e.x + Angles.trnsx(angle, rad), e.y + Angles.trnsy(angle, rad), 6f, 50f * e.fout(), angle);
+        }
+
+        Fill.circle(e.x, e.y, 12f * e.fout());
+        color();
+        Fill.circle(e.x, e.y, 6f * e.fout());
+        Drawf.light(e.x, e.y, rad * 1.6f, Pal.heal, e.fout());
+    }),
+
     coloredHitLarge = new Effect(21f, e -> {
         color(Color.white, e.color, e.fin());
         e.scaled(8f, s -> {
@@ -33,6 +57,28 @@ public final class HitFx{
 
         stroke(0.5f + e.fout());
         randLenVectors(e.id, 6, e.fin() * 35f, e.rotation + 180f, 45f, (x, y) -> lineAngle(e.x + x, e.y + y, Mathf.angle(x, y), e.fout() * 7f + 1f));
+    }),
+
+    hitExplosionLarge = new Effect(30f, 200f, e -> {
+        color(Pal.missileYellow);
+        e.scaled(12f, s -> {
+            stroke(s.fout() * 2f + 0.5f);
+            Lines.circle(e.x, e.y, s.fin() * 60f);
+        });
+
+        color(Color.gray);
+        randLenVectors(e.id, 8, 2f + 42f * e.finpow(), (x, y) -> {
+            Fill.circle(e.x + x, e.y + y, e.fout() * 5f + 0.5f);
+        });
+
+        color(Pal.missileYellowBack);
+        stroke(e.fout() * 1.5f);
+
+        randLenVectors(e.id + 1, 5, 1f + 56f * e.finpow(), (x, y) -> {
+            lineAngle(e.x + x, e.y + y, Mathf.angle(x, y), 1f + e.fout() * 5f);
+        });
+
+        Drawf.light(e.x, e.y, 60f, Pal.missileYellowBack, 0.8f * e.fout());
     }),
 
     hitExplosionMassive = new Effect(70f, 370f, e -> {

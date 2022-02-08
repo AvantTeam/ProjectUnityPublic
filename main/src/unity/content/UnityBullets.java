@@ -5,7 +5,7 @@ import mindustry.content.*;
 import mindustry.entities.bullet.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
-import unity.content.fx.*;
+import unity.content.effects.*;
 import unity.entities.bullet.energy.*;
 
 public class UnityBullets{

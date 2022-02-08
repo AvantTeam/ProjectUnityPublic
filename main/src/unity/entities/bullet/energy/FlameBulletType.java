@@ -31,6 +31,7 @@ public class FlameBulletType extends BulletType{
         collidesAir = false;
         keepVelocity = false;
         hittable = false;
+        layer = Layer.effect + 0.001f;
     }
 
     @Override
@@ -45,7 +46,7 @@ public class FlameBulletType extends BulletType{
                 Fill.circle(e.x + x, e.y + y, 0.65f + e.fout() * particleSizeScl);
                 Drawf.light(null, e.x + x, e.y + y, (0.65f + e.fout(Interp.pow4Out) * particleSizeScl) * 4f, tc2, 0.5f * e.fout(Interp.pow2Out));
             });
-        }).layer(Layer.effect + 0.001f);
+        }).layer(layer);
         if(smokeColors != null && smokeColors.length > 0){
             smokeEffect = new Effect(lifetime * 3f, range() * 2.25f, e -> {
                 Draw.color(tc.lerp(smokeColors, e.fin()));
@@ -56,7 +57,7 @@ public class FlameBulletType extends BulletType{
                     Fill.circle(e.x + x, e.y + y, 0.65f + slope * particleSizeScl);
                     Fill.circle(e.x + (x / 2f), e.y + (y / 2f), 0.5f + slope * (particleSizeScl / 2f));
                 });
-            }).followParent(false);
+            }).followParent(false).layer(layer - 0.001f);
         }
         hitEffect = new Effect(14f, e -> {
             Draw.color(tc.lerp(hitColors, e.fin()));

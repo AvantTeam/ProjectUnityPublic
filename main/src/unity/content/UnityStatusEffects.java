@@ -1,9 +1,10 @@
 package unity.content;
 
+import arc.graphics.*;
 import mindustry.type.*;
 
 public final class UnityStatusEffects{
-    public static StatusEffect disabled, weaken;
+    public static StatusEffect disabled, weaken, speedFatigue, sagittariusFatigue;
 
     private UnityStatusEffects(){
         throw new AssertionError();
@@ -20,6 +21,16 @@ public final class UnityStatusEffects{
             damageMultiplier = 0.75f;
             healthMultiplier = 0.75f;
             speedMultiplier = 0.5f;
+        }};
+
+        speedFatigue = new StatusEffect("speed-fatigue"){{
+            speedMultiplier = 0.6f;
+        }};
+
+        sagittariusFatigue = new StatusEffect("sagittarius-fatigue"){{
+            speedMultiplier = 0.1f;
+            healthMultiplier = 0.6f;
+            Color.valueOf(color, "62ae7f");
         }};
     }
 }
