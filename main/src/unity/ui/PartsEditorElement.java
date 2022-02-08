@@ -26,13 +26,13 @@ public class PartsEditorElement extends Element{
     public boolean erasing = false;
     public boolean mirror = true;
     //selection boxes?
-    //copy paste??????
 
     float panx=0,pany=0;
     float prevpx,prevpy;
 
     float mousex,mousey;
     float anchorx,anchory;
+    float scl = 1,targetscl = 1;
     int dragTriggered = 0;
 
 
@@ -46,6 +46,8 @@ public class PartsEditorElement extends Element{
                 anchory = y;
                 prevpx = panx;
                 prevpy = pany;
+                mousex = x;
+                mousey = y;
                 return true;
             }
 
@@ -68,6 +70,7 @@ public class PartsEditorElement extends Element{
 
             @Override
             public boolean mouseMoved(InputEvent event, float x, float y){
+                scene.setScrollFocus(PartsEditorElement.this); ///AAAAAA
                 mousex = x;
                 mousey = y;
                 var g = uiToGrid(x,y);
@@ -88,6 +91,25 @@ public class PartsEditorElement extends Element{
             public void exit(InputEvent event, float x, float y, int pointer, Element toActor){
                 super.exit(event, x, y, pointer, toActor);
                 Core.graphics.cursor(SystemCursor.arrow);
+                scene.setScrollFocus(null);
+            }
+
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Element fromActor){
+                scene.setScrollFocus(PartsEditorElement.this);
+            }
+
+            @Override
+            public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY){
+                Log.info("scrolled: "+amountX+","+amountY);
+                float scroll = amountY;
+                if(Math.abs(amountX) > Math.abs(amountY)){
+                    scroll = amountX;
+                }
+                targetscl *= (scroll*0.1)+1;
+                targetscl = Mathf.clamp(targetscl,0.2f,5);
+
+                return true;
             }
         });
     }
@@ -98,7 +120,6 @@ public class PartsEditorElement extends Element{
             return;
         }
         var g = uiToGrid(x,y);
-        Log.info(g);
         if(tileValid(g.x,g.y)){
             if(selected!=null){
                 boolean b = builder.placePart(selected, g.x, g.y);
@@ -125,12 +146,29 @@ public class PartsEditorElement extends Element{
     public void rebuild(){
         //?
     }
-
+    float gx = 0,gy = 0;
     @Override
     public void draw(){
+        float cx =   panx + width*0.0f; // cam center relative to gx
+        float cy =   pany + height*0.0f; // cam center relative to gy
+        float pscl = scl;
+        scl += (targetscl-scl)*0.1;
+
+        float scldiff = scl/pscl;
+
+
+
+
+        float dx = cx*(scldiff-1);
+        panx+=dx;
+        float dy = cy*(scldiff-1);
+        pany+=dy;
+
+        gx = gx();
+        gy = gy();
         float midx = x + width * 0.5f;
         float midy = y + height * 0.5f;
-        float gx = gx(), gy = gy();
+
 
         Draw.color(bgCol);
         Fill.rect(midx,midy,width,height);
@@ -141,22 +179,22 @@ public class PartsEditorElement extends Element{
             return;
         }
         Draw.color(blueprintCol);
-        rectCorner(gx,gy, builder.w*32, builder.h*32);
+        rectCorner(0,0, builder.w*32, builder.h*32);
         Draw.color(blueprintColAccent);
         //draw border and center lines
         Lines.stroke(5);
-        Lines.rect(gx,gy, builder.w*32, builder.h*32);
+        rectLine(0,0, builder.w*32, builder.h*32);
         int mid = builder.w/2;
         if(builder.w % 2 == 1){
-            Lines.rect(gx+mid*32,gy, 32, builder.h*32);
+            rectLine(mid*32,0, 32, builder.h*32);
         }else{
-            Lines.line(gx+mid*32,gy, gx+mid*32,gy+builder.h*32);
+            line(mid*32,0, mid * 32, builder.h * 32);
         }
         mid = builder.h/2;
         if(builder.h % 2 == 1){
-            Lines.rect(gx,gy+mid*32, builder.w*32,32);
+            rectLine(0,mid*32, builder.w*32,32);
         }else{
-            Lines.line(gx,gy+mid*32,gx+builder.w*32, gx+mid*32);
+            line(0,mid*32,builder.w*32, mid * 32);
         }
         Draw.reset();
 
@@ -172,16 +210,16 @@ public class PartsEditorElement extends Element{
         for(int i = minx;i<=maxx;i++){
             for(int j = miny; j <= maxy; j++){
                 if(i>0 && j>0){
-                    Fill.square(gx + i * 32, gy + j * 32, 3, 45);
+                    Fill.square(gx + i * 32 * scl, gy + j * 32 * scl, 3, 45);
                 }
             }
         }
         //draw highlight cursor
         Point2 cursor = uiToGrid(mousex,mousey);
         if(selected == null){
-            rectCorner(gx+cursor.x*32,gy+cursor.y*32, 32, 32);
+            rectCorner(cursor.x*32,cursor.y*32, 32, 32);
             if(mirror && mirrorX(cursor.x)!=cursor.x){
-                rectCorner(gx+mirrorX(cursor.x)*32,gy+cursor.y*32, 32, 32);
+                rectCorner(mirrorX(cursor.x)*32,cursor.y*32, 32, 32);
             }
         }
 
@@ -197,9 +235,9 @@ public class PartsEditorElement extends Element{
                     continue;
                 }
                 Draw.color(bgCol);
-                rectCorner(gx+i*32,gy+j*32, part.type.w*32, part.type.h*32);
+                rectCorner(i*32,j*32, part.type.w*32, part.type.h*32);
                 Draw.color(builder.valid[i][j]?Color.white:Color.red);
-                rectCorner(part.type.icon,gx+i*32,gy+j*32, part.type.w*32, part.type.h*32);
+                rectCorner(part.type.icon,i*32,j*32, part.type.w*32, part.type.h*32);
             }
         }
 
@@ -209,15 +247,15 @@ public class PartsEditorElement extends Element{
                 highlight = Color.red;
             }
             Draw.color(bgCol, 0.5f);
-            rectCorner(gx+cursor.x*32,gy+cursor.y*32, selected.w*32, selected.h*32);
+            rectCorner(cursor.x*32,cursor.y*32, selected.w*32, selected.h*32);
             Draw.color(highlight, 0.5f);
-            rectCorner(selected.icon,gx+cursor.x*32,gy+cursor.y*32, 32*selected.w, 32*selected.h);
+            rectCorner(selected.icon,cursor.x*32,cursor.y*32, 32*selected.w, 32*selected.h);
 
             if(mirror && mirrorX(cursor.x)!=cursor.x){
                 Draw.color(bgCol, 0.5f);
-                rectCorner(gx+mirrorX(cursor.x,selected.w)*32,gy+cursor.y*32, selected.w*32, selected.h*32);
+                rectCorner(mirrorX(cursor.x,selected.w)*32,cursor.y*32, selected.w*32, selected.h*32);
                 Draw.color(highlight, 0.5f);
-                rectCorner(selected.icon,gx+mirrorX(cursor.x,selected.w)*32,gy+cursor.y*32, 32*selected.w, 32*selected.h);
+                rectCorner(selected.icon,mirrorX(cursor.x,selected.w)*32,cursor.y*32, 32*selected.w, 32*selected.h);
             }
         }
 
@@ -232,22 +270,27 @@ public class PartsEditorElement extends Element{
     }
 
     public void rectCorner(float x,float y,float w,float h){
-        Fill.rect(x+w*0.5f,y+h*0.5f,w,h);
+        Fill.rect(gx + (x+w*0.5f)*scl,gy + (y+h*0.5f)*scl,w*scl,h*scl);
     }
     public void rectCorner(TextureRegion tr, float x,float y,float w,float h){
-        Draw.rect(tr,x+w*0.5f,y+h*0.5f,w,h);
+        Draw.rect(tr,gx + (x+w*0.5f)*scl,gy + (y+h*0.5f)*scl,w*scl,h*scl);
     }
-
+    public void rectLine(float x,float y,float w,float h){
+        Lines.rect(gx+x*scl,gy+y*scl, w*scl, h*scl);
+    }
+    public void line(float x,float y,float x2,float y2){
+        Lines.rect(gx+x*scl,gy+y*scl, gx+x2*scl,gy+y2*scl);
+    }
 
     public float gx(){
-        return x + (width - builder.w * 32) * 0.5f + panx;
+        return x + (width - builder.w * 32  * scl) * 0.5f + panx;
     }
     public float gy(){
-        return y + (height - builder.h * 32) * 0.5f + pany;
+        return y + (height - builder.h * 32  * scl) * 0.5f + pany;
     }
 
     public Point2 uiToGrid(float x,float y){
-        return new Point2(Mathf.floor((x-gx()+this.x)/32f), Mathf.floor((y-gy()+this.y)/32f));
+        return new Point2(Mathf.floor((x-gx()+this.x)/(32f*scl)), Mathf.floor((y-gy()+this.y)/(32f*scl)));
     }
 
     @Override

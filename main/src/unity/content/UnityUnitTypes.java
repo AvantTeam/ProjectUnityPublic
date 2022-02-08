@@ -1520,6 +1520,7 @@ public final class UnityUnitTypes{
         modularUnit = new UnityUnitType("modularUnit"){{
             rotateShooting = false;
             omniMovement = false;
+            weapons.add(new Weapon("gun")); //blank weapon so mobile doesn't die
             //stats? what stats? :D
         }};
     }

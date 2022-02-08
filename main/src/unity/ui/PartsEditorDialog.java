@@ -59,46 +59,7 @@ public class PartsEditorDialog extends BaseDialog{
                             editorElement.select(part);
                         }
                     }).pad(3).size(46f).name("part-" + part.name)
-                    .tooltip(tip -> {
-                        // TODO move this to ModularPartType?
-                        // display part stats in tooltip
-                        tip.setBackground(Tex.button);
-                        tip.table(t -> {
-                            t.table(header -> {
-                                header.top().left();
-                                header.image(part.icon).size(8 * 4);
-
-                                header.label(() -> Core.bundle.get("part." + part.name))
-                                .left().padLeft(5);
-                            }).top().left();
-                            t.row();
-                            t.image(Tex.whiteui).color(Pal.darkishGray).center().growX().height(5).padTop(5); // separator
-                        }).growX().padBottom(5);
-                        tip.row();
-                        tip.table(desc -> {
-                            desc.labelWrap(Core.bundle.get("part." + part.name + ".description")).minWidth(200).grow();
-                            desc.row();
-                            desc.image(Tex.whiteui).color(Pal.darkishGray).center().growX().height(5).padTop(5);
-                        }).top().left().minWidth(300).padBottom(5);
-                        /*
-                        tip.row();
-                        tip.table(stats -> {
-
-                        });
-                        */
-                        tip.row();
-                        tip.table(req -> {
-                            req.top().left();
-                            req.add("[lightgray]" + Stat.buildCost.localized() + ":[] ").left().top();
-                            req.row();
-                            req.table(reqlist -> {
-                                reqlist.top().left();
-                                for(ItemStack stack : part.cost){
-                                    reqlist.add(new ItemDisplay(stack.item, stack.amount, false)).padRight(5);
-                                }
-                            }).grow();
-                        }).growX();
-                    }).get();
+                    .tooltip(part::displayTooltip).get();
                     partbutton.resizeImage(iconMed);
 
                     // unselect if another one got selected
@@ -181,7 +142,7 @@ public class PartsEditorDialog extends BaseDialog{
         }).tooltip("copy").width(64);
         buttons.button(Icon.paste,()->{
             ModularConstructBuilder test = new ModularConstructBuilder(3,3);
-            test.set(Base64.getDecoder().decode(Core.app.getClipboardText().trim()));
+            test.set(Base64.getDecoder().decode(Core.app.getClipboardText().trim().replaceAll("[\\t\\n\\r]+","")));
             builder.clear();
             builder.paste(test);
         }).tooltip("paste").width(64);
@@ -263,8 +224,28 @@ public class PartsEditorDialog extends BaseDialog{
         float speed = eff *  Mathf.clamp(wcap/mass) * statmap.getValue("wheel","nominal speed");
         table.row();
         table.add("[lightgray]" + Stat.speed.localized()  + ":[accent] "+ Core.bundle.format("ui.parts.stat.speed",Strings.fixed(speed * 60f / tilesize,1))).left().top();
+        table.row();
+        table.add("[lightgray]" + Core.bundle.get("ui.parts.stat.armour-points") + ":[accent] "+ statmap.getValue("armour")).left().top();
+        table.row();
+        table.add("[lightgray]" + Stat.armor.localized() + ":[accent] "+ Strings.fixed(statmap.getValue("armour","realValue"),1)).left().top();
+
+        table.row();
+        int weaponslots = Math.round(statmap.getValue("weaponslots"));
+        int weaponslotsused = Math.round(statmap.getValue("weaponslotuse"));
+        table.add("[lightgray]" +  Core.bundle.get("ui.parts.stat.weapon-slots") + ": "+(weaponslotsused>weaponslots?"[red]":"[green]")+ weaponslotsused+"/"+weaponslots).left().top().tooltip(Core.bundle.get("ui.parts.stat.weapon-slots-tooltip"));
     };
 
+    public void updateScrollFocus(){
+        boolean[] done = {false};
 
+        Core.app.post(() -> forEach(child -> {
+            if(done[0]) return;
+
+            if(child instanceof ScrollPane || child instanceof PartsEditorElement){
+                Core.scene.setScrollFocus(child);
+                done[0] = true;
+            }
+        }));
+    }
 
 }

@@ -4,6 +4,7 @@ package unity.world.blocks.distribution;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.math.geom.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.content.*;
@@ -36,7 +37,24 @@ public class HeatPipe extends GenericGraphBlock{
     @Override
     public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
         float scl = tilesize * req.animScale;
-        Draw.rect(region, req.drawx(), req.drawy(), scl, scl, req.rotation * 90f);
+        int spriteIndex = 0;
+        for(int i =0;i<4;i++){
+            var pt = Geometry.d4((4-i)%4).cpy().add(req.x,req.y);
+            if(world.build(pt.x,pt.y) instanceof HeatPipeBuild){
+                spriteIndex += 1 << i;
+            }else{
+                final boolean[] f ={false};
+                list.each(plan->{
+                    if(!f[0] && plan.x == pt.x && plan.y == pt.y){
+                        f[0] = true;
+                    }
+                });
+                if(f[0]){
+                    spriteIndex += 1 << i;
+                }
+            }
+        }
+        Draw.rect(regions[spriteIndex], req.drawx(), req.drawy(), scl, scl);
     }
 
     public class HeatPipeBuild extends GenericGraphBuild{

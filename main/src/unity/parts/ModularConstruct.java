@@ -24,6 +24,7 @@ public class ModularConstruct implements Serializable{
 
     public ModularPart [][] parts;
     public Seq<ModularPart> partlist = new Seq<>();
+    public Seq<ModularPart> hasCustomDraw = new Seq<>();
     static final int idSize = 1;
     public byte[] data;
 
@@ -44,6 +45,9 @@ public class ModularConstruct implements Serializable{
                 int y = ub(data[2 + i * blocksize + idSize + 1]);
                 var part = ModularPartType.getPartFromId(id).create(x, y);
                 partlist.add(part);
+                if(part.type.open || part.type.hasCellDecal || part.type.hasExtraDecal){
+                    hasCustomDraw.add(part);
+                }
                 part.ax = x-w*0.5f + 0.5f;
                 part.ay = y-h*0.5f + 0.5f;
                 part.cx = x-w*0.5f + part.type.w*0.5f;

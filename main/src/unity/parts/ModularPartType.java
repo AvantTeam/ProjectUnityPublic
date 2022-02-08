@@ -6,6 +6,8 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.meta.*;
@@ -39,10 +41,13 @@ public class ModularPartType implements Displayable{
     public TextureRegion[] top;
     public TextureRegion[] outline;
     public boolean hasExtraDecal = false;
+    public boolean hasCellDecal = false;
+    public TextureRegion[] cell;
     //cost
     public float constructTimeMultiplier = 1; // base time based on item cost
     public ItemStack[] cost = {};
     //module cost..
+
 
     //stats
     protected Seq<ModularPartStat> stats = new Seq<>();
@@ -79,6 +84,10 @@ public class ModularPartType implements Displayable{
             getPartSprite(prefix+"-mid-outline"),
             getPartSprite(prefix+"-back-outline"),
         };
+        cell= new TextureRegion[]{
+            getPartSprite(prefix+"-cell-side"),
+            getPartSprite(prefix+"-cell-center")
+        };
     }
     public static TextureRegion getPartSprite(String e){
         var f = Core.atlas.find(e);
@@ -103,6 +112,12 @@ public class ModularPartType implements Displayable{
             for(int y = 0;y<h;y++){
                 part.panelingIndexes[x+y*w]=TilingUtils.getTilingIndex(grid,part.x+x,part.y+y,b -> b!=null && !b.type.open);
             }
+        }
+    }
+    public void drawCell(DrawTransform transform, ModularPart part){
+        if(hasCellDecal){
+            TextureRegion cellsprite = cell[Math.abs(part.cx)<0.01?1:0];
+            transform.drawRectScl(cellsprite, part.ax * partSize, part.ay * partSize, part.cx<0?1:-1, 1);
         }
     }
     public void drawTop(DrawTransform transform, ModularPart part){
@@ -153,6 +168,9 @@ public class ModularPartType implements Displayable{
     public void usesPower(float amount){
         stats.add(new PowerUsedStat(amount));
     }
+    public void addsWeaponSlots(float amount){
+        stats.add(new WeaponSlotStat(amount));
+    }
     public void healthMul(float amount){
         stats.add(new HealthStat(amount));
     }
@@ -179,6 +197,47 @@ public class ModularPartType implements Displayable{
                 req.add(new ItemDisplay(stack.item, stack.amount, false)).padRight(5);
             }
         }).growX().left().margin(3);
+    }
+
+    public void displayTooltip(Table tip){
+        tip.setBackground(Tex.button);
+        tip.table(t -> {
+            t.table(header -> {
+                header.top().left();
+                header.image(icon).size(8 * 4);
+
+                header.label(() -> Core.bundle.get("part." + name))
+                .left().padLeft(5);
+            }).top().left();
+            t.row();
+            t.image(Tex.whiteui).color(Pal.darkishGray).center().growX().height(5).padTop(5); // separator
+        }).growX().padBottom(5);
+        tip.row();
+        tip.table(desc -> {
+            desc.labelWrap(Core.bundle.get("part." + name + ".description")).minWidth(200).grow();
+            desc.row();
+            desc.image(Tex.whiteui).color(Pal.darkishGray).center().growX().height(5).padTop(5);
+        }).top().left().minWidth(300).padBottom(5);
+
+        tip.row();
+        tip.table(statTable -> {
+            stats.each(stat->{
+                stat.display(statTable);
+            });
+        }).left();
+
+        tip.row();
+        tip.table(req -> {
+            req.top().left();
+            req.add("[lightgray]" + Stat.buildCost.localized() + ":[] ").left().top();
+            req.row();
+            req.table(reqlist -> {
+                reqlist.top().left();
+                for(ItemStack stack : cost){
+                    reqlist.add(new ItemDisplay(stack.item, stack.amount, false)).padRight(5);
+                }
+            }).grow();
+        }).growX();
     }
 }
 

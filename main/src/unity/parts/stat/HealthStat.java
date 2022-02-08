@@ -1,5 +1,8 @@
 package unity.parts.stat;
 
+import arc.*;
+import arc.scene.ui.layout.*;
+import mindustry.gen.*;
 import unity.parts.*;
 
 public class HealthStat extends ModularPartStat{
@@ -31,5 +34,11 @@ public class HealthStat extends ModularPartStat{
             var jo = id.getOrCreate(name);
             jo.put("value", jo.getFloat("value") * hpboost);
         }
+    }
+
+    @Override
+    public void display(Table table){
+        table.row();
+        table.add("[lightgray]" + Core.bundle.get("ui.parts.stattype."+name) + ": [accent]"+hpboost + (percentage?"%":"")).left().top();
     }
 }

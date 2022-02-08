@@ -3,7 +3,6 @@ package unity;
 import arc.*;
 import arc.struct.*;
 import arc.util.*;
-import com.sun.management.*;
 import mindustry.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
@@ -11,18 +10,14 @@ import mindustry.mod.*;
 import mindustry.world.blocks.environment.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
+import unity.content.blocks.*;
 import unity.gen.*;
 import unity.mod.*;
 import unity.parts.*;
 import unity.ui.*;
 import unity.util.*;
 
-import java.lang.management.*;
-import java.lang.reflect.*;
-import java.util.*;
-
 import static mindustry.Vars.*;
-import static unity.util.ReflectUtils.*;
 
 /**
  * The mod's main mod class. Contains static references to other modules.
@@ -117,7 +112,7 @@ public class Unity extends Mod{
         UnityStatusEffects.load();
         UnityBullets.load();
         UnityUnitTypes.load();
-        UnityBlocksYoungcha.load();
+        YoungchaBlocks.load();
         UnityParts.load();
 
         //below has to be done after all things with faction tags are loaded.

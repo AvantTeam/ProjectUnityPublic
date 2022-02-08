@@ -22,8 +22,12 @@ public class AdditiveStat extends ModularPartStat{
     }
 
     public void display(Table table){
+        String valuestr = ": [accent]"+value;
+        if(value%1<=0.001f){
+            valuestr = ": [accent]"+(int)value;
+        }
         table.row();
-        table.add("[lightgray]" + Core.bundle.get("ui.parts.stattype."+name) + ": "+value).left().top();
+        table.add("[lightgray]" + Core.bundle.get("ui.parts.stattype."+name) + valuestr).left().top();
     }
 
     @Override
@@ -44,6 +48,16 @@ public class AdditiveStat extends ModularPartStat{
     public static class MassStat extends AdditiveStat{
         public MassStat(float power){
             super("mass",power);
+        }
+    }
+    public static class WeaponSlotStat extends AdditiveStat{
+        public WeaponSlotStat(float slot){
+            super("weaponslots",slot);
+        }
+    }
+    public static class WeaponSlotUseStat extends AdditiveStat{
+        public WeaponSlotUseStat(float slot){
+            super("weaponslotuse",slot);
         }
     }
 

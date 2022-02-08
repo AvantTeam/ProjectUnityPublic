@@ -3,13 +3,15 @@ package unity.parts.types;
 import mindustry.type.*;
 import unity.parts.*;
 import unity.parts.stat.*;
+import unity.parts.stat.AdditiveStat.*;
 
 public class ModularWeaponMountType extends ModularPartType{
     public ModularWeaponMountType(String name){
         super(name);
     }
 
-    public void weapon(Weapon weapon){
+    public void weapon(int slots, Weapon weapon){
+        stats.add(new WeaponSlotUseStat(slots));
         stats.add(new WeaponMountStat(weapon));
     }
 

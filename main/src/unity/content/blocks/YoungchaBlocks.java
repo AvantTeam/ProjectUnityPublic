@@ -1,4 +1,4 @@
-package unity.content;
+package unity.content.blocks;
 
 import mindustry.content.*;
 import mindustry.type.*;
@@ -6,6 +6,7 @@ import mindustry.world.*;
 import mindustry.world.blocks.environment.*;
 import mindustry.world.meta.*;
 import unity.annotations.Annotations.*;
+import unity.content.*;
 import unity.world.blocks.*;
 import unity.world.blocks.distribution.*;
 import unity.world.blocks.envrionment.*;
@@ -17,7 +18,7 @@ import unity.world.graph.*;
 import static mindustry.type.ItemStack.with;
 
 //frankly i do not wish to have my ide lag from an enormous unnavigable UnityBlocks file
-public class UnityBlocksYoungcha{
+public class YoungchaBlocks{
     ///environmental
     public static @FactionDef("youngcha")
     Block

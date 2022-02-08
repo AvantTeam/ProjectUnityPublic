@@ -60,6 +60,10 @@ public class UnityUnitType extends UnitType{
     @Override
     public void drawCell(Unit unit){
         if(unit.isAdded()){
+            if(unit instanceof ModularUnitc){
+                drawModularCell((Unit & ModularUnitc)unit);
+                return;
+            }
             super.drawCell(unit);
         }else{
             applyColor(unit);
@@ -84,7 +88,6 @@ public class UnityUnitType extends UnitType{
         //};
         super.drawOutline(unit);
     }
-
     @Override
     public void drawBody(Unit unit){
         if(unit instanceof ModularUnitc){
@@ -173,24 +176,38 @@ public class UnityUnitType extends UnitType{
             unit.doodadlist().each(d->{
                 d.drawOutline(dt);
             });
-            construct.partlist.each((p) -> {
+            construct.hasCustomDraw.each((p) -> {
                 p.type.drawOutline(dt, p);
             });
-            construct.partlist.each((p) -> {
+            construct.hasCustomDraw.each((p) -> {
                 p.type.draw(dt, p);
             });
             unit.doodadlist().each(d->{
                 d.drawTop(dt);
             });
-            construct.partlist.each((p) -> {
+            construct.hasCustomDraw.each((p) -> {
                 p.type.drawTop(dt, p);
+            });
+        }
+        Draw.reset();
+    }
+    public <T extends Unit & ModularUnitc> void drawModularCell(T  unit){
+        applyColor(unit);
+        Draw.color(cellColor(unit));
+        DrawTransform dt = new DrawTransform(new Vec2(unit.x,unit.y),unit.rotation);
+        var construct = unit.construct();
+        if(construct!=null){
+            ModularWheelType.rollDistance = unit.driveDist();
+            construct.hasCustomDraw.each((p) -> {
+                p.type.drawCell(dt, p);
             });
         }
         Draw.reset();
     }
 
 
-    public Unit spawn(Team t, float x, float y,byte[] data){
+
+    public Unit spawn(Team t, float x, float y, byte[] data){
         var unit = this.create(t);
         unit.set(x, y);
         ModularConstruct.cache.put(unit,data);

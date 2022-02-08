@@ -12,7 +12,14 @@ import unity.parts.*;
 import unity.parts.types.*;
 
 public class UnityParts{
-    public static ModularPartType panel, smallRoot, gun,cannon,smallEngine,smallWheel,smallTracks;
+    //unit
+    //misc
+    public static ModularPartType panel, mediumPanel, smallRoot;
+    //weapons
+    public static ModularPartType gun,cannon,howitzer;
+    public static ModularPartType gunBridge;
+    //movement
+    public static ModularPartType smallEngine,engine,smallWheel,smallTracks;
 
     //unit
     public static Seq<PanelDoodadType> unitdoodads1x1 = new Seq<>();
@@ -20,9 +27,10 @@ public class UnityParts{
 
     public static void load(){
         //region units
+        ///DO NOT CHANGE ORDER (will ruin modular things)
         panel = new ModularPartType("panel"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.titanium,10,UnityItems.nickel,10));
-            health(50);
+            requirements(PartCategories.miscUnit,ItemStack.with(Items.titanium,7,UnityItems.nickel,5));
+            health(40);
             mass(20);
             armor(1);
         }};
@@ -31,14 +39,16 @@ public class UnityParts{
             health(100);
             mass(10);
             producesPower(15);
+            addsWeaponSlots(2);
             root = true;
+            hasCellDecal = true;
         }};
         gun = new ModularWeaponMountType("gun"){{
            requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,10));
            health(10);
            mass(20);
            usesPower(5);
-           weapon(new Weapon("mount-weapon"){{
+           weapon(1,new Weapon("mount-weapon"){{
                rotate = true;
                reload = 18f;
                bullet = Bullets.standardCopper;
@@ -47,21 +57,21 @@ public class UnityParts{
 
         }};
         cannon = new ModularWeaponMountType("cannon"){{
-           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,50,Items.titanium,70,Items.graphite,20,UnityItems.nickel,20));
+           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,40,Items.titanium,50,Items.graphite,20,UnityItems.nickel,20));
            health(40);
            mass(100);
            usesPower(20);
            w = 2;
            h = 2;
-           weapon(new Weapon("unity-part-cannon"){{
+           weapon(2,new Weapon("unity-part-cannon"){{
                rotate = true;
-               reload = 40f;
+               reload = 60f;
                ejectEffect = Fx.casing2;
                shootSound = Sounds.artillery;
                bullet = new BasicBulletType(7f, 40){{
                    width = 11f;
                    height = 20f;
-                   lifetime = 27f;
+                   lifetime = 24f;
                    shootEffect = Fx.shootBig;
                    splashDamage = 20;
                    splashDamageRadius = 25;
@@ -69,7 +79,6 @@ public class UnityParts{
                }};
                //insert bullet
            }});
-
         }};
         smallEngine = new ModularPartType("engine-small"){{
             requirements(PartCategories.movementUnit,ItemStack.with(Items.lead,10,Items.silicon,5));
@@ -82,7 +91,7 @@ public class UnityParts{
             health(15);
             mass(15);
             wheel(1,30,1.5f);
-            usesPower(7);
+            usesPower(10);
         }};
         smallTracks = new ModularWheelType("tracks-small"){{
             requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,15,UnityItems.nickel,10));
@@ -93,6 +102,59 @@ public class UnityParts{
             wheel(6,180,0.7f);
             usesPower(20);
         }};
+        howitzer = new ModularWeaponMountType("howitzer"){{
+            requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,80,Items.titanium,120,Items.graphite,80,UnityItems.nickel,50));
+            health(75);
+            mass(350);
+            usesPower(80);
+            w = 3;
+            h = 4;
+            weapon(5,new Weapon("unity-part-howitzer"){{
+                rotate = true;
+                reload = 80f;
+                ejectEffect = Fx.casing3;
+                shots = 2;
+                inaccuracy = 6;
+                shotDelay = 2f;
+                bullet = new ArtilleryBulletType(7f, 50){{
+                    width = 15f;
+                    height = 25f;
+                    lifetime = 30;
+                    shootEffect = Fx.shootBig;
+                    splashDamage = 50;
+                    splashDamageRadius = 55;
+                    hitEffect = Fx.blastExplosion;
+                    fragLifeMin = 0.1f;
+                    fragLifeMax = 0.3f;
+                    fragBullets = 3;
+                    fragBullet = Bullets.standardCopper;
+               }};
+            }});
+        }};
+        mediumPanel = new ModularPartType("medium-panel"){{
+            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,20,Items.titanium,50));
+            w = 2;
+            h = 2;
+            health(200);
+            mass(80);
+            armor(15);
+        }};
+        gunBridge = new ModularPartType("gun-bridge"){{
+            requirements(PartCategories.weaponsUnit,ItemStack.with(Items.graphite,10,UnityItems.nickel,10));
+            usesPower(20);
+            mass(20);
+            addsWeaponSlots(4);
+            hasCellDecal = true;
+        }};
+        engine = new ModularPartType("engine"){{
+            requirements(PartCategories.movementUnit,ItemStack.with(Items.titanium,90,Items.lead,50, Items.silicon, 30));
+            w = 3;
+            h = 3;
+            health(90);
+            mass(200);
+            producesPower(400);
+        }};
+
         //endregion
     }
 
