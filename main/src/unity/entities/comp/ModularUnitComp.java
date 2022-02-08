@@ -17,6 +17,7 @@ import mindustry.type.*;
 import mindustry.world.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
+import unity.content.effects.*;
 import unity.gen.*;
 import unity.parts.*;
 import unity.parts.PanelDoodadType.*;
@@ -26,7 +27,6 @@ import unity.util.*;
 import java.util.*;
 
 import static mindustry.Vars.*;
-import static unity.content.fx.OtherFx.dust;
 import static unity.util.Utils.getFloat;
 
 
@@ -345,7 +345,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
                     nvt.set(nv.x + Mathf.range(3), nv.y + Mathf.range(3));
                     Tile t = Vars.world.tileWorld(pos.x, pos.y);
                     if(t != null){
-                        dust.at(pos.x, pos.y, 0, t.floor().mapColor, nvt);
+                        OtherFx.dust.at(pos.x, pos.y, 0, t.floor().mapColor, nvt);
                     }
 
                 }
