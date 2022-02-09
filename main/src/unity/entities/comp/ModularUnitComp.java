@@ -277,7 +277,12 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         float hratio = Mathf.clamp(this.health / this.maxHealth);
         this.maxHealth = statmap.getOrCreate("health").getFloat("value");
-        this.health = hratio * this.maxHealth;
+        if(savedHp<=0){
+            this.health = hratio * this.maxHealth;
+        }else{
+            this.health = savedHp;
+            savedHp = -1;
+        }
         var weapons = statmap.stats.getList("weapons");
         mounts = new WeaponMount[weapons.length()];
         weaponrange = 0;
@@ -427,6 +432,9 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public void lookAt(float angle){
         rotation = Angles.moveToward(rotation, angle, rotateSpeed * Time.delta * speedMultiplier());
     }
-
-
+    transient float savedHp = -1 ;
+    @Override
+    public void read(Reads read){
+        savedHp = health;
+    }
 }

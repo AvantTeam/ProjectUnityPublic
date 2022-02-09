@@ -1,5 +1,6 @@
 package unity.world.blocks;
 
+import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -9,6 +10,7 @@ import mindustry.graphics.*;
 import mindustry.world.*;
 import unity.graphics.*;
 import unity.world.graph.*;
+import unity.world.graph.GraphConnector.*;
 
 import static mindustry.Vars.*;
 
@@ -102,6 +104,12 @@ public class GenericGraphBlock extends Block implements GraphBlock{
                             GraphEdge edge = (GraphEdge)e;
                             UnityDrawf.line(Pal.accent, edge.n1.getNode().build().x, edge.n1.getNode().build().y, edge.n2.getNode().build().x, edge.n2.getNode().build().y);
                         });
+                        if(con instanceof GraphConnector.FixedGraphConnector fg){
+                            for(var port : fg.connectionPoints){
+                                Draw.color(port.edge==null? Color.red:Color.green);
+                                Drawf.tri((port.getRelpos().x+tile.x + port.getDir().x*0.5f)*tilesize , (port.getRelpos().y+tile.y + port.getDir().y*0.5f)*tilesize, 4,4,0);
+                            }
+                        }
                     }
                 });
                 Draw.reset();

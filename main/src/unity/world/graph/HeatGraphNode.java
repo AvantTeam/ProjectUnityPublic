@@ -12,6 +12,7 @@ import static unity.graphics.UnityPal.*;
 public class HeatGraphNode extends GraphNode<HeatGraph>{
     public static final float celsiusZero = 273.15f;
     public static float ambientTemp = celsiusZero + 20;
+    public float flux = 0;
     float tempBuffer = ambientTemp; //write to
     float temp = ambientTemp; //read from
     public float emissiveness = 0.01f;

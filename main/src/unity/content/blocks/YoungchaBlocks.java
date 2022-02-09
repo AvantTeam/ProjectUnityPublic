@@ -38,7 +38,7 @@ public class YoungchaBlocks{
         //transmission
         heatPipe, steamPiston,
         //power
-        combustionHeater,
+        combustionHeater,thermalHeater,seebeckGenerator,smallRadiator,
     //other
     sandboxAssembler; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
@@ -162,20 +162,52 @@ public class YoungchaBlocks{
         }};
 
         combustionHeater = new CombustionHeater("combustion-heater"){{
-            requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100));
+            requirements(Category.power, with(UnityItems.nickel, 30, Items.lead, 70, Items.copper, 70));
             size = 2;
             rotate = true;
             health = 700;
             solid = true;
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.05f));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.015f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
         }};
 
+        thermalHeater = new ThermalHeater("thermal-heater"){{
+            size = 2;
+            rotate = true;
+            health = 700;
+            solid = true;
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.03f));
+            config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
+            requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, Items.silicon, 30));
+        }};
+
+        seebeckGenerator = new SeebeckGenerator("seebeck-generator"){{
+            size = 3;
+            rotate = true;
+            health = 1700;
+            solid = true;
+            hasPower = true;
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.01f, 1800 + HeatGraphNode.celsiusZero));
+            config.fixedConnection(HeatGraph.class, 0,1,0,  0,0,0,  0,1,0  ,0,0,0);
+            requirements(Category.power, with(UnityItems.nickel, 50, Items.graphite, 30, Items.copper, 120,Items.lead, 100, Items.silicon, 30));
+        }};
+        smallRadiator = new HeatRadiator("small-radiator"){{
+
+            size = 2;
+            rotate = true;
+            health = 700;
+            solid = true;
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.4f, 0.15f, 1800 + HeatGraphNode.celsiusZero));
+            config.fixedConnection(HeatGraph.class, 0, 0,  1, 1,  0, 0,  1, 1);
+            requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, Items.silicon, 30));
+        }};
+
         sandboxAssembler = new ModularUnitAssembler("sandbox-assembler"){{
-            requirements(Category.units, with(UnityItems.nickel, 100, Items.graphite, 50, Items.copper, 100, Items.lead, 100));
+            requirements(Category.units, BuildVisibility.sandboxOnly, with());
             size = 3;
             health = 1700;
         }};
+
 
         //
     }

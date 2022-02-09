@@ -27,7 +27,7 @@ public class UnityParts{
 
     public static void load(){
         //region units
-        ///DO NOT CHANGE ORDER (will ruin modular things)
+        ///DO NOT CHANGE ORDER (will break saves)
         panel = new ModularPartType("panel"){{
             requirements(PartCategories.miscUnit,ItemStack.with(Items.titanium,7,UnityItems.nickel,5));
             health(40);
@@ -91,7 +91,7 @@ public class UnityParts{
             health(15);
             mass(15);
             wheel(1,30,1.5f);
-            usesPower(10);
+            usesPower(7);
         }};
         smallTracks = new ModularWheelType("tracks-small"){{
             requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,15,UnityItems.nickel,10));
@@ -105,7 +105,7 @@ public class UnityParts{
         howitzer = new ModularWeaponMountType("howitzer"){{
             requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,80,Items.titanium,120,Items.graphite,80,UnityItems.nickel,50));
             health(75);
-            mass(350);
+            mass(550);
             usesPower(80);
             w = 3;
             h = 4;
@@ -136,7 +136,7 @@ public class UnityParts{
             w = 2;
             h = 2;
             health(200);
-            mass(80);
+            mass(120);
             armor(15);
         }};
         gunBridge = new ModularPartType("gun-bridge"){{
@@ -151,7 +151,7 @@ public class UnityParts{
             w = 3;
             h = 3;
             health(90);
-            mass(200);
+            mass(500);
             producesPower(400);
         }};
 

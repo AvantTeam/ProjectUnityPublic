@@ -5,6 +5,7 @@ import arc.util.*;
 public class GraphEdge{
     public GraphConnector n1,n2;
     public long id;
+    boolean valid;//removednt
     public GraphEdge(GraphConnector n1, GraphConnector n2){
         this.n1 = n1;
         this.n2 = n2;
@@ -12,6 +13,7 @@ public class GraphEdge{
         if(n1==n2){
             throw new IllegalStateException("vertexes cant self connect");
         }
+        valid = true;
     }
 
     public GraphConnector other(Graph current){

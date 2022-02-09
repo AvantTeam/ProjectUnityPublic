@@ -21,6 +21,11 @@ public class HeatGraph extends Graph<HeatGraph>{
         float b = 0;
         HeatGraphNode hgn;
         HeatGraphNode hgno;
+
+        for(GraphConnector<HeatGraph> v : vertexes){
+            ((HeatGraphNode)v.getNode()).flux=0;
+        }
+
         int iter = 3; // convergence iterations
         for(int i = 0;i<iter;i++){
             for(GraphConnector<HeatGraph> v : vertexes){
@@ -40,7 +45,13 @@ public class HeatGraph extends Graph<HeatGraph>{
             if(i!=iter-1){
                 for(GraphConnector<HeatGraph> v : vertexes){
                     hgno = ((HeatGraphNode)v.node);
+                    hgno.flux += hgno.tempBuffer-hgno.temp;
                     hgno.temp = hgno.tempBuffer;
+                }
+            }else{
+                for(GraphConnector<HeatGraph> v : vertexes){
+                    hgno = ((HeatGraphNode)v.node);
+                    hgno.flux += hgno.tempBuffer-hgno.temp;
                 }
             }
         }

@@ -3,6 +3,7 @@ package unity.ui;
 import arc.*;
 import arc.func.*;
 import arc.graphics.*;
+import arc.input.*;
 import arc.math.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
@@ -136,6 +137,7 @@ public class PartsEditorDialog extends BaseDialog{
         }).update(i->{i.setChecked(editorElement.mirror);}).tooltip("mirror").width(64);
         buttons.button(Icon.file,()->{
             builder.clear();
+            editorElement.onAction();
         }).tooltip("clear").width(64);
         buttons.button(Icon.copy,()->{
             Core.app.setClipboardText(Base64.getEncoder().encodeToString(builder.exportCompressed()));
@@ -145,8 +147,22 @@ public class PartsEditorDialog extends BaseDialog{
             test.set(Base64.getDecoder().decode(Core.app.getClipboardText().trim().replaceAll("[\\t\\n\\r]+","")));
             builder.clear();
             builder.paste(test);
+            editorElement.onAction();
         }).tooltip("paste").width(64);
-        buttons.button("@back", Icon.left, this::hide).name("back");
+        if(Core.graphics.getWidth()<750){
+            buttons.row();
+            buttons.table(row2->{
+                buttons.button("@undo", Icon.undo, ()->{
+                    editorElement.undo();
+                }).name("undo").width(64);
+                buttons.button("@redo", Icon.redo, ()->{
+                    editorElement.redo();
+                }).name("redo").width(64);
+                buttons.button("@back", Icon.left, this::hide).name("back");
+            }).left();
+        }else{
+            buttons.button("@back", Icon.left, this::hide).name("back");
+        }
 
         ///
         selectSide = new Table();
@@ -163,6 +179,19 @@ public class PartsEditorDialog extends BaseDialog{
         add(editorSide);
 
         hidden(() -> consumer.get(builder.export()));
+
+        //input
+        update(()->{
+            if(Core.scene != null && Core.scene.getKeyboardFocus() == this){
+                if(Core.input.ctrl()){
+                    if(Core.input.keyTap(KeyCode.z)){
+                        editorElement.undo();
+                    }else if(Core.input.keyTap(KeyCode.y)){
+                        editorElement.redo();
+                    }
+                }
+            }
+        });
     }
 
     public void show(byte[] data, Cons<byte[]> modified,Cons2<ModularConstructBuilder, Table> viewer){
