@@ -11,5 +11,7 @@ worth showing is released here, while the critically secret or completely unfini
 be played by the average player-base as of now; this only aims for additional developing hands, suggestions, and balancing feedback.
 
 ## Compiling
-
-no
+```
+git clone https://github.com/AvantTeam/ProjectUnityPublic
+gradlew tools:proc main:deploy
+```
