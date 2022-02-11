@@ -1,10 +1,15 @@
 package unity.world.blocks.power;
 
 import arc.*;
+import arc.func.*;
+import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.util.*;
 import mindustry.gen.*;
+import mindustry.ui.*;
 import mindustry.world.meta.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
@@ -12,8 +17,8 @@ import unity.world.graph.*;
 import unity.world.graph.GraphConnector.*;
 
 public class SeebeckGenerator extends GenericGraphBlock{
-    public float maxPower = 30;
-    public float seebeckStrength = 200f;
+    public float maxPower = 10;
+    public float seebeckStrength = 2f;
     TextureRegion[] rotations;
     TextureRegion[] heat;
     public SeebeckGenerator(String name){
@@ -41,13 +46,21 @@ public class SeebeckGenerator extends GenericGraphBlock{
 
     public class SeebeckGeneratorBuild extends GenericGraphBuild{
         float leftheat,rightheat;
+        float[] heatdiff = {0};
+        float powergen = 0;
         @Override
         public float getPowerProduction(){
+            return Mathf.clamp(powergen,0,maxPower);
+        }
+
+        @Override
+        public void updateTile(){
+            super.updateTile();
 
             var node = heatNode();
             leftheat = node.getTemp();
             rightheat = node.getTemp();
-            float[] heatdiff = {0};
+            heatdiff[0] = 0;
             ((FixedGraphConnector<HeatGraph>)node.connector.get(0)) .eachConnected((connector,port)->{
                 if(connector.getNode() instanceof HeatGraphNode heatnode){
                     heatdiff[0] += Math.abs(node.getTemp()-heatnode.getTemp())*heatnode.conductivity; /// well to stop low conductivity from making huge temperature differentials
@@ -58,7 +71,7 @@ public class SeebeckGenerator extends GenericGraphBlock{
                     }
                 }
             });
-            return Mathf.clamp(seebeckStrength*node.flux,0,maxPower);
+            powergen+=(seebeckStrength*heatdiff[0]-powergen)*Mathf.clamp(0.1f* Time.delta);
         }
 
         @Override

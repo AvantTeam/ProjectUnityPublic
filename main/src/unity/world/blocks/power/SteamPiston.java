@@ -68,7 +68,7 @@ public class SteamPiston extends GenericGraphBlock{
                 }else{
                     if(rwater<=0 && consValid()){
                         consume();
-                        heatnode.setTemp(heatnode.getTemp()-eff*15);
+                        heatnode.addHeatEnergy(-eff*150);
                         rwater += 10;
                     }
                     if(rwater>0){

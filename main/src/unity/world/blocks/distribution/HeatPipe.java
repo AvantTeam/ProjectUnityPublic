@@ -111,17 +111,5 @@ public class HeatPipe extends GenericGraphBlock{
             }
             drawTeamTop();
         }
-
-        @Override
-        public void read(Reads read, byte revision){
-            super.read(read, revision);
-            heatNode().setTemp(read.f());
-        }
-
-        @Override
-        public void write(Writes write){
-            super.write(write);
-            write.f(heatNode().getTemp());
-        }
     }
 }

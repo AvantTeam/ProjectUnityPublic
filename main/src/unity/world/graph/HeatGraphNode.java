@@ -5,6 +5,7 @@ import arc.graphics.*;
 import arc.math.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
+import arc.util.io.*;
 import mindustry.ui.*;
 
 import static unity.graphics.UnityPal.*;
@@ -13,23 +14,26 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
     public static final float celsiusZero = 273.15f;
     public static float ambientTemp = celsiusZero + 20;
     public float flux = 0;
-    float tempBuffer = ambientTemp; //write to
-    float temp = ambientTemp; //read from
+    public float heatenergy = 1f;
+    float energyBuffer = 0; //write to
     public float emissiveness = 0.01f;
     public float conductivity = 0.1f;
+    public float heatcapacity = 1f;
     public float maxTemp = celsiusZero +1000;
 
     public boolean heatProducer = false;
     public float targetTemp = 1000; public float prodEfficency = 0.1f;
     public float efficency = 0;
 
-    public HeatGraphNode(GraphBuild build, float emissiveness, float conductivity, float maxTemp){
+    public HeatGraphNode(GraphBuild build, float emissiveness, float conductivity, float heatcapacity, float maxTemp){
         super(build);
         this.emissiveness = emissiveness;
         this.conductivity = conductivity;
         this.maxTemp = maxTemp;
+        this.heatcapacity = heatcapacity;
+        energyBuffer = this.heatenergy = heatcapacity * ambientTemp;
     }
-    public HeatGraphNode(GraphBuild build, float emissiveness, float conductivity, float maxTemp, float targetTemp ,float prodEfficency){
+    public HeatGraphNode(GraphBuild build, float emissiveness, float conductivity, float heatcapacity, float maxTemp, float targetTemp , float prodEfficency){
        super(build);
        this.emissiveness = emissiveness;
        this.conductivity = conductivity;
@@ -37,6 +41,8 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
        this.targetTemp = targetTemp;
        this.prodEfficency=prodEfficency;
        this.heatProducer = true;
+       this.heatcapacity = heatcapacity;
+       energyBuffer = this.heatenergy = heatcapacity * ambientTemp;
    }
 
     public HeatGraphNode(GraphBuild build){
@@ -46,14 +52,13 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
     @Override
     public void displayBars(Table table){
         table.row();
-        table.add(new Bar(() -> Core.bundle.format("bar.unity-temp", Strings.fixed(temp - celsiusZero, 1)), this::heatColor, () -> Mathf.clamp(Math.abs(temp / 273))));
+        table.add(new Bar(() -> Core.bundle.format("bar.unity-temp", Strings.fixed(getTemp() - celsiusZero, 1)), this::heatColor, () -> Mathf.clamp(Math.abs(getTemp() / 273))));
     }
 
     @Override
     public void update(){
         //graph handles all heat transmission.
-        tempBuffer += (ambientTemp - tempBuffer) * emissiveness * Time.delta / 60f;
-        temp = tempBuffer;
+        heatenergy += (ambientTemp - getTemp()) * emissiveness * Time.delta / 60f;
         if(heatProducer){
             generateHeat();
         }
@@ -66,9 +71,10 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
     }
 
     public void heatColor(Color input){
+        float t = getTemp();
         float a = 0;
-        if(temp > celsiusZero){
-            a = Math.max(0, (temp - 498) * 0.001f);
+        if(t > celsiusZero){
+            a = Math.max(0, (t - 498) * 0.001f);
             if(a < 0.01){
                 input.set(Color.clear);
                 return;
@@ -79,7 +85,7 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
                 input.mul(a);
             }
         }else{
-            a = 1.0f - Mathf.clamp(temp / celsiusZero);
+            a = 1.0f - Mathf.clamp(t / celsiusZero);
             if(a < 0.01){
                 input.set(Color.clear);
             }
@@ -87,19 +93,32 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
         }
     }
 
-    public void generateHeat(float targetTemp,float eff){
-        setTemp(temp + (targetTemp-temp)*eff);
+    @Override
+    public void read(Reads read){
+        this.energyBuffer = this.heatenergy = read.f();
+    }
+
+    @Override
+    public void write(Writes write){
+        write.f(this.heatenergy );
+    }
+
+    public void generateHeat(float targetTemp, float eff){
+        heatenergy += (targetTemp-getTemp())*eff;
     }
     public void generateHeat(){
-        setTemp(temp + (targetTemp-temp)*efficency*prodEfficency);
+        heatenergy += (targetTemp-getTemp())*efficency*prodEfficency;
     }
 
     public float getTemp(){
-        return temp;
+        return heatenergy/ heatcapacity;
     }
 
     public void setTemp(float temp){
-        tempBuffer = temp;
-        this.temp = temp;
+        heatenergy = temp*heatcapacity;
     }
+
+    public void addHeatEnergy(float e){
+            heatenergy += e;
+        }
 }

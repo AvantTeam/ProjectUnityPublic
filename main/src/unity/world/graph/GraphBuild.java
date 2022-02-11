@@ -118,13 +118,16 @@ public interface GraphBuild{
         });
     }
 
-    //conv for js
+    //conv for getting
     default TorqueGraphNode torqueNode(){
         return (TorqueGraphNode)getGraphNode(TorqueGraph.class);
     }
     default HeatGraphNode heatNode(){
         return (HeatGraphNode)getGraphNode(HeatGraph.class);
     }
+    default CrucibleGraphNode crucibleNode(){
+            return (CrucibleGraphNode)getGraphNode(CrucibleGraph.class);
+        }
 
     //conv for drawing
     default float getCorrectRotation(){

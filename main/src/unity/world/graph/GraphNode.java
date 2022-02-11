@@ -62,7 +62,7 @@ public class GraphNode<T extends Graph>{
     }
     public void write(Writes write){
         connector.each(con->{
-            if(con.getGraph().firstVertex()==con){
+            if(con.getGraph().isRoot(con)){
                 write.bool(true);
                 con.graph.write(write);
             }else{

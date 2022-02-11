@@ -153,6 +153,8 @@ public class ModularPartType implements Displayable{
             stat.mergePost(statmap,part);
         }
     }
+
+    //units
     public void armor(float amount){
            stats.add(new ArmourStat(amount));
        }
@@ -174,7 +176,11 @@ public class ModularPartType implements Displayable{
     public void healthMul(float amount){
         stats.add(new HealthStat(amount));
     }
-
+    public void itemCapacity(float amount){
+            stats.add(new ItemCapacityStat(amount));
+        }
+    //turrets
+    //???
 
     @Override
     public void display(Table table){

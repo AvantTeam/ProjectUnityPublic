@@ -1,5 +1,6 @@
 package unity.world.blocks;
 
+import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.scene.ui.layout.*;
@@ -20,6 +21,10 @@ public class GenericGraphBlock extends Block implements GraphBlock{
     public GenericGraphBlock(String name){
         super(name);
         update = true;
+    }
+
+    public TextureRegion loadTex(String n){
+        return Core.atlas.find(name+"-"+n);
     }
 
     @Override

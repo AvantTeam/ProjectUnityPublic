@@ -40,6 +40,7 @@ public class UnityParts{
             mass(10);
             producesPower(15);
             addsWeaponSlots(2);
+            itemCapacity(20);//the default
             root = true;
             hasCellDecal = true;
         }};
