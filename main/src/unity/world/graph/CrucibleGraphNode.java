@@ -21,6 +21,7 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
     public boolean doesCrafting = true;
     public float baseSize = 1;
     Color color = new Color();
+    public GraphConnector<CrucibleGraph> accessConnector = null;
 
     public OrderedMap<Item, CrucibleFluid> fluids = new OrderedMap<>();
     public CrucibleGraphNode(GraphBuild build, float totalCapacity){

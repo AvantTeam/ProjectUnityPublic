@@ -89,7 +89,9 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         applyStatMap(statmap);
         if(construct != ModularConstruct.test){
             constructLoaded = true;
-            initDoodads();
+            if(!headless){
+                initDoodads();
+            }
             int w = construct.parts.length;
             int h = construct.parts[0].length;
             int maxx = 0, minx = 256;
@@ -295,7 +297,9 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             if(weaponslotsused>weaponslots){
                 weapon.reload *= 4f*(weaponslotsused-weaponslots);
             }
-            weapon.load();
+            if(!headless){
+                weapon.load();
+            }
             mounts[i] = weapon.mountType.get(weapon);
             ModularPart mpart = weapons.getMap(i).get("part");
             weaponrange = Math.max(weaponrange, weapon.bullet.range() + Mathf.dst(mpart.cx, mpart.cy) * ModularPartType.partSize);
@@ -310,6 +314,34 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         armor = statmap.getValue("armour", "realValue");
 
+    }
+
+    @Replace
+    public void setType(UnitType type) {
+        this.type = type;
+        if (controller == null) controller(type.createController()); //for now
+        if(type!=UnityUnitTypes.modularUnit){
+            this.maxHealth = type.health;
+            drag(type.drag);
+            this.armor = type.armor;
+            hitSize(type.hitSize);
+            hovering(type.hovering);
+            if(controller == null) controller(type.createController());
+            if(mounts().length != type.weapons.size) setupWeapons(type);
+            if(abilities().size != type.abilities.size){
+                abilities(type.abilities.map(Ability::copy));
+            }
+        }
+    }
+
+    @Replace
+    public void setupWeapons(UnitType def) {
+        if(def!=UnityUnitTypes.modularUnit){
+            mounts = new WeaponMount[def.weapons.size];
+            for(int i = 0; i < mounts.length; i++){
+                mounts[i] = def.weapons.get(i).mountType.get(def.weapons.get(i));
+            }
+        }
     }
 
     public void initWeapon(Weapon w){

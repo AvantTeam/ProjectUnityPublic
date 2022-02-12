@@ -25,9 +25,15 @@ public class CrucibleGraph extends Graph<CrucibleGraph>{
     public void onUpdate(){
         for(GraphConnector<CrucibleGraph> v : vertexes){
            CrucibleGraphNode cgn = (CrucibleGraphNode)v.getNode();
+           if(cgn.accessConnector!=null && v!=cgn.accessConnector){
+               continue;
+           }
             float transfer = 0;
             for(GraphEdge ge : v.connections){
                 CrucibleGraphNode cgno = (CrucibleGraphNode)ge.other(v).getNode();
+                if(cgno.accessConnector!=null && ge.other(v)!=cgno.accessConnector){
+                   continue;
+                }
                 for(var fluid: cgn.fluids){
                     var otherfluid = cgno.getFluid(fluid.key);
                     var thisfluid = cgn.getFluid(fluid.key);

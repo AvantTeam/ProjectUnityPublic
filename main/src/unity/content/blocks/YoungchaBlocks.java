@@ -41,7 +41,7 @@ public class YoungchaBlocks{
         combustionHeater,thermalHeater,seebeckGenerator,smallRadiator,
     //crucible
         //crafting
-        crucible,crucibleChannel,
+        crucible,crucibleChannel,cruciblePump,
     //other
     sandboxAssembler; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
@@ -72,10 +72,10 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.005f, 3f, b));
             config.fixedConnection(TorqueGraph.class, 1, 0, 1, 0);
-            requirements(Category.distribution, with(Items.copper, 10, Items.lead, 10));
+            requirements(Category.power, with(Items.copper, 10, Items.lead, 10));
         }};
         shaftRouter = new GenericGraphBlock("shaft-router"){{
-            requirements(Category.distribution, with(Items.copper, 20, Items.lead, 20));
+            requirements(Category.power, with(Items.copper, 20, Items.lead, 20));
             health = 150;
             solid = true;
 
@@ -83,7 +83,7 @@ public class YoungchaBlocks{
             config.fixedConnection(TorqueGraph.class, 1, 1, 1, 1);
         }};
         smallTransmission = new SimpleTransmission("small-transmission"){{
-            requirements(Category.distribution, with(UnityItems.nickel, 20, Items.copper, 20, Items.lead, 20));
+            requirements(Category.power, with(UnityItems.nickel, 20, Items.copper, 20, Items.lead, 20));
             health = 700;
             size = 2;
             config.nodeConfig.put(TorqueGraph.class, b -> new TransmissionTorqueGraphNode(0.05f, 8f, b));
@@ -91,7 +91,7 @@ public class YoungchaBlocks{
             config.fixedConnection(TorqueGraph.class, 1, 0, 0, 0, 0, 1, 0, 0);
         }};
         torqueMeter = new TorqueMeter("torque-meter"){{
-            requirements(Category.distribution, with(UnityItems.nickel, 20, Items.lead, 30));
+            requirements(Category.power, with(UnityItems.nickel, 20, Items.lead, 30));
             health = 150;
             rotate = true;
             solid = true;
@@ -136,7 +136,7 @@ public class YoungchaBlocks{
         }};
 
         heatPipe = new HeatPipe("heat-pipe"){{
-            requirements(Category.distribution, with(UnityItems.nickel, 5, Items.copper, 10));
+            requirements(Category.power, with(UnityItems.nickel, 5, Items.copper, 10));
             health = 250;
             solid = false;
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.005f, 0.4f, 1,2500 + HeatGraphNode.celsiusZero));
@@ -181,7 +181,7 @@ public class YoungchaBlocks{
             solid = true;
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero,4, 1000 + HeatGraphNode.celsiusZero,0.03f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
-            requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, Items.silicon, 30));
+            requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
         }};
 
         seebeckGenerator = new SeebeckGenerator("seebeck-generator"){{
@@ -192,7 +192,7 @@ public class YoungchaBlocks{
             hasPower = true;
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.01f,9, 1800 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 0,1,0,  0,0,0,  0,1,0  ,0,0,0);
-            requirements(Category.power, with(UnityItems.nickel, 50, Items.graphite, 30, Items.copper, 120,Items.lead, 100, Items.silicon, 30));
+            requirements(Category.power, with(UnityItems.nickel, 50, Items.graphite, 30, Items.copper, 120,Items.lead, 100, UnityItems.cupronickel, 30));
         }};
         smallRadiator = new HeatRadiator("small-radiator"){{
 
@@ -202,7 +202,7 @@ public class YoungchaBlocks{
             solid = true;
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.4f, 0.15f, 4,1800 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 0, 0,  1, 1,  0, 0,  1, 1);
-            requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, Items.silicon, 30));
+            requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
         }};
 
         crucible = new CrucibleBlock("crucible"){{
@@ -224,11 +224,25 @@ public class YoungchaBlocks{
             config.fixedConnection(CrucibleGraph.class, 1,1,1,1);
         }};
 
+        cruciblePump = new CruciblePump("crucible-pump"){{
+            requirements(Category.crafting, with(UnityItems.nickel, 30, Items.graphite, 30, Items.titanium, 30));
+            health = 200;
+            rotate = true;
+            solid = true;
+
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,5));
+            config.fixedConnection(CrucibleGraph.class, 0,0,1,0);
+            config.fixedConnection(CrucibleGraph.class, 1,0,0,0);
+
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 10f, b));
+            config.fixedConnection(TorqueGraph.class, 0, 1, 0, 1);
+        }};
 
         sandboxAssembler = new ModularUnitAssembler("sandbox-assembler"){{
             requirements(Category.units, BuildVisibility.sandboxOnly, with());
             size = 3;
             health = 1700;
+            sandbox = true;
         }};
         //
     }
