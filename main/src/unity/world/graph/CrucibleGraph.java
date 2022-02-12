@@ -24,33 +24,24 @@ public class CrucibleGraph extends Graph<CrucibleGraph>{
     @Override
     public void onUpdate(){
         for(GraphConnector<CrucibleGraph> v : vertexes){
-            CrucibleGraphNode cgn = (CrucibleGraphNode)v.getNode();
-            for(var fluid: cgn.fluids){
-                fluid.value.meltedBuffer = fluid.value.melted;
-            }
-        }
-        for(GraphConnector<CrucibleGraph> v : vertexes){
            CrucibleGraphNode cgn = (CrucibleGraphNode)v.getNode();
+            float transfer = 0;
             for(GraphEdge ge : v.connections){
                 CrucibleGraphNode cgno = (CrucibleGraphNode)ge.other(v).getNode();
-                float transfer = 0;
                 for(var fluid: cgn.fluids){
-                    transfer = cgn.getFluid(fluid.key).total() - cgno.getFluid(fluid.key).total();
-                    if(transfer>0){
-                        transfer = Math.min(transfer, cgn.getFluid(fluid.key).melted);
+                    var otherfluid = cgno.getFluid(fluid.key);
+                    var thisfluid = cgn.getFluid(fluid.key);
+                    transfer = thisfluid.total()/cgn.baseSize - otherfluid.total()/cgno.baseSize;
+                    if(transfer>0.1f){
+                        transfer *= 0.1f;
+                        transfer = Math.min(transfer, Math.min(thisfluid.melted,cgno.capacity-otherfluid.total()));
                     }else{
-                        transfer = Math.min(transfer, cgno.getFluid(fluid.key).melted);
+                        continue;
                     }
-                    transfer *= 0.1f;
-                    cgno.getFluid(fluid.key).meltedBuffer += transfer;
-                    cgn.getFluid(fluid.key).meltedBuffer -= transfer;
+
+                    otherfluid.melted += transfer;
+                    thisfluid.melted -= transfer;
                 }
-            }
-        }
-        for(GraphConnector<CrucibleGraph> v : vertexes){
-            CrucibleGraphNode cgn = (CrucibleGraphNode)v.getNode();
-            for(var fluid: cgn.fluids){
-                fluid.value.melted = fluid.value.meltedBuffer;
             }
         }
     }

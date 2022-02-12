@@ -66,6 +66,9 @@ public class UnityUI{
 
 
     public void init(){
+        if(Vars.headless){
+            return;
+        }
         partsEditor = new PartsEditorDialog();
 
         Events.run(Trigger.update,()->{

@@ -41,7 +41,7 @@ public class YoungchaBlocks{
         combustionHeater,thermalHeater,seebeckGenerator,smallRadiator,
     //crucible
         //crafting
-        crucible,
+        crucible,crucibleChannel,
     //other
     sandboxAssembler; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
@@ -215,6 +215,13 @@ public class YoungchaBlocks{
             config.fixedConnection(HeatGraph.class, 1,0,1,  1,0,1,  1,0,1,  1,0,1);
             config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,50));
             config.fixedConnection(CrucibleGraph.class, 0,1,0,  0,1,0,  0,1,0,  0,1,0);
+        }};
+
+        crucibleChannel = new CrucibleChannel("crucible-channel"){{
+            requirements(Category.crafting, with(UnityItems.nickel, 10, Items.graphite, 10));
+            health = 200;
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,5));
+            config.fixedConnection(CrucibleGraph.class, 1,1,1,1);
         }};
 
 

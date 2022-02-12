@@ -10,13 +10,13 @@ public class CrucibleRecipes{
     public static ObjectMap<Item,CrucibleItem> items = new ObjectMap<>();
     public static Seq<CrucibleRecipe> recipes = new Seq<>();
     static {
-        items.put(Items.copper,new CrucibleItem(Items.copper, HeatGraphNode.celsiusZero + 900, 0.1f, 20));
-        items.put(Items.lead,new CrucibleItem(Items.lead, HeatGraphNode.celsiusZero + 400, 0.15f, 10));
-        items.put(UnityItems.nickel,new CrucibleItem(UnityItems.nickel, HeatGraphNode.celsiusZero + 930, 0.15f, 20));
-        items.put(UnityItems.cupronickel,new CrucibleItem(UnityItems.cupronickel, HeatGraphNode.celsiusZero + 800, 0.15f, 30));
-        items.put(Items.sand,new CrucibleItem(Items.sand, HeatGraphNode.celsiusZero + 1500, 0.15f, 10));
-        items.put(Items.metaglass,new CrucibleItem(Items.metaglass, HeatGraphNode.celsiusZero + 900, 0.15f, 20));
-        items.put(Items.titanium,new CrucibleItem(Items.sand, HeatGraphNode.celsiusZero + 1600, 0.15f, 40));
+        items.put(Items.copper,new CrucibleItem(Items.copper, HeatGraphNode.celsiusZero + 900, 0.1f, 50));
+        items.put(Items.lead,new CrucibleItem(Items.lead, HeatGraphNode.celsiusZero + 400, 0.15f, 20));
+        items.put(UnityItems.nickel,new CrucibleItem(UnityItems.nickel, HeatGraphNode.celsiusZero + 930, 0.15f, 40));
+        items.put(UnityItems.cupronickel,new CrucibleItem(UnityItems.cupronickel, HeatGraphNode.celsiusZero + 800, 0.15f, 60));
+        items.put(Items.sand,new CrucibleItem(Items.sand, HeatGraphNode.celsiusZero + 1500, 0.15f, 80));
+        items.put(Items.metaglass,new CrucibleItem(Items.metaglass, HeatGraphNode.celsiusZero + 900, 0.15f, 60));
+        items.put(Items.titanium,new CrucibleItem(Items.sand, HeatGraphNode.celsiusZero + 1600, 0.15f, 100));
 
         recipes.add(new CrucibleRecipe(UnityItems.cupronickel,0.1f,HeatGraphNode.celsiusZero + 150,
             needs(Items.copper, 2,true),

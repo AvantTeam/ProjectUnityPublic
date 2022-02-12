@@ -14,9 +14,8 @@ import unity.world.graph.*;
 import static mindustry.Vars.*;
 
 public class CrucibleBlock extends GenericGraphBlock{
-    TextureRegion floor,base,liquid, heat,chunks;
-    TextureRegion[] channel;
-    TextureRegion channelLiquid;
+    TextureRegion floor,liquid, heat,chunks;
+    TextureRegion[] base,baseopen;
     Vec2[] pos;
     public CrucibleBlock(String name){
         super(name);
@@ -26,14 +25,17 @@ public class CrucibleBlock extends GenericGraphBlock{
     public void load(){
         super.load();
         floor = loadTex("floor");
-        base = loadTex("base");
         heat = loadTex("heat");
         liquid = loadTex("liquid");
         chunks = loadTex("solid");
-        channel = new TextureRegion[2];
-        channel[0] = loadTex("channel1");
-        channel[1] = loadTex("channel2");
-        channelLiquid = loadTex("channel-liquid");
+
+        base = new TextureRegion[2];
+        base[0] = loadTex("base1");
+        base[1] = loadTex("base2");
+
+        baseopen = new TextureRegion[2];
+        baseopen[0] = loadTex("base-open1");
+        baseopen[1] = loadTex("base-open2");
 
         pos = new Vec2[30];
         for(int i =0;i<pos.length;i++){
@@ -76,6 +78,11 @@ public class CrucibleBlock extends GenericGraphBlock{
             if(liquidColor.a>0.01){
                 Draw.color(liquidColor);
                 Draw.rect(liquid, x, y);
+                float scl = 30f, mag = 0.2f;
+                Draw.rectv(liquid,x,y,20,20,vec -> vec.add(
+                Mathf.sin(vec.y*3 + Time.time, scl, mag) + Mathf.sin(vec.x*3 - Time.time, 70, 0.8f),
+                Mathf.cos(vec.x*3 + Time.time + 8, scl + 6f, mag * 1.1f) + Mathf.sin(vec.y*3 - Time.time, 50, 0.2f)
+                ));
                 Draw.color(liquidColor, 0.5f);
                 rand.setSeed(pos());
                 for(int i = 0; i < 20; i++){
@@ -107,18 +114,18 @@ public class CrucibleBlock extends GenericGraphBlock{
                 }
             }
             Draw.color();
-            Draw.rect(base,x,y);
+            for(int i = 0;i<4;i++){
+                if(connection[i]){
+                    Draw.rect(baseopen[i==2||i==3? 0 : 1],x,y,180 + i*90);
+                }else{
+                    Draw.rect(base[i==2||i==3? 0 : 1],x,y,180 + i*90);
+                }
+            }
+
             UnityDrawf.drawHeat(heat,x,y,0,heatNode().getTemp());
             drawTeamTop();
 
-            for(int i = 0;i<4;i++){
-                if(connection[i]){
-                    Draw.rect(channel[i==2||i==3? 1 : 0],x,y,180 + i*90);
-                    Draw.color(liquidColor);
-                    Draw.rect(channelLiquid,x,y,180 +i*90);
-                    Draw.color();
-                }
-            }
+
         }
     }
 }

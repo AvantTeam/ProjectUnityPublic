@@ -6,20 +6,33 @@ import arc.math.geom.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import arc.util.io.*;
 import mindustry.type.*;
 import unity.ui.*;
 import unity.world.graph.CrucibleGraph.*;
 import unity.world.meta.*;
 
+import static mindustry.Vars.content;
+
 
 public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
     public float capacity;
     public float transferrate = 0.1f;
+    public boolean doesCrafting = true;
+    public float baseSize = 1;
+    Color color = new Color();
 
     public OrderedMap<Item, CrucibleFluid> fluids = new OrderedMap<>();
     public CrucibleGraphNode(GraphBuild build, float totalCapacity){
         super(build);
         this.capacity =totalCapacity;
+        baseSize = Mathf.sqr(build.getBuild().block.size);
+    }
+    public CrucibleGraphNode(GraphBuild build, float totalCapacity, boolean crafts){
+        super(build);
+        this.capacity =totalCapacity;
+        this.doesCrafting = crafts;
+        baseSize = Mathf.sqr(build.getBuild().block.size);
     }
 
     @Override
@@ -49,8 +62,10 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
         }
         return fluids.get(i);
     }
-
     public Color getColor(){
+        return color;
+    }
+    public void updateColor(){
         Vec3 color = new Vec3();
         float t = 0;
         float tt;
@@ -60,10 +75,11 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
             color.add(fluid.key.color.r*tt,fluid.key.color.g*tt,fluid.key.color.b*tt);
         }
         if(t == 0){
-            return Color.clear;
+            this.color.set(Color.clear);
+            return;
         }
         color.scl(1f/t);
-        return new Color(color.x,color.y,color.z,Mathf.clamp(10f*t/capacity));
+        this.color.set(color.x,color.y,color.z,Mathf.clamp(10f*t/capacity));
     }
 
     private Seq<Item> smeltOrder = new Seq<>();
@@ -73,6 +89,9 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
     public void update(){
         var heat = this.build.heatNode();
         if( heat!= null){
+            if(!doesCrafting){
+                return;
+            }
             smeltOrder.clear();
             coolOrder.clear();
             for(var fluid : fluids){
@@ -147,6 +166,36 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
                 }
                 getFluid(recipe.output).melted += maxam;
             }
+        }
+        updateColor();
+    }
+
+    @Override
+    public void read(Reads read){
+        int total = read.i();
+        for(int i =0; i<total; i++){
+            Item item = content.item(read.s());
+            var fluid = new CrucibleFluid(item);
+            fluid.solid = read.f();
+            fluid.melted = read.f();
+            fluids.put(item, fluid);
+        }
+    }
+
+    @Override
+    public void write(Writes write){
+        int t = 0;
+        for(var fluid : fluids){
+            t += fluid.value.total()>0?1:0;
+        }
+        write.i(t);
+        for(var fluid : fluids){
+            if(fluid.value.total()<=0){
+                continue;
+            }
+            write.s(fluid.key.id);
+            write.f(fluid.value.solid);
+            write.f(fluid.value.melted);
         }
     }
 }
