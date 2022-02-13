@@ -17,6 +17,7 @@ public class CrucibleRecipes{
         items.put(Items.sand,new CrucibleItem(Items.sand, HeatGraphNode.celsiusZero + 1500, 0.15f, 80));
         items.put(Items.metaglass,new CrucibleItem(Items.metaglass, HeatGraphNode.celsiusZero + 900, 0.15f, 60));
         items.put(Items.titanium,new CrucibleItem(Items.sand, HeatGraphNode.celsiusZero + 1600, 0.15f, 100));
+        items.put(Items.thorium,new CrucibleItem(Items.thorium, HeatGraphNode.celsiusZero + 1750, 0.15f, 100));
 
         recipes.add(new CrucibleRecipe(UnityItems.cupronickel,0.1f,HeatGraphNode.celsiusZero + 150,
             needs(Items.copper, 2,true),

@@ -8,6 +8,8 @@ import arc.math.geom.*;
 import arc.util.*;
 import mindustry.graphics.*;
 
+import java.util.*;
+
 import static mindustry.Vars.tilesize;
 
 public final class UnityDrawf{
@@ -169,5 +171,42 @@ public final class UnityDrawf{
         Lines.stroke(1f, color);
         Lines.line(x, y, x2, y2);
         Draw.reset();
+    }
+    static Vec3[] tmpV = new Vec3[4];
+    public static void drawRectOrtho(TextureRegion region, float x, float y, float z, float w, float h, float rotY){
+        drawRectOrtho(region,x,y,0,0,z,w,h,rotY);
+    }
+    public static void drawRectOrtho(TextureRegion region, float x, float y, float ox, float oy, float z, float w, float h, float rotY){
+        tmpV[3].set(+w*0.5f, +h*0.5f, 0);
+        tmpV[0].set(-w*0.5f, +h*0.5f, 0);
+        tmpV[1].set(-w*0.5f, -h*0.5f, 0);
+        tmpV[2].set(+w*0.5f, -h*0.5f, 0);
+        for(int i = 0;i<4;i++){
+            tmpV[i].add(ox,oy,z);
+            tmpV[i].rotate(Vec3.Y,rotY);
+            tmpV[i].add(x,y,0);
+        }
+        Fill.quad(region,tmpV[0].x,tmpV[0].y, tmpV[1].x,tmpV[1].y, tmpV[2].x,tmpV[2].y, tmpV[3].x,tmpV[3].y);
+    }
+    static TextureRegion t1=new TextureRegion(),t2=new TextureRegion();
+    public static void drawRectOffsetHorz(TextureRegion region, float x, float y,float w,float h,float rotation,float o){
+        t1.set(region);
+        t2.set(region);
+        float cx = x+w*0.5f;
+        float dx = x-w*0.5f + w*o;
+        float t1w = w*(1f-o);
+        float t2w = w*o;
+        t1.u2 = Mathf.lerp(region.u,region.u2,1-o);
+        t2.u = Mathf.lerp(region.u2,region.u,o);
+        Draw.rect(t1, dx+t1w*0.5f, y, t1w, h, x-dx, h*0.5f, rotation);
+        Draw.rect(t2, dx-t2w*0.5f, y, t2w, h, x-(dx-t2w), h*0.5f, rotation);
+    }
+
+
+
+    static {
+        for(int i = 0;i<4;i++){
+            tmpV[i] = new Vec3();
+        }
     }
 }

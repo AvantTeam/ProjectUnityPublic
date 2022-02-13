@@ -7,6 +7,7 @@ import arc.math.geom.*;
 import arc.util.*;
 import mindustry.gen.*;
 import mindustry.type.*;
+import mindustry.world.blocks.payloads.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
 import unity.world.graph.*;
@@ -83,6 +84,12 @@ public class CrucibleBlock extends GenericGraphBlock{
                 Mathf.sin(vec.y*3 + Time.time, scl, mag) + Mathf.sin(vec.x*3 - Time.time, 70, 0.8f),
                 Mathf.cos(vec.x*3 + Time.time + 8, scl + 6f, mag * 1.1f) + Mathf.sin(vec.y*3 - Time.time, 50, 0.2f)
                 ));
+                Draw.alpha(Mathf.curve(Mathf.sinDeg(Time.time*0.3f),-1,1));
+                Draw.rectv(liquid,x,y,20,20,90,vec -> vec.add(
+                Mathf.sin(vec.y*3 + Time.time, scl, mag) + Mathf.sin(vec.x*3 - Time.time, 70, 0.8f),
+                Mathf.cos(vec.x*3 + Time.time + 8, scl + 6f, mag * 1.1f) + Mathf.sin(vec.y*3 - Time.time, 50, 0.2f)
+                ));
+
                 Draw.color(liquidColor, 0.5f);
                 rand.setSeed(pos());
                 for(int i = 0; i < 20; i++){

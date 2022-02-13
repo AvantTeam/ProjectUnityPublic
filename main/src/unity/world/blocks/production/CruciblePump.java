@@ -15,6 +15,7 @@ import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.distribution.Sorter.*;
+import unity.graphics.*;
 import unity.world.blocks.*;
 import unity.world.blocks.GenericGraphBlock.*;
 import unity.world.graph.*;
@@ -101,17 +102,18 @@ public class CruciblePump extends GenericGraphBlock{
 
         @Override
         public void draw(){
+            var torque = getGraph(TorqueGraph.class);
             Draw.rect(floor, x, y);
             Draw.color(crucibleNode().getColor());
             Fill.rect(x, y, tilesize, tilesize);
             Draw.color();
-            Draw.rect(base, x, y, getCorrectRotation());
+            Draw.rect(base, x, y, -getCorrectRotation());
             Color c = Color.gray;
             if(config != null){
                 c.set(config.color);
             }
             Draw.color(c);
-            Draw.rect(arrow, x, y, rotdeg());
+            UnityDrawf.drawRectOffsetHorz(arrow, x, y,arrow.width*Draw.scl,arrow.height*Draw.scl, rotdeg(),(torque.rotation*0.5f/360f)%1f);
             Draw.color();
             drawTeamTop();
         }

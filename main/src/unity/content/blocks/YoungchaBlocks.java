@@ -41,7 +41,7 @@ public class YoungchaBlocks{
         combustionHeater,thermalHeater,seebeckGenerator,smallRadiator,
     //crucible
         //crafting
-        crucible,crucibleChannel,cruciblePump,
+        crucible,crucibleChannel,cruciblePump,crucibleCaster,
     //other
     sandboxAssembler; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
@@ -225,7 +225,7 @@ public class YoungchaBlocks{
         }};
 
         cruciblePump = new CruciblePump("crucible-pump"){{
-            requirements(Category.crafting, with(UnityItems.nickel, 30, Items.graphite, 30, Items.titanium, 30));
+            requirements(Category.crafting, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 30));
             health = 200;
             rotate = true;
             solid = true;
@@ -236,6 +236,22 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 10f, b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 1);
+        }};
+
+        crucibleCaster = new CrucibleCaster("casting-mold"){{
+            requirements(Category.crafting, with(UnityItems.nickel, 60, Items.graphite, 50));
+            health = 1700;
+            rotate = true;
+            solid = true;
+            size = 3;
+            itemCapacity = 4;
+            hasItems = true;
+
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,5));
+            config.fixedConnection(CrucibleGraph.class, 0,0,0, 0,0,0, 0,1,0, 0,0,0);
+
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 100f, b));
+            config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
         }};
 
         sandboxAssembler = new ModularUnitAssembler("sandbox-assembler"){{

@@ -22,8 +22,7 @@ public class UnityParts{
     public static ModularPartType smallEngine,engine,smallWheel,smallTracks;
 
     //unit
-    public static Seq<PanelDoodadType> unitdoodads1x1 = new Seq<>();
-    public static Seq<PanelDoodadType> unitdoodads2x2 = new Seq<>();
+    public static Seq<PanelDoodadPalette> unitDoodads = new Seq<>();
 
     public static void load(){
         //region units
@@ -160,11 +159,13 @@ public class UnityParts{
     }
 
     public static void loadDoodads(){
-        for(int i = 0;i<12;i++){
-            unitdoodads1x1.add(getUnitDoodad("1x1-"+(i+1), "1x1-outline-"+(i+1), 0 , 0));
-        }
-        for(int i = 0;i<5;i++){
-            unitdoodads2x2.add(getUnitDoodad("2x2-"+(i+1), "2x2-outline-"+(i+1), 0 ,0,   1, 1,   0, 1,   1, 0));
+        unitDoodads.add(new PanelDoodadPalette(true,true,1,1,"1x1",12));
+        unitDoodads.add(new PanelDoodadPalette(false,true,2,2,"2x2",5));
+        unitDoodads.add(new PanelDoodadPalette(false,true,3,3,"3x3",4));
+        unitDoodads.add(new PanelDoodadPalette(true,true,3,2,"3x2",3));
+
+        for(int i=0;i<unitDoodads.size;i++){
+            unitDoodads.get(i).load();
         }
     }
 

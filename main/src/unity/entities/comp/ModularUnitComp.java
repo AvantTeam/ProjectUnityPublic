@@ -222,14 +222,26 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             for(int i = 0; i < Math.round(w / 2f); i++){
                 for(int j = 0; j < h; j++){
                     mirrored = null;
+
                     if(filled[i][j] && !placed[i][j]){
                         draw.clear();
-                        draw.add(getType(UnityParts.unitdoodads1x1, lightness[i][j]));
-                        var x2 = getType(UnityParts.unitdoodads2x2, lightness[i][j]);
-                        if(x2.canFit(construct.parts, i, j) && i + 1 < middlex){
-                            draw.add(x2);
+                        for(var pal:UnityParts.unitDoodads){
+                            if(pal.w==1 && pal.h==1){
+                                draw.add(pal.get(1-lightness[i][j]));
+                            }else{
+                                var type = pal.get(1-lightness[i][j]);
+                                boolean allowed = false;
+                                if((pal.w%2==0 || pal.sides) && i + pal.w-1 < middlex){
+                                    allowed = true;
+                                }
+                                if(pal.center && i == middlex-(pal.w/2)){
+                                    allowed = true;
+                                }
+                                if(allowed && type.canFit(construct.parts, i, j)){
+                                    draw.add(type);
+                                }
+                            }
                         }
-
                         PanelDoodadType doodad = draw.random();
                         mirrored = doodad;
 
@@ -241,7 +253,20 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
                             continue;
                         }
                         draw.clear();
-                        draw.add(getType(UnityParts.unitdoodads1x1, lightness[w - i - 1][j]));
+                        for(var pal:UnityParts.unitDoodads){
+                            if(pal.w==1 && pal.h==1){
+                                draw.add(pal.get(1-lightness[w - i -1][j]));
+                            }else{
+                                var type = pal.get(1-lightness[w - i -1][j]);
+                                boolean allowed = false;
+                                if((pal.w%2==0 || pal.sides) && w - i -1 > middlex){
+                                    allowed = true;
+                                }
+                                if(allowed && type.canFit(construct.parts, i, j)){
+                                    draw.add(type);
+                                }
+                            }
+                        }
                         PanelDoodadType doodad = draw.random();
                         addDoodad(placed, get(doodad, w - i - doodad.w + ox, j + oy), w - i - doodad.w, j);
                     }
