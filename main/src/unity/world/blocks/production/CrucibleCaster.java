@@ -15,13 +15,11 @@ import unity.world.graph.*;
 
 import static java.lang.Math.exp;
 import static mindustry.Vars.content;
+import static unity.util.Utils.interp;
 
-public class CrucibleCaster extends GenericGraphBlock{
+public class CrucibleCaster extends GenericCaster{
     TextureRegion floor,platter,platterside,liquid,castliquid;
     TextureRegion[] base;
-    public float castTime = 30f;
-    public float moveTime = 20f;
-    public float maxSpeed = 50f;
     public Vec2[] itemPos = {
         new Vec2(0.4f*8, 0.4f*8),
         new Vec2(-0.4f*8, 0.4f*8),
@@ -58,47 +56,47 @@ public class CrucibleCaster extends GenericGraphBlock{
         return true;
     }
 
-    public class CrucibleCasterBuild extends GenericGraphBuild{
+    public class CrucibleCasterBuild extends GenericCasterBuild{
         public Item currentCast;
-        public float progress;
+
+        @Override
+        public boolean isCasting(){
+            return currentCast!=null;
+        }
+
+        @Override
+        public void tryStartCast(){
+            var crucible = crucibleNode();
+            for(var fluid : crucible.fluids){
+                if(fluid.value.melted >= 4){
+                    currentCast = fluid.key;
+                }
+            }
+            if(currentCast!=null){
+                crucible.getFluid(currentCast).melted-=4;
+            }
+        }
+
+        @Override
+        public void offloadCast(){
+            for(int i = 0; i < 4; i++){
+                offload(currentCast);
+            }
+        }
+
+        @Override
+        public void resetCast(){
+            currentCast = null;
+        }
+
+        @Override
+        public boolean canOffloadCast(){
+            return items.empty();
+        }
 
         @Override
         public void updateTile(){
             super.updateTile();
-            var crucible = crucibleNode();
-            var torque = getGraph(TorqueGraph.class);
-            if(currentCast==null){
-                for(var fluid : crucible.fluids){
-                    if(fluid.value.melted >= 4){
-                        currentCast = fluid.key;
-                    }
-                }
-                if(currentCast!=null){
-                    crucible.getFluid(currentCast).melted-=4;
-                }
-            }else{
-                if(progress<castTime){
-                    progress += Time.delta;
-                    if(progress>castTime){
-                        float f = progress-castTime;
-                        progress-=f;
-                        progress+=f* Mathf.curve(torque.lastVelocity,0,maxSpeed);
-                    }
-                }else{
-                    progress+=Time.delta * Mathf.curve(torque.lastVelocity,0,maxSpeed);
-                        if(progress>=castTime+moveTime){
-                        if(items.empty()){
-                            for(int i = 0; i < 4; i++){
-                                offload(currentCast);
-                            }
-                            progress = 0;
-                            currentCast = null;
-                        }else{
-                            progress = castTime+moveTime;
-                        }
-                    }
-                }
-            }
             dumpOutputs();
         }
         public void dumpOutputs(){
@@ -142,14 +140,11 @@ public class CrucibleCaster extends GenericGraphBlock{
             return itemCapacity;
         }
 
-        public float interp(float x,float x2,float t){
-            return (float)(1-(1.0/(1+exp((t*2-1)/0.2f))))*(x2-x)+x;
-        }
+
 
         @Override
         public void draw(){
             var crucible = crucibleNode();
-            var torque = getGraph(TorqueGraph.class);
             Draw.rect(floor,x,y);
 
             if(currentCast!=null){
@@ -167,19 +162,19 @@ public class CrucibleCaster extends GenericGraphBlock{
                     }
                 }else{
                     float moveprog = Mathf.curve(progress,castTime,castTime+moveTime);
-                    //temp
+
                     float ang = interp(0,180,moveprog);
 
                     if(ang<90){
-                        UnityDrawf.drawRectOrtho(platter, x, y, -2, platter.width*0.25f, platter.height*0.25f, ang);
+                        UnityDrawf.drawRectOrtho(platter, x, y, -2, platter.width*0.25f, platter.height*0.25f, ang,rotdeg());
                     }else{
-                        UnityDrawf.drawRectOrtho(platter, x, y, 2, platter.width*0.25f, platter.height*0.25f, ang);
+                        UnityDrawf.drawRectOrtho(platter, x, y, 2, platter.width*0.25f, platter.height*0.25f, ang,rotdeg());
                     }
-                    UnityDrawf.drawRectOrtho(platterside, x, y, -8, 4, 16, ang-90);
+                    UnityDrawf.drawRectOrtho(platterside, x, y, -8, 4, 16, ang-90,rotdeg());
 
                     if(ang<90){
                         for(int i = 0; i < itemPos.length; i++){
-                            UnityDrawf.drawRectOrtho(currentCast.fullIcon, x , y , itemPos[i].x, itemPos[i].y,-3, itemsize, itemsize,ang);
+                            UnityDrawf.drawRectOrtho(currentCast.fullIcon, x , y , itemPos[i].x, itemPos[i].y,-3, itemsize, itemsize,ang,rotdeg());
                         }
                     }
                 }
@@ -199,14 +194,12 @@ public class CrucibleCaster extends GenericGraphBlock{
         @Override
         public void read(Reads read, byte revision){
             super.read(read, revision);
-            progress = read.f();
             currentCast = content.item(read.s());
         }
 
         @Override
         public void write(Writes write){
             super.write(write);
-            write.f(progress);
             write.s(currentCast == null ? -1 : currentCast.id);
         }
     }

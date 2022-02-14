@@ -108,13 +108,11 @@ public class CruciblePump extends GenericGraphBlock{
             Fill.rect(x, y, tilesize, tilesize);
             Draw.color();
             Draw.rect(base, x, y, -getCorrectRotation());
-            Color c = Color.gray;
             if(config != null){
-                c.set(config.color);
+                Draw.color(config.color);
+                UnityDrawf.drawRectOffsetHorz(arrow, x, y,arrow.width*Draw.scl,arrow.height*Draw.scl, rotdeg(),(torque.rotation*0.5f/360f)%1f);
+                Draw.color();
             }
-            Draw.color(c);
-            UnityDrawf.drawRectOffsetHorz(arrow, x, y,arrow.width*Draw.scl,arrow.height*Draw.scl, rotdeg(),(torque.rotation*0.5f/360f)%1f);
-            Draw.color();
             drawTeamTop();
         }
 

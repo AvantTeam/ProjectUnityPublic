@@ -10,6 +10,7 @@ import unity.content.*;
 import unity.world.blocks.*;
 import unity.world.blocks.distribution.*;
 import unity.world.blocks.envrionment.*;
+import unity.world.blocks.payloads.*;
 import unity.world.blocks.power.*;
 import unity.world.blocks.production.*;
 import unity.world.blocks.units.*;
@@ -41,7 +42,9 @@ public class YoungchaBlocks{
         combustionHeater,thermalHeater,seebeckGenerator,smallRadiator,
     //crucible
         //crafting
-        crucible,crucibleChannel,cruciblePump,crucibleCaster,
+        crucible,crucibleChannel,cruciblePump,crucibleCaster,payloadCaster,crucibleSource,
+    //modules
+        basicPanel,
     //other
     sandboxAssembler; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
@@ -179,7 +182,7 @@ public class YoungchaBlocks{
             rotate = true;
             health = 700;
             solid = true;
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero,4, 1000 + HeatGraphNode.celsiusZero,0.03f));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero,4, 1000 + HeatGraphNode.celsiusZero,0.2f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
             requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
         }};
@@ -254,12 +257,39 @@ public class YoungchaBlocks{
             config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
         }};
 
+        payloadCaster= new PayloadCaster("payload-casting-mold"){{
+            requirements(Category.crafting, with(UnityItems.cupronickel, 30, Items.metaglass, 30,Items.graphite, 50));
+            health = 1700;
+            rotate = true;
+            solid = true;
+            size = 3;
+            moveTime = 50;
+
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,50));
+            config.fixedConnection(CrucibleGraph.class, 0,0,0, 0,0,0, 0,1,0, 0,0,0);
+
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 100f, b));
+            config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
+        }};
+
+        crucibleSource = new CrucibleSource("crucible-source"){{
+            solid = true;
+            requirements(Category.crafting,BuildVisibility.sandboxOnly,with());
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,99));
+            config.fixedConnection(CrucibleGraph.class, 1,1,1,1);
+        }};
+
         sandboxAssembler = new ModularUnitAssembler("sandbox-assembler"){{
             requirements(Category.units, BuildVisibility.sandboxOnly, with());
             size = 3;
             health = 1700;
             sandbox = true;
         }};
-        //
+
+
+        //modules
+        basicPanel = new ModuleBlock("module-basic-panel"){{
+            requirements(Category.crafting, BuildVisibility.hidden,with(UnityItems.nickel, 8));
+        }};
     }
 }

@@ -10,6 +10,7 @@ import mindustry.graphics.*;
 
 import java.util.*;
 
+import static arc.math.geom.Mat3D.*;
 import static mindustry.Vars.tilesize;
 
 public final class UnityDrawf{
@@ -172,19 +173,61 @@ public final class UnityDrawf{
         Lines.line(x, y, x2, y2);
         Draw.reset();
     }
-    static Vec3[] tmpV = new Vec3[4];
-    public static void drawRectOrtho(TextureRegion region, float x, float y, float z, float w, float h, float rotY){
-        drawRectOrtho(region,x,y,0,0,z,w,h,rotY);
+    
+    public static void mulVec(float[] mat, Vec3 vec){
+        float x = vec.x * mat[M00] + vec.y * mat[M01] + vec.z * mat[M02] + mat[M03];
+        float y = vec.x * mat[M10] + vec.y * mat[M11] + vec.z * mat[M12] + mat[M13];
+        float z = vec.x * mat[M20] + vec.y * mat[M21] + vec.z * mat[M22] + mat[M23];
+        vec.x = x;
+        vec.y = y;
+        vec.z = z;
     }
-    public static void drawRectOrtho(TextureRegion region, float x, float y, float ox, float oy, float z, float w, float h, float rotY){
+    
+    static Vec3[] tmpV = new Vec3[4];
+    public static void drawRectOrtho(TextureRegion region, float x, float y, float z, float w, float h, float rotY, float rotZ){
+        drawRectOrtho(region,x,y,0,0,z,w,h,rotY,rotZ);
+    }
+    static Mat3D matT = new Mat3D();
+    static Vec3 tAxis = new Vec3();
+    static Vec3 tmpV2 = new Vec3();
+    
+    
+    public static void drawRectOrtho(TextureRegion region, float x, float y, float ox, float oy, float z, float w, float h, float rotY, float rotZ){
+        tmpV[3].set(+w*0.5f, +h*0.5f, 0);
+        tmpV[0].set(-w*0.5f, +h*0.5f, 0);
+        tmpV[1].set(-w*0.5f, -h*0.5f, 0);
+        tmpV[2].set(+w*0.5f, -h*0.5f, 0);
+
+        tmpV2.set(ox,oy,z);
+        matT.idt();
+
+        if(w!=h){
+            for(int i = 0;i<4;i++){
+                tmpV[i].rotate(Vec3.Z,rotZ);
+            }
+        }
+        tAxis.set(Vec3.Y).rotate(Vec3.Z,-rotZ);
+        tmpV2.rotate(Vec3.Z,-rotZ);
+        matT.rotate(tAxis,-rotY);
+        matT.translate(tmpV2);
+
+        for(int i = 0;i<4;i++){
+            mulVec(matT.val,tmpV[i]);
+            tmpV[i].add(x,y,0);
+        }
+
+        Fill.quad(region,tmpV[0].x,tmpV[0].y, tmpV[1].x,tmpV[1].y, tmpV[2].x,tmpV[2].y, tmpV[3].x,tmpV[3].y);
+    }
+    public static void drawRectOrtho(TextureRegion region, float x, float y, float z, float ox, float oy,float oz, float w, float h, float rotY, float rotZ){
         tmpV[3].set(+w*0.5f, +h*0.5f, 0);
         tmpV[0].set(-w*0.5f, +h*0.5f, 0);
         tmpV[1].set(-w*0.5f, -h*0.5f, 0);
         tmpV[2].set(+w*0.5f, -h*0.5f, 0);
         for(int i = 0;i<4;i++){
-            tmpV[i].add(ox,oy,z);
+            tmpV[i].add(ox,oy,oz);
             tmpV[i].rotate(Vec3.Y,rotY);
-            tmpV[i].add(x,y,0);
+            tmpV[i].rotate(Vec3.Z,rotZ);
+            tmpV[i].add(x,y,z);
         }
         Fill.quad(region,tmpV[0].x,tmpV[0].y, tmpV[1].x,tmpV[1].y, tmpV[2].x,tmpV[2].y, tmpV[3].x,tmpV[3].y);
     }

@@ -10,6 +10,7 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mindustry.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
@@ -143,11 +144,15 @@ public class PartsEditorDialog extends BaseDialog{
             Core.app.setClipboardText(Base64.getEncoder().encodeToString(builder.exportCompressed()));
         }).tooltip("copy").width(64);
         buttons.button(Icon.paste,()->{
-            ModularConstructBuilder test = new ModularConstructBuilder(3,3);
-            test.set(Base64.getDecoder().decode(Core.app.getClipboardText().trim().replaceAll("[\\t\\n\\r]+","")));
-            builder.clear();
-            builder.paste(test);
-            editorElement.onAction();
+            try{
+                ModularConstructBuilder test = new ModularConstructBuilder(3, 3);
+                test.set(Base64.getDecoder().decode(Core.app.getClipboardText().trim().replaceAll("[\\t\\n\\r]+", "")));
+                builder.clear();
+                builder.paste(test);
+                editorElement.onAction();
+            }catch(Exception e){
+                Vars.ui.showOkText("Uh", "Your code is poopoo", () -> {}); ///?????
+            }
         }).tooltip("paste").width(64);
         if(Core.graphics.getWidth()<750){
             buttons.row();
