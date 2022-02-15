@@ -400,8 +400,9 @@ public class MergeProcessor extends BaseProcessor{
 
             ExecutableElement first = entry.value.first();
 
-            boolean superCall = entry.value.contains(m -> annotation(m, Replace.class) != null);
-            if(superCall) superCall = hasMethod(isBuild ? findBuild(baseClass) : baseClass, first);
+            boolean superCall =
+                !entry.value.contains(m -> annotation(m, Replace.class) != null) &&
+                hasMethod(isBuild ? findBuild(baseClass) : baseClass, first);
 
             if(annotation(first, InternalImpl.class) != null) continue;
 
