@@ -85,15 +85,6 @@ task dex(type: Jar){
     from zipTree(dexJar)
 }
 
-task dmove(dependsOn: deploy){
-    doLast{
-        copy{
-            from "build/libs/ProjectUnityDesktop.jar"
-            into System.getenv("destination")
-        }
-    }
-}
-
 class Fetcher{
     UnsafeRunnable run
 
