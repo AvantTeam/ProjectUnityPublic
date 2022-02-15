@@ -90,49 +90,6 @@ public class Annotations{
     @Retention(RetentionPolicy.SOURCE)
     public @interface MergeInterface{}
 
-    /** Works somewhat like Ctrl CV for Block and Building */
-    @Target({ElementType.TYPE, ElementType.FIELD})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Dupe{
-        /** @return The base class and code */
-        Class<?> base() default Block.class;
-
-        /** @return The new parent of the adopted base */
-        Class<?> parent();
-
-        /** @return The duped target name */
-        String name() default "";
-    }
-
-    /** Notifies that this class is a component class; an interface will be generated out of this */
-    @Target(ElementType.TYPE)
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DupeComponent{}
-
-    /** The generated interface from {@link DupeComponent} */
-    @Target(ElementType.TYPE)
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DupeInterface{}
-
-    /** Indicates that {@link Dupe} should ignore the field or method completely */
-    @Target({ElementType.FIELD, ElementType.METHOD})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Ignore{}
-
-    /** Indicates that {@link Dupe} should replace the method completely */
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Actually{
-        /** @return The replacement */
-        String value() default "";
-    }
-
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SuperIdol{
-        String value();
-    }
-
     /** Indicates that this class is an entity component */
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.SOURCE)
