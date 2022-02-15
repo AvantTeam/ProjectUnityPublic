@@ -108,10 +108,12 @@ public class Unity extends Mod{
 
 
         Faction.init();
+        UnityLiquids.load();
         UnityItems.load();
         UnityStatusEffects.load();
         UnityBullets.load();
         UnityUnitTypes.load();
+        KoruhBlocks.load();
         YoungchaBlocks.load();
         UnityParts.load();
 
