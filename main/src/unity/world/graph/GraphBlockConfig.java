@@ -1,10 +1,18 @@
 package unity.world.graph;
 
 import arc.func.*;
+import arc.graphics.g2d.*;
+import arc.math.geom.*;
 import arc.struct.*;
+import arc.util.*;
+import mindustry.entities.units.*;
 import mindustry.world.*;
+import unity.world.graph.GraphConnector.FixedGraphConnector.*;
 
 import java.lang.reflect.*;
+
+import static arc.math.geom.Geometry.*;
+import static mindustry.Vars.tilesize;
 
 //the uh block settings part of graphs ig
 public class GraphBlockConfig{
@@ -35,7 +43,6 @@ public class GraphBlockConfig{
         }catch(Exception e){
             throw new IllegalStateException("Graph doesn't have a empty constructor or constructor is invalid/inaccessible");
         }
-
     }
 
     public static abstract class ConnectionConfig<T extends Graph>{
@@ -82,4 +89,50 @@ public class GraphBlockConfig{
     public Block getBlock(){
         return block;
     }
+
+    public void drawConnectionPoints(BuildPlan req, Eachable<BuildPlan> list){
+        //soon
+        for(ConnectionConfig c:connections){
+            TextureRegion tr = Graphs.graphIcons.get(c.graphType);
+            if(tr == null){
+                return;
+            }
+            if(c instanceof FixedConnectionConfig fcc){
+                for(int i = 0;i<fcc.connectionIndexes.length;i++){
+                    if(fcc.connectionIndexes[i]!=0){
+                        Point2 p2 = getConnectSidePos(i,this.block.size,req.rotation);
+                        Draw.rect(tr,(req.x+p2.x)*tilesize,(req.x+p2.y)*tilesize);
+                    }
+                }
+            }
+        }
+
+    }
+
+    //this came from js, but im not sure if it relative to the center or the bl corner of the building.
+    //gets positions along the sides.
+    public Point2 getConnectSidePos(int index, int size, int rotation){
+        int side = index / size;
+        side = (side + rotation) % 4;
+        Point2 tangent = d4((side + 1) % 4);
+        int originX = 0, originY = 0;
+        if(size > 1){
+            originX += size / 2;
+            originY += size / 2;
+            originY -= size - 1;
+            if(side > 0){
+                for(int i = 1; i <= side; i++){
+                    originX += d4x(i) * (size - 1);
+                    originY += d4y(i) * (size - 1);
+                }
+            }
+            originX += tangent.x * (index % size);
+            originY += tangent.y * (index % size);
+        }
+        return new Point2(originX+d4x(side),originY+d4y(side));
+    }
+
+
+
+
 }

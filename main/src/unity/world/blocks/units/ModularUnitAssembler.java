@@ -43,7 +43,7 @@ public class ModularUnitAssembler extends PayloadBlock{
             //ui lamdba soup time
             var configureButtonCell = table.button(Tex.whiteui, Styles.clearTransi, 50,
             (() -> {
-                Unity.ui.partsEditor.show(blueprint.export(), this::configure, PartsEditorDialog.unitInfoViewer);
+                Unity.ui.partsEditor.show(blueprint.export(), this::configure, PartsEditorDialog.unitInfoViewer,part->part.visible);
             }));
             configureButtonCell.size(50);
             configureButtonCell.get().getStyle().imageUp = Icon.pencil;

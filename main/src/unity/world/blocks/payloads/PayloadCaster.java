@@ -65,6 +65,7 @@ public class PayloadCaster extends GenericCaster{
 
     public class PayloadCasterBuild extends GenericCasterBuild{
         public @Nullable Block cast;
+        public @Nullable Block currentlycasting = null;
         public boolean casting = false;
         public BuildPayload waiting = null;
 
@@ -110,11 +111,12 @@ public class PayloadCaster extends GenericCaster{
                 crucible.getFluid(i.item).melted-=i.amount;
             }
             casting = true;
+            currentlycasting = cast;
         }
 
         @Override
         public void offloadCast(){
-            if(waiting ==null){
+            if(waiting ==null ){
                 return;
             }
             var build = front();
@@ -131,9 +133,12 @@ public class PayloadCaster extends GenericCaster{
 
         @Override
         public boolean canOffloadCast(){
+            if(currentlycasting==null){
+                return false;
+            }
             if(casting){
                 if(waiting ==null){
-                    waiting = new BuildPayload(cast,this.team);
+                    waiting = new BuildPayload(currentlycasting,this.team);
                     waiting.set(x,y,rotdeg());
                 }
                 var build = front();
@@ -153,6 +158,7 @@ public class PayloadCaster extends GenericCaster{
 
             Draw.rect(payloadExit,x,y,rotdeg());
             Draw.z(Layer.blockOver);
+            var cast = currentlycasting;
             if(isCasting()){
                 float castprog = Mathf.curve(progress,0,castTime);
                 if(progress<castTime){
@@ -227,12 +233,14 @@ public class PayloadCaster extends GenericCaster{
           public void write(Writes write){
               super.write(write);
               write.s(cast == null ? -1 : cast.id);
+              write.s(currentlycasting == null ? -1 : currentlycasting.id);
           }
 
           @Override
           public void read(Reads read, byte revision){
               super.read(read, revision);
               cast = Vars.content.block(read.s());
+              currentlycasting = Vars.content.block(read.s());
           }
     }
 }

@@ -199,7 +199,7 @@ public class PartsEditorDialog extends BaseDialog{
         });
     }
 
-    public void show(byte[] data, Cons<byte[]> modified,Cons2<ModularConstructBuilder, Table> viewer){
+    public void show(byte[] data, Cons<byte[]> modified,Cons2<ModularConstructBuilder, Table> viewer, Boolf<ModularPartType> allowed){
         this.builder.set(data);
         leftSideBuilder.get(selectSide);
         editorElement.setBuilder(this.builder);

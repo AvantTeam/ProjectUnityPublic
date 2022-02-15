@@ -54,6 +54,7 @@ public class ModularPartType implements Displayable{
 
     //places it can connect to
     public boolean root = false;
+    public boolean visible = true;
 
 
     public ModularPart create(int x, int y){

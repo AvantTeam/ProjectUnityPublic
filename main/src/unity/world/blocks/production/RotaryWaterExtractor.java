@@ -62,8 +62,9 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
 
     @Override
     public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
-        Draw.alpha(0.5f);
-        Draw.rect(region, req.drawx(), req.drawy(), req.rotation * 90f);
+        //soon
+        super.drawRequestRegion(req,list);
+
     }
 
     @Override
