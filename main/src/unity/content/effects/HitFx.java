@@ -100,16 +100,6 @@ public final class HitFx{
 
         randLenVectors(e.id + 1, 14, 1f + 160f * e.finpow(), (x, y) ->
             lineAngle(e.x + x, e.y + y, Mathf.angle(x, y), 1f + e.fout() * 3f));
-    }),
-
-    branchFragHit = new Effect(8f, e -> {
-        color(Color.white, Pal.lancerLaser, e.fin());
-
-        stroke(0.5f + e.fout());
-        Lines.circle(e.x, e.y, e.fin() * 5f);
-
-        stroke(e.fout());
-        Lines.circle(e.x, e.y, e.fin() * 6f);
     });
 
     private HitFx(){

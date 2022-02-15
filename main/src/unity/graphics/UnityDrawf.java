@@ -59,18 +59,6 @@ public final class UnityDrawf{
         }
     }
 
-    public static void snowFlake(float x, float y, float r, float s){
-        for(int i = 0; i < 3; i++){
-            Lines.lineAngleCenter(x, y, r + 60 * i, s);
-        }
-    }
-
-    public static void spark(float x, float y, float w, float h, float r){
-        for(int i = 0; i < 4; i++){
-            Drawf.tri(x, y, w, h, r + 90 * i);
-        }
-    }
-
     public static void drawHeat(TextureRegion reg, float x, float y, float rot, float temp){
         float a;
         if(temp > 273.15f){

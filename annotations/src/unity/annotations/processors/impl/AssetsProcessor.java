@@ -27,7 +27,7 @@ public class AssetsProcessor extends BaseProcessor{
     @Override
     public void process(RoundEnvironment roundEnv) throws Exception{
         if(round == 1){
-            assets.clear().addAll(
+            assets.clear().add(
                 // Sounds
                 new Asset(){
                     @Override
@@ -89,7 +89,6 @@ public class AssetsProcessor extends BaseProcessor{
                 boolean useProp = a.properties();
 
                 Fi propFile = rootDir.child("main/assets/" + a.directory() + "/" + a.propertyFile());
-                Log.info("Asset:"+"main/assets/" + a.directory() + "/" + a.propertyFile());
                 ObjectMap<String, String> temp = null;
                 if(useProp) PropertiesUtils.load(temp = new ObjectMap<>(), propFile.reader());
 

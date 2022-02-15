@@ -8,42 +8,12 @@ import unity.graphics.*;
 public class UnityItems{
     public static Item
     //faction-items
-    //koruh
-    stone, denseAlloy, steel, dirium, uranium,
     //youngcha
-    nickel, cupronickel, superAlloy;
+    nickel,cupronickel,superAlloy;
+    //
 
     public static void load(){
         //region faction-alloys
-
-        stone = new Item("stone", Color.valueOf("8a8a8a")){{
-            hardness = 1;
-            cost = 0.4f;
-            lowPriority = true;
-        }};
-
-        denseAlloy = new Item("dense-alloy", Color.valueOf("a68a84")){{
-            hardness = 2;
-            cost = 2f;
-        }};
-
-        steel = new Item("steel", Color.valueOf("e1e3ed")){{
-            hardness = 4;
-            cost = 2.5f;
-        }};
-
-        dirium = new Item("dirium", Color.valueOf("96f7c3")){{
-            cost = 0.3f;
-            hardness = 9;
-        }};
-
-        uranium = new Item("uranium", Color.valueOf("ace284")){{
-            cost = 2f;
-            hardness = 3;
-            radioactivity = 1f;
-        }};
-
-        //youngcha
 
         cupronickel = new Item("cupronickel", Color.valueOf("a19975")){{
             cost = 2.5f;

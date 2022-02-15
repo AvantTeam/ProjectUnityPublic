@@ -160,7 +160,7 @@ public abstract class BaseProcessor extends AbstractProcessor{
     }
 
     public static TypeName tName(Element e){
-        return e == null ? TypeName.VOID : TypeName.get(e.asType());
+        return TypeName.get(e.asType());
     }
 
     public static ClassName cName(Class<?> type){
