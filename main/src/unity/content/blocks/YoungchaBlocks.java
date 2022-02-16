@@ -10,6 +10,7 @@ import unity.content.*;
 import unity.world.blocks.*;
 import unity.world.blocks.distribution.*;
 import unity.world.blocks.envrionment.*;
+import unity.world.blocks.payloads.*;
 import unity.world.blocks.power.*;
 import unity.world.blocks.production.*;
 import unity.world.blocks.units.*;
@@ -38,7 +39,12 @@ public class YoungchaBlocks{
         //transmission
         heatPipe, steamPiston,
         //power
-        combustionHeater,
+        combustionHeater,thermalHeater,seebeckGenerator,smallRadiator,
+    //crucible
+        //crafting
+        crucible,crucibleChannel,cruciblePump,crucibleCaster,payloadCaster,crucibleSource,
+    //modules
+        basicPanel,
     //other
     sandboxAssembler; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
@@ -69,10 +75,10 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.005f, 3f, b));
             config.fixedConnection(TorqueGraph.class, 1, 0, 1, 0);
-            requirements(Category.distribution, with(Items.copper, 10, Items.lead, 10));
+            requirements(Category.power, with(Items.copper, 10, Items.lead, 10));
         }};
         shaftRouter = new GenericGraphBlock("shaft-router"){{
-            requirements(Category.distribution, with(Items.copper, 20, Items.lead, 20));
+            requirements(Category.power, with(Items.copper, 20, Items.lead, 20));
             health = 150;
             solid = true;
 
@@ -80,7 +86,7 @@ public class YoungchaBlocks{
             config.fixedConnection(TorqueGraph.class, 1, 1, 1, 1);
         }};
         smallTransmission = new SimpleTransmission("small-transmission"){{
-            requirements(Category.distribution, with(UnityItems.nickel, 20, Items.copper, 20, Items.lead, 20));
+            requirements(Category.power, with(UnityItems.nickel, 20, Items.copper, 20, Items.lead, 20));
             health = 700;
             size = 2;
             config.nodeConfig.put(TorqueGraph.class, b -> new TransmissionTorqueGraphNode(0.05f, 8f, b));
@@ -88,7 +94,7 @@ public class YoungchaBlocks{
             config.fixedConnection(TorqueGraph.class, 1, 0, 0, 0, 0, 1, 0, 0);
         }};
         torqueMeter = new TorqueMeter("torque-meter"){{
-            requirements(Category.distribution, with(UnityItems.nickel, 20, Items.lead, 30));
+            requirements(Category.power, with(UnityItems.nickel, 20, Items.lead, 30));
             health = 150;
             rotate = true;
             solid = true;
@@ -133,10 +139,10 @@ public class YoungchaBlocks{
         }};
 
         heatPipe = new HeatPipe("heat-pipe"){{
-            requirements(Category.distribution, with(UnityItems.nickel, 5, Items.copper, 10));
+            requirements(Category.power, with(UnityItems.nickel, 5, Items.copper, 10));
             health = 250;
             solid = false;
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.005f, 0.4f, 2500 + HeatGraphNode.celsiusZero));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.005f, 0.4f, 1,2500 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 1, 1, 1, 1);
         }};
 
@@ -157,26 +163,133 @@ public class YoungchaBlocks{
             health = 1300;
             solid = true;
             consumes.liquid(Liquids.water, 0.1f);
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1200 + HeatGraphNode.celsiusZero));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 9, 1200 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 0,0,0, 0,0,0 ,0,1,0 ,0,0,0);
         }};
 
         combustionHeater = new CombustionHeater("combustion-heater"){{
-            requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100));
+            requirements(Category.power, with(UnityItems.nickel, 30, Items.lead, 70, Items.copper, 70));
             size = 2;
             rotate = true;
             health = 700;
             solid = true;
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.05f));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 4, 1500 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.015f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
         }};
 
-        sandboxAssembler = new ModularUnitAssembler("sandbox-assembler"){{
-            requirements(Category.units, with(UnityItems.nickel, 100, Items.graphite, 50, Items.copper, 100, Items.lead, 100));
-            size = 3;
-            health = 1700;
+        thermalHeater = new ThermalHeater("thermal-heater"){{
+            size = 2;
+            rotate = true;
+            health = 700;
+            solid = true;
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero,4, 1000 + HeatGraphNode.celsiusZero,0.2f));
+            config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
+            requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
         }};
 
-        //
+        seebeckGenerator = new SeebeckGenerator("seebeck-generator"){{
+            size = 3;
+            rotate = true;
+            health = 1700;
+            solid = true;
+            hasPower = true;
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.01f,9, 1800 + HeatGraphNode.celsiusZero));
+            config.fixedConnection(HeatGraph.class, 0,1,0,  0,0,0,  0,1,0  ,0,0,0);
+            requirements(Category.power, with(UnityItems.nickel, 50, Items.graphite, 30, Items.copper, 120,Items.lead, 100, UnityItems.cupronickel, 30));
+        }};
+        smallRadiator = new HeatRadiator("small-radiator"){{
+
+            size = 2;
+            rotate = true;
+            health = 700;
+            solid = true;
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.4f, 0.15f, 4,1800 + HeatGraphNode.celsiusZero));
+            config.fixedConnection(HeatGraph.class, 0, 0,  1, 1,  0, 0,  1, 1);
+            requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
+        }};
+
+        crucible = new CrucibleBlock("crucible"){{
+            requirements(Category.crafting, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 50));
+            size = 3;
+            health = 1700;
+            solid = true;
+
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.02f, 0.15f, 9,1800 + HeatGraphNode.celsiusZero));
+            config.fixedConnection(HeatGraph.class, 1,0,1,  1,0,1,  1,0,1,  1,0,1);
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,50));
+            config.fixedConnection(CrucibleGraph.class, 0,1,0,  0,1,0,  0,1,0,  0,1,0);
+        }};
+
+        crucibleChannel = new CrucibleChannel("crucible-channel"){{
+            requirements(Category.crafting, with(UnityItems.nickel, 10, Items.graphite, 10));
+            health = 200;
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,5));
+            config.fixedConnection(CrucibleGraph.class, 1,1,1,1);
+        }};
+
+        cruciblePump = new CruciblePump("crucible-pump"){{
+            requirements(Category.crafting, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 30));
+            health = 200;
+            rotate = true;
+            solid = true;
+
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,5));
+            config.fixedConnection(CrucibleGraph.class, 0,0,1,0);
+            config.fixedConnection(CrucibleGraph.class, 1,0,0,0);
+
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 10f, b));
+            config.fixedConnection(TorqueGraph.class, 0, 1, 0, 1);
+        }};
+
+        crucibleCaster = new CrucibleCaster("casting-mold"){{
+            requirements(Category.crafting, with(UnityItems.nickel, 60, Items.graphite, 50));
+            health = 1700;
+            rotate = true;
+            solid = true;
+            size = 3;
+            itemCapacity = 4;
+            hasItems = true;
+
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,5));
+            config.fixedConnection(CrucibleGraph.class, 0,0,0, 0,0,0, 0,1,0, 0,0,0);
+
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 100f, b));
+            config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
+        }};
+
+        payloadCaster= new PayloadCaster("payload-casting-mold"){{
+            requirements(Category.crafting, with(UnityItems.cupronickel, 30, Items.metaglass, 30,Items.graphite, 50));
+            health = 1700;
+            rotate = true;
+            solid = true;
+            size = 3;
+            moveTime = 50;
+
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,50));
+            config.fixedConnection(CrucibleGraph.class, 0,0,0, 0,0,0, 0,1,0, 0,0,0);
+
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 100f, b));
+            config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
+        }};
+
+        crucibleSource = new CrucibleSource("crucible-source"){{
+            solid = true;
+            requirements(Category.crafting,BuildVisibility.sandboxOnly,with());
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,99));
+            config.fixedConnection(CrucibleGraph.class, 1,1,1,1);
+        }};
+
+        sandboxAssembler = new ModularUnitAssembler("sandbox-assembler"){{
+            requirements(Category.units, BuildVisibility.sandboxOnly, with());
+            size = 3;
+            health = 1700;
+            sandbox = true;
+        }};
+
+
+        //modules
+        basicPanel = new ModuleBlock("module-basic-panel"){{
+            requirements(Category.crafting, BuildVisibility.hidden,with(UnityItems.nickel, 8));
+        }};
     }
 }

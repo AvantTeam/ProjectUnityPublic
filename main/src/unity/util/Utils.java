@@ -14,12 +14,20 @@ import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 
+import static java.lang.Math.exp;
 import static mindustry.Vars.*;
 
 public final class Utils{
     public static final PowIn pow6In = new PowIn(6);
 
     public static final float sqrtHalf = Mathf.sqrt(0.5f);
+
+    public static float interp(float x,float x2,float t){
+        return (float)(1-(1.0/(1+exp((t*2-1)/0.2f))))*(x2-x)+x;
+    }
+    public static float sqinterp(float x,float x2,float t){
+        return (float)(t*t)*(x2-x)+x;
+    }
 
     public static final Quat
         q1 = new Quat(),

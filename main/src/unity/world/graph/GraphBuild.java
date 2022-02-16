@@ -3,8 +3,11 @@ package unity.world.graph;
 import arc.func.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.struct.ObjectMap.*;
 import arc.util.io.*;
 import mindustry.gen.*;
+
+import static unity.util.UnityTmp.graphIterator;
 
 public interface GraphBuild{
     OrderedMap<Class<? extends Graph>, GraphNode> getNodes();
@@ -66,6 +69,13 @@ public interface GraphBuild{
         }
     }
 
+    default void eachNode(Cons2<Class<? extends Graph>, GraphNode> cons){
+        graphIterator = new Entries<>(getNodes());
+        for(var e: graphIterator){
+            cons.get(e.key,e.value);
+        }
+    }
+
     default void updateGraphs(){
         if(getPrevRotation()==-1){
             setPrevRotation(getBuild().rotation);
@@ -77,7 +87,7 @@ public interface GraphBuild{
             onRotate();
         }
 
-        getNodes().each((cls, graphNode) -> {
+        eachNode((cls, graphNode) -> {
             //change later.
             graphNode.update();
             for(var graphConn : graphNode.connector){
@@ -108,13 +118,16 @@ public interface GraphBuild{
         });
     }
 
-    //conv for js
+    //conv for getting
     default TorqueGraphNode torqueNode(){
         return (TorqueGraphNode)getGraphNode(TorqueGraph.class);
     }
     default HeatGraphNode heatNode(){
         return (HeatGraphNode)getGraphNode(HeatGraph.class);
     }
+    default CrucibleGraphNode crucibleNode(){
+            return (CrucibleGraphNode)getGraphNode(CrucibleGraph.class);
+        }
 
     //conv for drawing
     default float getCorrectRotation(){

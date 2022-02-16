@@ -66,6 +66,9 @@ public class UnityUI{
 
 
     public void init(){
+        if(Vars.headless){
+            return;
+        }
         partsEditor = new PartsEditorDialog();
 
         Events.run(Trigger.update,()->{
@@ -142,9 +145,9 @@ public class UnityUI{
     }
 
     public void reloadBlocks(){
-        Table table = ReflectUtils.getFieldValue(Vars.ui.hudfrag.blockfrag,ReflectUtils.getField(Vars.ui.hudfrag.blockfrag,"toggler"));
-        for(Block b:Vars.content.blocks()){
-            if(FactionMeta.map(b)==null){
+        Table table = ReflectUtils.getFieldValue(Vars.ui.hudfrag.blockfrag, ReflectUtils.getField(Vars.ui.hudfrag.blockfrag, "toggler"));
+        for(Block b : Vars.content.blocks()){
+            if(FactionMeta.map(b) == null){
                 b.placeablePlayer = included.contains(Faction.vanilla);
             }else{
                 b.placeablePlayer = included.contains(FactionMeta.map(b));
@@ -154,8 +157,12 @@ public class UnityUI{
             }
         }
         //fuckery (updates the blocks)
-        var b = (ImageButton)table.find("category-"+ Vars.ui.hudfrag.blockfrag.currentCategory.name());
+        var b = (ImageButton)table.find("category-" + Vars.ui.hudfrag.blockfrag.currentCategory.name());
+        if(b==null){
+            b = (ImageButton)table.find("category-" + Category.distribution.name());
+        }
         b.fireClick();
+
 
     }
 

@@ -25,12 +25,11 @@ public class UnityParts{
     public static ModularPartType smallEngine, engine, smallWheel, smallTracks, mediumWheel, largeWheel, largeTracks, tankTracks, tankTracksLarge;
 
     //unit
-    public static Seq<PanelDoodadType> unitdoodads1x1 = new Seq<>();
-    public static Seq<PanelDoodadType> unitdoodads2x2 = new Seq<>();
+    public static Seq<PanelDoodadPalette> unitDoodads = new Seq<>();
 
     public static void load(){
         //region units
-        ///DO NOT CHANGE ORDER (will ruin modular things)
+        ///DO NOT CHANGE ORDER (will break saves)
         panel = new ModularPartType("panel"){{
             requirements(PartCategories.miscUnit,ItemStack.with(Items.titanium,7,UnityItems.nickel,5));
             health(40);
@@ -43,6 +42,7 @@ public class UnityParts{
             mass(10);
             producesPower(15);
             addsWeaponSlots(2);
+            itemCapacity(20);//the default
             root = true;
             hasCellDecal = true;
         }};
@@ -92,7 +92,7 @@ public class UnityParts{
             health(15);
             mass(15);
             wheel(1,30,1.5f);
-            usesPower(10);
+            usesPower(7);
         }};
         smallTracks = new ModularWheelType("tracks-small"){{
             requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,15,UnityItems.nickel,10));
@@ -106,7 +106,7 @@ public class UnityParts{
         howitzer = new ModularWeaponMountType("howitzer"){{
             requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,80,Items.titanium,120,Items.graphite,80,UnityItems.nickel,50));
             health(75);
-            mass(350);
+            mass(550);
             usesPower(80);
             w = 3;
             h = 4;
@@ -139,7 +139,7 @@ public class UnityParts{
             w = 2;
             h = 2;
             health(200);
-            mass(80);
+            mass(120);
             armor(15);
         }};
         gunBridge = new ModularPartType("gun-bridge"){{
@@ -154,7 +154,7 @@ public class UnityParts{
             w = 3;
             h = 3;
             health(90);
-            mass(200);
+            mass(500);
             producesPower(400);
         }};
         mediumRoot = new ModularPartType("root-medium"){{
@@ -293,11 +293,13 @@ public class UnityParts{
     }
 
     public static void loadDoodads(){
-        for(int i = 0;i<12;i++){
-            unitdoodads1x1.add(getUnitDoodad("1x1-"+(i+1), "1x1-outline-"+(i+1), 0 , 0));
-        }
-        for(int i = 0;i<5;i++){
-            unitdoodads2x2.add(getUnitDoodad("2x2-"+(i+1), "2x2-outline-"+(i+1), 0 ,0,   1, 1,   0, 1,   1, 0));
+        unitDoodads.add(new PanelDoodadPalette(true,true,1,1,"1x1",12));
+        unitDoodads.add(new PanelDoodadPalette(false,true,2,2,"2x2",5));
+        unitDoodads.add(new PanelDoodadPalette(false,true,3,3,"3x3",4));
+        unitDoodads.add(new PanelDoodadPalette(true,true,3,2,"3x2",3));
+
+        for(int i=0;i<unitDoodads.size;i++){
+            unitDoodads.get(i).load();
         }
     }
 

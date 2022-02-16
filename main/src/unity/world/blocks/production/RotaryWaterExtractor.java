@@ -36,6 +36,7 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         super(name);
         solid = true;
         noUpdateDisabled = false;
+        rotate = true;
     }
 
     @Override

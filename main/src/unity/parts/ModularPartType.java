@@ -117,19 +117,19 @@ public class ModularPartType implements Displayable{
     public void drawCell(DrawTransform transform, ModularPart part){
         if(hasCellDecal){
             TextureRegion cellsprite = cell[Math.abs(part.cx)<0.01?1:0];
-            transform.drawRectScl(cellsprite, part.ax * partSize, part.ay * partSize, part.cx<0?1:-1, 1);
+            transform.drawRectScl(cellsprite, part.cx * partSize, part.cy * partSize, part.cx<0?1:-1, 1);
         }
     }
     public void drawTop(DrawTransform transform, ModularPart part){
         if(hasExtraDecal)
-            transform.drawRect(top[part.front],part.ax*partSize,part.ay*partSize);
+            transform.drawRect(top[part.front],part.cx*partSize,part.cy*partSize);
     }
     public void draw(DrawTransform transform, ModularPart part){
         transform.drawRect(panelling[part.panelingIndexes[0]],part.ax*partSize,part.ay*partSize);
     }
     public void drawOutline(DrawTransform transform, ModularPart part){
         if(hasExtraDecal)
-            transform.drawRect(outline[part.front], part.ax*partSize,part.ay*partSize);
+            transform.drawRect(outline[part.front], part.cx*partSize,part.cy*partSize);
     }
 
     public static ModularPartType getPartFromId(int id){
@@ -153,6 +153,8 @@ public class ModularPartType implements Displayable{
             stat.mergePost(statmap,part);
         }
     }
+
+    //units
     public void armor(float amount){
            stats.add(new ArmourStat(amount));
        }
@@ -174,7 +176,11 @@ public class ModularPartType implements Displayable{
     public void healthMul(float amount){
         stats.add(new HealthStat(amount));
     }
-
+    public void itemCapacity(float amount){
+            stats.add(new ItemCapacityStat(amount));
+        }
+    //turrets
+    //???
 
     @Override
     public void display(Table table){

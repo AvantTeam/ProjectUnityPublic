@@ -249,4 +249,8 @@ public abstract class Graph<T extends Graph>{
         authoritativeUntil = (int)(Core.graphics.getFrameId()+1);
     }
 
+    public boolean isRoot(GraphConnector<T> t){
+        return vertexes.first()==t;
+    }
+
 }

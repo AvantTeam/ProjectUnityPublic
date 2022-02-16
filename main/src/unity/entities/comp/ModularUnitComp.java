@@ -89,7 +89,9 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         applyStatMap(statmap);
         if(construct != ModularConstruct.test){
             constructLoaded = true;
-            initDoodads();
+            if(!headless){
+                initDoodads();
+            }
             int w = construct.parts.length;
             int h = construct.parts[0].length;
             int maxx = 0, minx = 256;
@@ -220,14 +222,26 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             for(int i = 0; i < Math.round(w / 2f); i++){
                 for(int j = 0; j < h; j++){
                     mirrored = null;
+
                     if(filled[i][j] && !placed[i][j]){
                         draw.clear();
-                        draw.add(getType(UnityParts.unitdoodads1x1, lightness[i][j]));
-                        var x2 = getType(UnityParts.unitdoodads2x2, lightness[i][j]);
-                        if(x2.canFit(construct.parts, i, j) && i + 1 < middlex){
-                            draw.add(x2);
+                        for(var pal:UnityParts.unitDoodads){
+                            if(pal.w==1 && pal.h==1){
+                                draw.add(pal.get(1-lightness[i][j]));
+                            }else{
+                                var type = pal.get(1-lightness[i][j]);
+                                boolean allowed = false;
+                                if((pal.w%2==0 || pal.sides) && i + pal.w-1 < middlex){
+                                    allowed = true;
+                                }
+                                if(pal.center && i == middlex-(pal.w/2)){
+                                    allowed = true;
+                                }
+                                if(allowed && type.canFit(construct.parts, i, j)){
+                                    draw.add(type);
+                                }
+                            }
                         }
-
                         PanelDoodadType doodad = draw.random();
                         mirrored = doodad;
 
@@ -239,7 +253,20 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
                             continue;
                         }
                         draw.clear();
-                        draw.add(getType(UnityParts.unitdoodads1x1, lightness[w - i - 1][j]));
+                        for(var pal:UnityParts.unitDoodads){
+                            if(pal.w==1 && pal.h==1){
+                                draw.add(pal.get(1-lightness[w - i -1][j]));
+                            }else{
+                                var type = pal.get(1-lightness[w - i -1][j]);
+                                boolean allowed = false;
+                                if((pal.w%2==0 || pal.sides) && w - i -1 > middlex){
+                                    allowed = true;
+                                }
+                                if(allowed && type.canFit(construct.parts, i, j)){
+                                    draw.add(type);
+                                }
+                            }
+                        }
                         PanelDoodadType doodad = draw.random();
                         addDoodad(placed, get(doodad, w - i - doodad.w + ox, j + oy), w - i - doodad.w, j);
                     }
@@ -277,7 +304,12 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         float hratio = Mathf.clamp(this.health / this.maxHealth);
         this.maxHealth = statmap.getOrCreate("health").getFloat("value");
-        this.health = hratio * this.maxHealth;
+        if(savedHp<=0){
+            this.health = hratio * this.maxHealth;
+        }else{
+            this.health = savedHp;
+            savedHp = -1;
+        }
         var weapons = statmap.stats.getList("weapons");
         mounts = new WeaponMount[weapons.length()];
         weaponrange = 0;
@@ -290,7 +322,9 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             if(weaponslotsused>weaponslots){
                 weapon.reload *= 4f*(weaponslotsused-weaponslots);
             }
-            weapon.load();
+            if(!headless){
+                weapon.load();
+            }
             mounts[i] = weapon.mountType.get(weapon);
             ModularPart mpart = weapons.getMap(i).get("part");
             weaponrange = Math.max(weaponrange, weapon.bullet.range() + Mathf.dst(mpart.cx, mpart.cy) * ModularPartType.partSize);
@@ -305,6 +339,34 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         armor = statmap.getValue("armour", "realValue");
 
+    }
+
+    @Replace
+    public void setType(UnitType type) {
+        this.type = type;
+        if (controller == null) controller(type.createController()); //for now
+        if(type!=UnityUnitTypes.modularUnit){
+            this.maxHealth = type.health;
+            drag(type.drag);
+            this.armor = type.armor;
+            hitSize(type.hitSize);
+            hovering(type.hovering);
+            if(controller == null) controller(type.createController());
+            if(mounts().length != type.weapons.size) setupWeapons(type);
+            if(abilities().size != type.abilities.size){
+                abilities(type.abilities.map(Ability::copy));
+            }
+        }
+    }
+
+    @Replace
+    public void setupWeapons(UnitType def) {
+        if(def!=UnityUnitTypes.modularUnit){
+            mounts = new WeaponMount[def.weapons.size];
+            for(int i = 0; i < mounts.length; i++){
+                mounts[i] = def.weapons.get(i).mountType.get(def.weapons.get(i));
+            }
+        }
     }
 
     public void initWeapon(Weapon w){
@@ -427,6 +489,9 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public void lookAt(float angle){
         rotation = Angles.moveToward(rotation, angle, rotateSpeed * Time.delta * speedMultiplier());
     }
-
-
+    transient float savedHp = -1 ;
+    @Override
+    public void read(Reads read){
+        savedHp = health;
+    }
 }
