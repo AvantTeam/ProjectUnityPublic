@@ -14,7 +14,7 @@ import mindustry.world.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.draw.*;
 import mindustry.world.meta.*;
-import unity.annotations.*;
+import unity.annotations.Annotations.*;
 import unity.content.*;
 import unity.content.effects.*;
 import unity.entities.bullet.exp.*;
@@ -35,19 +35,20 @@ import static mindustry.type.ItemStack.empty;
 import static mindustry.type.ItemStack.with;
 
 public class KoruhBlocks {
-    public static @Annotations.FactionDef("koruh")
-    Block
+    public static @FactionDef("koruh") Block
     //crafting
-    denseSmelter, solidifier, steelSmelter, titaniumExtractor, lavaSmelter, diriumCrucible, coalExtractor,
+    denseSmelter, solidifier, steelSmelter, titaniumExtractor, coalExtractor;
+
+    public static @FactionDef("koruh") Block lavaSmelter, diriumCrucible;
 
     //defense
-    stoneWall, denseWall, steelWall, steelWallLarge, diriumWall, diriumWallLarge, shieldProjector, diriumProjector,
+    public static @FactionDef("koruh") Block stoneWall, denseWall, steelWall, steelWallLarge, diriumWall, diriumWallLarge, shieldProjector, diriumProjector,
 
     //distribution
     steelConveyor, teleporter;
 
-    public static @Annotations.FactionDef("koruh")
-    @Annotations.Dupe(base = ExpTurret.class, parent = KoruhConveyor.class)
+    public static @FactionDef("koruh")
+    @Dupe(base = ExpTurret.class, parent = KoruhConveyor.class)
     Block diriumConveyor;
 
     //unit
@@ -56,19 +57,17 @@ public class KoruhBlocks {
     //power
     //uraniumReactor,
 
-    //TODO
-    public static @Annotations.FactionDef("koruh") Block expFountain, expVoid, expTank, expChest, expRouter, expTower, expTowerDiagonal, bufferTower, expHub, expNode, expNodeLarge;// expOutput, expUnloader;
+    //exp
+    public static @FactionDef("koruh") Block expFountain, expVoid, expTank, expChest, expRouter, expTower, expTowerDiagonal, bufferTower, expHub, expNode, expNodeLarge;// expOutput, expUnloader;
 
     //turret
-    public static @Annotations.FactionDef("koruh")
-    @Annotations.LoadRegs("bt-laser-turret-top")
+    public static @FactionDef("koruh")
+    @LoadRegs("bt-laser-turret-top")
     Block laser, laserCharge, laserBranch, laserBreakthrough;
 
-    public static @Annotations.FactionDef("koruh")
-    Block laserFrost, laserKelvin;
+    public static @FactionDef("koruh") Block laserFrost, laserKelvin;
 
-    public static @Annotations.FactionDef("koruh")
-    Block inferno;
+    public static @FactionDef("koruh") Block inferno;
 
     public static void load(){
         denseSmelter = new KoruhCrafter("dense-smelter"){{
@@ -217,7 +216,7 @@ public class KoruhBlocks {
             };
         }};
 
-        diriumCrucible = new KoruhCrafter("dirium-crucible"){{
+        diriumCrucible = new LevelKoruhCrafter("dirium-crucible"){{
             requirements(Category.crafting, with(Items.plastanium, 60, UnityItems.stone, 90, UnityItems.denseAlloy, 90, UnityItems.steel, 150));
 
             health = 320;
@@ -393,6 +392,7 @@ public class KoruhBlocks {
             displayedSpeed = 20f;
             drawMultiplier = 1.3f;
 
+            passive = true;
             draw = new DrawOver();
         }};
 

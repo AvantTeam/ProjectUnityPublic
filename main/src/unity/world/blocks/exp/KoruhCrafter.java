@@ -40,7 +40,7 @@ public class KoruhCrafter extends GenericCrafter {
     }
 
     public class KoruhCrafterBuild extends GenericCrafterBuild implements ExpHolder{
-        public int exp;
+        public int expc;
 
         public void lackingExp(int missing){
             //this block is run last so that in the event of a block destruction, no code relies on the block type
@@ -51,14 +51,14 @@ public class KoruhCrafter extends GenericCrafter {
 
         @Override
         public boolean consValid(){
-            return super.consValid() && (ignoreExp || exp >= expUse);
+            return super.consValid() && (ignoreExp || expc >= expUse);
         }
 
         @Override
         public void consume(){
             super.consume();
-            int a = Math.min(expUse, exp);
-            exp -= a;
+            int a = Math.min(expUse, expc);
+            expc -= a;
             if(a < expUse){
                 lackingExp(expUse - a);
                 craftDamageEffect.at(this);
@@ -67,31 +67,31 @@ public class KoruhCrafter extends GenericCrafter {
 
         @Override
         public int getExp(){
-            return exp;
+            return expc;
         }
 
         @Override
         public int handleExp(int amount){
             if(amount > 0){
-                int e = Math.min(expCapacity - exp, amount);
-                exp += e;
+                int e = Math.min(expCapacity - expc, amount);
+                expc += e;
                 return e;
             }
             else{
-                int e = Math.min(-amount, exp);
-                exp -= e;
+                int e = Math.min(-amount, expc);
+                expc -= e;
                 return -e;
             }
         }
 
         public float expf(){
-            return exp / (float)expCapacity;
+            return expc / (float)expCapacity;
         }
 
         @Override
         public int unloadExp(int amount){
-            int e = Math.min(amount, exp);
-            exp -= e;
+            int e = Math.min(amount, expc);
+            expc -= e;
             return e;
         }
 
@@ -108,25 +108,25 @@ public class KoruhCrafter extends GenericCrafter {
         @Override
         public void drawSelect(){
             super.drawSelect();
-            drawPlaceText(exp + "/" + expCapacity, tile.x, tile.y, exp >= expUse);
+            drawPlaceText(expc + "/" + expCapacity, tile.x, tile.y, expc >= expUse);
         }
 
         @Override
         public void onDestroyed(){
-            ExpOrbs.spreadExp(x, y, exp * 0.3f, 3 * size);
+            ExpOrbs.spreadExp(x, y, expc * 0.3f, 3 * size);
             super.onDestroyed();
         }
 
         @Override
         public void write(Writes write){
             super.write(write);
-            write.i(exp);
+            write.i(expc);
         }
 
         @Override
         public void read(Reads read, byte revision){
             super.read(read, revision);
-            exp = read.i();
+            expc = read.i();
         }
     }
 }
