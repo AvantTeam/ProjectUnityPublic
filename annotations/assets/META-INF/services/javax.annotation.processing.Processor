@@ -4,3 +4,4 @@ unity.annotations.processors.impl.LoadProcessor
 unity.annotations.processors.impl.StructProcessor
 unity.annotations.processors.entity.EntityProcessor
 unity.annotations.processors.entity.MergeProcessor
+unity.annotations.processors.entity.DupeProcessor

@@ -130,7 +130,6 @@ public class ExpTurret extends Turret {
             if(f.hasTable){
                 stats.add(f.stat, t -> {
                     buildGraphTable(t, f);
-                    t.row();
                 });
             }
             else stats.add(f.stat, f.toString());
@@ -144,7 +143,7 @@ public class ExpTurret extends Turret {
         }
 
         //stats.add(Stat.itemCapacity, "@", Core.bundle.format(passive ? "exp.lvlAmountP" : "exp.lvlAmount", maxLevel));
-        if(!passive) stats.add(Stat.itemCapacity, "@", Core.bundle.format("exp.expAmount", maxExp));
+        stats.add(Stat.itemCapacity, "@", Core.bundle.format("exp.expAmount", maxExp));
         stats.add(Stat.itemCapacity, t -> {
             t.add(Core.bundle.format(passive ? "exp.lvlAmountP" : "exp.lvlAmount", maxLevel)).tooltip(Core.bundle.get("exp.tooltip"));
         });
@@ -306,15 +305,7 @@ public class ExpTurret extends Turret {
             return maxLevel;
         }
 
-        /** @return the current expf. May be either in exp context or level context.
-         */
         public float expf(){
-            return lvlexpf();
-        }
-
-        /** @return the current expf. Always in level context.
-         */
-        public float lvlexpf(){
             int lv = level();
             if(lv >= maxLevel) return 1f;
             float lb = expCap(lv - 1);
@@ -398,7 +389,7 @@ public class ExpTurret extends Turret {
             table.table(t -> {
                 t.defaults().height(18f).pad(4);
                 t.label(() -> "Lv " + level()).color(passive ? UnityPal.passive : Pal.accent).width(65f);
-                t.add(new Bar(() -> level() >= maxLevel ? "MAX" : Core.bundle.format("bar.expp", (int)(lvlexpf() * 100f)), () -> UnityPal.exp, this::lvlexpf)).growX();
+                t.add(new Bar(() -> level() >= maxLevel ? "MAX" : Core.bundle.format("bar.expp", (int)(expf() * 100f)), () -> UnityPal.exp, this::expf)).growX();
             }).pad(0).growX().padTop(4).padBottom(4);
             table.row();
         }
@@ -425,8 +416,7 @@ public class ExpTurret extends Turret {
 
         @Override
         public void killed(){
-            if(!passive) ExpOrbs.spreadExp(x, y, exp * 0.3f, 3f * size);
-            super.killed();
+            ExpOrbs.spreadExp(x, y, exp * 0.3f, 3f * size);
         }
 
         @Override

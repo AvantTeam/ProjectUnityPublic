@@ -22,7 +22,7 @@ public class UnityBullets{
 
     sapLaser, sapArtilleryFrag, continuousSapLaser,
 
-    laser, shardLaserFrag, shardLaser, frostLaser, branchLaserFrag, branchLaser, distField, smallDistField, fractalLaser,
+    laser, shardLaserFrag, shardLaser, frostLaser, branchLaserFrag, branchLaser, celsiusSmoke, kelvinSmoke,
     breakthroughLaser, laserGeyser,
 
     coalBlaze, pyraBlaze;
@@ -262,67 +262,6 @@ public class UnityBullets{
             fromColor = Pal.lancerLaser.cpy().lerp(Pal.sapBullet, 0.5f);
             toColor = Pal.sapBullet;
             hitMissed = true;
-        }};
-
-        distField = new DistFieldBulletType(0, -1){{
-            centerColor = Pal.lancerLaser.cpy().a(0);
-            edgeColor = Pal.place;
-            distSplashFx = UnityFx.distSplashFx;
-            distStart = UnityFx.distStart;
-            distStatus = distort;
-
-            collidesTiles = false;
-            collides = false;
-            collidesAir = false;
-            keepVelocity = false;
-
-            lifetime = 6 * 60;
-            radius = 3f*8;
-            radiusInc = 0.1f*8;
-            bulletSlow = 0.1f;
-            bulletSlowInc = 0.025f;
-            damageLimit = 100f;
-            distDamage = 0.1f;
-            expChance = 0.5f/60;
-            expGain = 1;
-        }};
-
-        smallDistField = new DistFieldBulletType(0, -1){{
-            centerColor = Pal.lancerLaser.cpy().a(0);
-            edgeColor = Pal.place;
-            distSplashFx = UnityFx.distSplashFx;
-            distStart = UnityFx.distStart;
-            distStatus = distort;
-
-            collidesTiles = false;
-            collides = false;
-            collidesAir = false;
-            keepVelocity = false;
-
-            lifetime = 2.5f * 60;
-            radius = 1.5f*8;
-            radiusInc = 0;
-            bulletSlow = 0.05f;
-            bulletSlowInc = 0;
-            damageLimit = 50f;
-            distDamage = 0.05f;
-            expChance = 0.1f/60;
-            expGain = 1;
-        }};
-
-        fractalLaser = new ExpLaserFieldBulletType(170f, 130f){{
-            damageInc = 6f;
-            lengthInc = 2f;
-            fields = 2;
-            fieldInc = 0.15f;
-            width = 2;
-            expGain = buildingExpGain = 1;
-            fromColor = Pal.lancerLaser.cpy().lerp(Pal.place, 0.5f);
-            toColor = Pal.place;
-            maxRange = 150f + 2f * 30f; //Account for range increase
-
-            distField = UnityBullets.distField;
-            smallDistField = UnityBullets.smallDistField;
         }};
 
         laserGeyser = new GeyserBulletType(){{

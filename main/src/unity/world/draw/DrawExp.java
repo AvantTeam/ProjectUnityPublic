@@ -3,7 +3,6 @@ package unity.world.draw;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
-import mindustry.graphics.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.draw.*;
@@ -27,7 +26,6 @@ public class DrawExp extends DrawBlock {
         }
 
         if(top.found()){
-            Draw.z(Layer.blockOver);
             Draw.color(flame);
             Draw.alpha(Mathf.absin(build.totalProgress, glowScale, glowAmount) * build.warmup);
             Draw.rect(top, build.x, build.y);

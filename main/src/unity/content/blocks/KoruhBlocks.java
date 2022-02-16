@@ -14,7 +14,7 @@ import mindustry.world.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.draw.*;
 import mindustry.world.meta.*;
-import unity.annotations.Annotations.*;
+import unity.annotations.*;
 import unity.content.*;
 import unity.content.effects.*;
 import unity.entities.bullet.exp.*;
@@ -35,20 +35,19 @@ import static mindustry.type.ItemStack.empty;
 import static mindustry.type.ItemStack.with;
 
 public class KoruhBlocks {
-    public static @FactionDef("koruh") Block
+    public static @Annotations.FactionDef("koruh")
+    Block
     //crafting
-    denseSmelter, solidifier, steelSmelter, titaniumExtractor, coalExtractor;
-
-    public static @FactionDef("koruh") Block lavaSmelter, diriumCrucible;
+    denseSmelter, solidifier, steelSmelter, titaniumExtractor, lavaSmelter, diriumCrucible, coalExtractor,
 
     //defense
-    public static @FactionDef("koruh") Block stoneWall, denseWall, steelWall, steelWallLarge, diriumWall, diriumWallLarge, shieldProjector, diriumProjector,
+    stoneWall, denseWall, steelWall, steelWallLarge, diriumWall, diriumWallLarge, shieldProjector, diriumProjector,
 
     //distribution
     steelConveyor, teleporter;
 
-    public static @FactionDef("koruh")
-    @Dupe(base = ExpTurret.class, parent = KoruhConveyor.class)
+    public static @Annotations.FactionDef("koruh")
+    @Annotations.Dupe(base = ExpTurret.class, parent = KoruhConveyor.class)
     Block diriumConveyor;
 
     //unit
@@ -57,17 +56,19 @@ public class KoruhBlocks {
     //power
     //uraniumReactor,
 
-    //exp
-    public static @FactionDef("koruh") Block expFountain, expVoid, expTank, expChest, expRouter, expTower, expTowerDiagonal, bufferTower, expHub, expNode, expNodeLarge;// expOutput, expUnloader;
+    //TODO
+    public static @Annotations.FactionDef("koruh") Block expFountain, expVoid, expTank, expChest, expRouter, expTower, expTowerDiagonal, bufferTower, expHub, expNode, expNodeLarge;// expOutput, expUnloader;
 
     //turret
-    public static @FactionDef("koruh")
-    @LoadRegs("bt-laser-turret-top")
-    Block laser, laserCharge, laserBranch, laserFractal, laserBreakthrough;
+    public static @Annotations.FactionDef("koruh")
+    @Annotations.LoadRegs("bt-laser-turret-top")
+    Block laser, laserCharge, laserBranch, laserBreakthrough;
 
-    public static @FactionDef("koruh") Block laserFrost, laserKelvin;
+    public static @Annotations.FactionDef("koruh")
+    Block laserFrost, laserKelvin;
 
-    public static @FactionDef("koruh") Block inferno;
+    public static @Annotations.FactionDef("koruh")
+    Block inferno;
 
     public static void load(){
         denseSmelter = new KoruhCrafter("dense-smelter"){{
@@ -216,7 +217,7 @@ public class KoruhBlocks {
             };
         }};
 
-        diriumCrucible = new LevelKoruhCrafter("dirium-crucible"){{
+        diriumCrucible = new KoruhCrafter("dirium-crucible"){{
             requirements(Category.crafting, with(Items.plastanium, 60, UnityItems.stone, 90, UnityItems.denseAlloy, 90, UnityItems.steel, 150));
 
             health = 320;
@@ -392,7 +393,6 @@ public class KoruhBlocks {
             displayedSpeed = 20f;
             drawMultiplier = 1.3f;
 
-            passive = true;
             draw = new DrawOver();
         }};
 
@@ -537,7 +537,7 @@ public class KoruhBlocks {
             pregrade = (ExpTurret) laser;
         }};
 
-        laserFractal = new ExpPowerTurret("fractal-laser-turret"){{
+        /*laserFractal = new ExpPowerTurret("fractal-laser-turret"){{
             requirements(Category.turret, with(UnityItems.steel, 50, Items.graphite, 90, Items.thorium, 95));
             size = 3;
             health = 2000;
@@ -546,9 +546,9 @@ public class KoruhBlocks {
             coolantMultiplier = 2f;
             range = 140f;
 
-            chargeTime = 80f;
-            chargeMaxDelay = 20f;
-            chargeEffects = 8;
+            chargeTime = 50f;
+            chargeMaxDelay = 40f;
+            chargeEffects = 5;
             recoilAmount = 4f;
 
             cooldown = 0.03f;
@@ -556,28 +556,33 @@ public class KoruhBlocks {
             shootShake = 5f;
             powerUse = 13f;
 
-            shootEffect = ShootFx.laserFractalShoot;
+            shootEffect = ShootFx.laserChargeShoot;
             smokeEffect = Fx.none;
-            chargeEffect = UnityFx.laserFractalCharge;
-            chargeBeginEffect = UnityFx.laserFractalChargeBegin;
+            chargeEffect = UnityFx.laserCharge;
+            chargeBeginEffect = UnityFx.laserChargeBegin;
+            heatColor = Color.red;
             shootSound = Sounds.laser;
 
-            heatColor = Color.red;
             fromColor = UnityPal.lancerSap3;
             toColor = Pal.place;
 
             shootType = UnityBullets.fractalLaser;
+
+            //todo fractal laser (handle radius on the bullet's side
+            //basicFieldRadius = 85f;
 
             maxLevel = 30;
             expFields = new EField[]{
                     new LinearReloadTime(v -> reloadTime = v, UnityBullets.distField.lifetime / 3f, -2f),
                     new EField.ELinear(v -> range = v, 140f, 0.25f * tilesize, Stat.shootRange, v -> Strings.autoFixed(v / tilesize, 2) + " blocks")
             };
+            //progression.linear(basicFieldRadius, 0.2f * tilesize, val -> basicFieldRadius = val);
 
+            //bulletCons((ExpLaserFieldBulletType type, Bullet b) -> type.basicFieldRadius = basicFieldRadius);
             pregrade = (ExpTurret) laserCharge;
             pregradeLevel = 15;
             effectColors = new Color[]{fromColor, Pal.lancerLaser.cpy().lerp(Pal.sapBullet, 0.75f), Pal.sapBullet};
-        }};
+        }};*/
 
         laserBranch = new BurstChargePowerTurret("swarm-laser-turret"){{
             requirements(Category.turret, with(UnityItems.steel, 50, Items.silicon, 90, Items.thorium, 95));

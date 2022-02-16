@@ -11,15 +11,7 @@ import static arc.Core.*;
 //draws level-specific regions over the default draw.
 public class DrawOver extends DrawLevel{
     public TextureRegion[] levelRegions;
-    public float layer;
-
-    public DrawOver(float layer){
-        this.layer = layer;
-    }
-
-    public DrawOver(){
-        this(Layer.blockOver);
-    }
+    public float layer = Layer.blockOver;
 
     @Override
     public void load(Block block){
@@ -43,10 +35,8 @@ public class DrawOver extends DrawLevel{
     public <T extends Building & LevelHolder> void draw(T build){
         TextureRegion r = levelRegion(build);
         if(r != build.block.region){
-            float z = Draw.z();
             Draw.z(layer);
             Draw.rect(r, build.x, build.y, build.block.rotate ? build.rotdeg() : 0);
-            Draw.z(z);
         }
     }
 
