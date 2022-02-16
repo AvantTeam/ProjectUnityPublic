@@ -8,18 +8,21 @@ import mindustry.entities.bullet.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
+import mindustry.type.weapons.*;
 import unity.parts.*;
 import unity.parts.types.*;
+import unity.content.effects.*;
+import unity.type.weapons.*;
 
 public class UnityParts{
     //unit
     //misc
-    public static ModularPartType panel, mediumPanel, smallRoot;
+    public static ModularPartType panel, mediumPanel, smallRoot, mediumRoot, largeRoot, largePanel;
     //weapons
-    public static ModularPartType gun,cannon,howitzer;
+    public static ModularPartType gun, cannon, howitzer, pointDefense, tankCannon;
     public static ModularPartType gunBridge;
     //movement
-    public static ModularPartType smallEngine,engine,smallWheel,smallTracks;
+    public static ModularPartType smallEngine, engine, smallWheel, smallTracks, mediumWheel, largeWheel, largeTracks, tankTracks, tankTracksLarge;
 
     //unit
     public static Seq<PanelDoodadType> unitdoodads1x1 = new Seq<>();
@@ -48,13 +51,11 @@ public class UnityParts{
            health(10);
            mass(20);
            usesPower(5);
-           weapon(1,new Weapon("mount-weapon"){{
+           weapon(1,new Weapon("unity-part-gun"){{
                rotate = true;
                reload = 18f;
                bullet = Bullets.standardCopper;
-               //insert bullet
            }});
-
         }};
         cannon = new ModularWeaponMountType("cannon"){{
            requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,40,Items.titanium,50,Items.graphite,20,UnityItems.nickel,20));
@@ -65,9 +66,10 @@ public class UnityParts{
            h = 2;
            weapon(2,new Weapon("unity-part-cannon"){{
                rotate = true;
+               rotateSpeed = 6f;
                reload = 60f;
                ejectEffect = Fx.casing2;
-               shootSound = Sounds.artillery;
+               shootSound = Sounds.bang;
                bullet = new BasicBulletType(7f, 40){{
                    width = 11f;
                    height = 20f;
@@ -77,7 +79,6 @@ public class UnityParts{
                    splashDamageRadius = 25;
                    hitEffect = Fx.blastExplosion;
                }};
-               //insert bullet
            }});
         }};
         smallEngine = new ModularPartType("engine-small"){{
@@ -111,11 +112,13 @@ public class UnityParts{
             h = 4;
             weapon(5,new Weapon("unity-part-howitzer"){{
                 rotate = true;
+                rotateSpeed = 4f;
                 reload = 80f;
                 ejectEffect = Fx.casing3;
                 shots = 2;
                 inaccuracy = 6;
                 shotDelay = 2f;
+                shootSound = Sounds.artillery;
                 bullet = new ArtilleryBulletType(7f, 50){{
                     width = 15f;
                     height = 25f;
@@ -154,7 +157,138 @@ public class UnityParts{
             mass(200);
             producesPower(400);
         }};
-
+        mediumRoot = new ModularPartType("root-medium"){{
+            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,25,Items.titanium,15));
+            w = 2;
+            h = 2;
+            health(250);
+            mass(40);
+            producesPower(50);
+            addsWeaponSlots(6);
+            root = true;
+            hasCellDecal = true;
+        }};
+        largeRoot = new ModularPartType("root-large"){{
+            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,75,Items.titanium,50,UnityItems.nickel,30,Items.thorium,15));
+            w = 3;
+            h = 3;
+            health(500);
+            armor(2);
+            mass(150);
+            producesPower(100);
+            addsWeaponSlots(10);
+            root = true;
+            hasCellDecal = true;
+        }};
+        largePanel = new ModularPartType("large-panel"){{
+            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,50,Items.titanium,100,UnityItems.nickel,50));
+            w = 3;
+            h = 3;
+            health(600);
+            mass(200);
+            armor(150);
+        }};
+        mediumWheel = new ModularWheelType("wheel-medium"){{
+            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,50,Items.titanium,25));
+            w = 2;
+            h = 4;
+            health(75);
+            mass(100);
+            wheel(1,180,1.3f);
+            usesPower(50);
+        }};
+        largeWheel = new ModularWheelType("wheel-large"){{
+            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,400,Items.titanium,150,Items.thorium,90,UnityItems.nickel,100));
+            w = 3;
+            h = 8;
+            health(150);
+            mass(200);
+            wheel(1,650,1f);
+            usesPower(250);
+        }};
+        pointDefense = new ModularWeaponMountType("point-defense"){{
+            requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,60, UnityItems.nickel,30));
+            w = 2;
+            h = 3;
+            health(60);
+            mass(60);
+            usesPower(15);
+            weapon(3,new PointDefenseWeapon("unity-part-point-defense"){{
+                rotate = true;
+                reload = 12f;
+                targetInterval = 0f;
+                targetSwitchInterval = 0f;
+                shootSound = Sounds.lasershoot;
+                bullet = new BulletType(){{
+                    smokeEffect = Fx.pointHit;
+                    hitEffect = Fx.pointHit;
+                    maxRange = 120f;
+                    damage = 9f;
+                    speed = 3f;
+                }};
+            }});
+        }};
+        largeTracks = new ModularWheelType("tracks-large"){{
+            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,50,Items.thorium,40,UnityItems.nickel,30));
+            w = 2;
+            h = 9;
+            health(180);
+            mass(200);
+            wheel(6,950,0.6f);
+            usesPower(60);
+        }};
+        tankTracks = new ModularWheelType("tank-tracks"){{
+            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,250,Items.titanium,100,UnityItems.nickel,100));
+            w = 3;
+            h = 16;
+            health(210);
+            mass(250);
+            wheel(6,2000,0.6f);
+            usesPower(200);
+        }};
+        tankTracksLarge = new ModularWheelType("tank-tracks-large"){{
+            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,700,Items.titanium,500,Items.thorium,200,Items.surgeAlloy,100,UnityItems.nickel,300));
+            w = 5;
+            h = 30;
+            health(500);
+            mass(500);
+            wheel(6,10000,0.6f);
+            usesPower(1200);
+        }};
+        tankCannon = new ModularWeaponMountType("tank-cannon"){{
+           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon, 500, Items.titanium, 500, Items.thorium, 250, UnityItems.nickel, 300, UnityItems.cupronickel, 150));
+           health(750);
+           mass(1800);
+           usesPower(400);
+           w = 9;
+           h = 12;
+           weapon(30,new MultiBarrelWeapon("unity-part-tonk-cannon"){{
+               rotate = true;
+               rotateSpeed = 1.5f;
+               recoil = 0f;
+               reload = 120f;
+               shootY = 36f;
+               barrels = 1;
+               barrelRecoil = 7f;
+               ejectEffect = Fx.casing3Double;
+               shootSound = Sounds.bang;
+               cooldownTime = 120f;
+               shake = 4f;
+               bullet = new BasicBulletType(12f, 200){{
+                   width = 25f;
+                   height = 80f;
+                   lifetime = 40f;
+                   shootEffect = ShootFx.tonkCannon;
+                   smokeEffect = ShootFx.tonkCannonSmoke;
+                   hitEffect = Fx.massiveExplosion;
+                   despawnEffect = Fx.massiveExplosion;
+                   trailChance = 0f;
+                   trailLength = 10;
+                   trailWidth = 3f;
+                   trailColor = Pal.bulletYellowBack;
+               }};
+           }});
+        }};
         //endregion
     }
 
