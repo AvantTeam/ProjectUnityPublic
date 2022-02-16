@@ -76,7 +76,8 @@ public class ExpLaserBulletType extends ExpBulletType {
             hit(b, tile.x, tile.y);
             handleExp(b, tile.x, tile.y, expGain);
         }else{
-            Vec2 v = new Vec2().trns(b.rotation(), getLength(b)).add(b.x, b.y);
+            float dst = (b.lifetime / lifetime) * range();
+            Vec2 v = new Vec2().trns(b.rotation(), scaleVelocity ? Math.min(dst, getLength(b)) : getLength(b)).add(b.x, b.y);
             b.data = v;
             if(hitMissed) hit(b, v.x, v.y);
         }

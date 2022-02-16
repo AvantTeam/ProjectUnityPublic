@@ -63,7 +63,7 @@ public class KoruhBlocks {
     //turret
     public static @FactionDef("koruh")
     @LoadRegs("bt-laser-turret-top")
-    Block laser, laserCharge, laserBranch, laserBreakthrough;
+    Block laser, laserCharge, laserBranch, laserFractal, laserBreakthrough;
 
     public static @FactionDef("koruh") Block laserFrost, laserKelvin;
 
@@ -537,7 +537,7 @@ public class KoruhBlocks {
             pregrade = (ExpTurret) laser;
         }};
 
-        /*laserFractal = new ExpPowerTurret("fractal-laser-turret"){{
+        laserFractal = new ExpPowerTurret("fractal-laser-turret"){{
             requirements(Category.turret, with(UnityItems.steel, 50, Items.graphite, 90, Items.thorium, 95));
             size = 3;
             health = 2000;
@@ -546,9 +546,9 @@ public class KoruhBlocks {
             coolantMultiplier = 2f;
             range = 140f;
 
-            chargeTime = 50f;
-            chargeMaxDelay = 40f;
-            chargeEffects = 5;
+            chargeTime = 80f;
+            chargeMaxDelay = 20f;
+            chargeEffects = 8;
             recoilAmount = 4f;
 
             cooldown = 0.03f;
@@ -556,33 +556,28 @@ public class KoruhBlocks {
             shootShake = 5f;
             powerUse = 13f;
 
-            shootEffect = ShootFx.laserChargeShoot;
+            shootEffect = ShootFx.laserFractalShoot;
             smokeEffect = Fx.none;
-            chargeEffect = UnityFx.laserCharge;
-            chargeBeginEffect = UnityFx.laserChargeBegin;
-            heatColor = Color.red;
+            chargeEffect = UnityFx.laserFractalCharge;
+            chargeBeginEffect = UnityFx.laserFractalChargeBegin;
             shootSound = Sounds.laser;
 
+            heatColor = Color.red;
             fromColor = UnityPal.lancerSap3;
             toColor = Pal.place;
 
             shootType = UnityBullets.fractalLaser;
-
-            //todo fractal laser (handle radius on the bullet's side
-            //basicFieldRadius = 85f;
 
             maxLevel = 30;
             expFields = new EField[]{
                     new LinearReloadTime(v -> reloadTime = v, UnityBullets.distField.lifetime / 3f, -2f),
                     new EField.ELinear(v -> range = v, 140f, 0.25f * tilesize, Stat.shootRange, v -> Strings.autoFixed(v / tilesize, 2) + " blocks")
             };
-            //progression.linear(basicFieldRadius, 0.2f * tilesize, val -> basicFieldRadius = val);
 
-            //bulletCons((ExpLaserFieldBulletType type, Bullet b) -> type.basicFieldRadius = basicFieldRadius);
             pregrade = (ExpTurret) laserCharge;
             pregradeLevel = 15;
             effectColors = new Color[]{fromColor, Pal.lancerLaser.cpy().lerp(Pal.sapBullet, 0.75f), Pal.sapBullet};
-        }};*/
+        }};
 
         laserBranch = new BurstChargePowerTurret("swarm-laser-turret"){{
             requirements(Category.turret, with(UnityItems.steel, 50, Items.silicon, 90, Items.thorium, 95));
