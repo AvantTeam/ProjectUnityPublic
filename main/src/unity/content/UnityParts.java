@@ -150,7 +150,7 @@ public class UnityParts{
             hasCellDecal = true;
         }};
         engine = new ModularPartType("engine"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.titanium,90,Items.lead,50, Items.silicon, 30));
+            requirements(PartCategories.movementUnit,ItemStack.with(UnityItems.cupronickel,90,Items.lead,50, Items.silicon, 30));
             w = 3;
             h = 3;
             health(90);
@@ -158,7 +158,7 @@ public class UnityParts{
             producesPower(400);
         }};
         mediumRoot = new ModularPartType("root-medium"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,25,Items.titanium,15));
+            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,25,UnityItems.cupronickel,15));
             w = 2;
             h = 2;
             health(250);
@@ -169,7 +169,7 @@ public class UnityParts{
             hasCellDecal = true;
         }};
         largeRoot = new ModularPartType("root-large"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,75,Items.titanium,50,UnityItems.nickel,30,Items.thorium,15));
+            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,75,Items.titanium,50,UnityItems.nickel,30,UnityItems.superAlloy,15));
             w = 3;
             h = 3;
             health(500);
@@ -198,7 +198,7 @@ public class UnityParts{
             usesPower(50);
         }};
         largeWheel = new ModularWheelType("wheel-large"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,400,Items.titanium,150,Items.thorium,90,UnityItems.nickel,100));
+            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,400,Items.titanium,150,Items.thorium,90,UnityItems.cupronickel,100));
             w = 3;
             h = 8;
             health(150);
@@ -215,7 +215,7 @@ public class UnityParts{
             usesPower(15);
             weapon(3,new PointDefenseWeapon("unity-part-point-defense"){{
                 rotate = true;
-                reload = 12f;
+                reload = 18f;
                 targetInterval = 0f;
                 targetSwitchInterval = 0f;
                 shootSound = Sounds.lasershoot;
@@ -238,7 +238,7 @@ public class UnityParts{
             usesPower(60);
         }};
         tankTracks = new ModularWheelType("tank-tracks"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,250,Items.titanium,100,UnityItems.nickel,100));
+            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,250,Items.titanium,100,UnityItems.nickel,100,UnityItems.cupronickel,50));
             w = 3;
             h = 16;
             health(210);
@@ -247,7 +247,7 @@ public class UnityParts{
             usesPower(200);
         }};
         tankTracksLarge = new ModularWheelType("tank-tracks-large"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,700,Items.titanium,500,Items.thorium,200,Items.surgeAlloy,100,UnityItems.nickel,300));
+            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,700,Items.titanium,500,Items.thorium,200,UnityItems.nickel,300,UnityItems.cupronickel,200,UnityItems.superAlloy,100));
             w = 5;
             h = 30;
             health(500);
@@ -256,7 +256,7 @@ public class UnityParts{
             usesPower(1200);
         }};
         tankCannon = new ModularWeaponMountType("tank-cannon"){{
-           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon, 500, Items.titanium, 500, Items.thorium, 250, UnityItems.nickel, 300, UnityItems.cupronickel, 150));
+           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon, 500, Items.titanium, 500, Items.thorium, 250, UnityItems.nickel, 300, UnityItems.cupronickel, 200));
            health(750);
            mass(1800);
            usesPower(400);
