@@ -183,7 +183,7 @@ public class ExpTower extends ExpTank {
             reload = 0;
             if(exp <= 0) return;
 
-            int a = shootExp(buffer ? bufferExp : exp);
+            int a = shootExp(buffer ? Math.min(exp, bufferExp) : exp);
             if(a > 0){
                 exp -= a;
                 heat = manualReload;

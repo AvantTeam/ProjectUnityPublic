@@ -76,6 +76,12 @@ public class Unity extends Mod{
             });
         }
 
+        Events.on(ContentInitEvent.class, e -> {
+            if(!headless){
+                Regions.load();
+            }
+        });
+
         Utils.init();
 
         try{

@@ -16,7 +16,7 @@ import unity.content.effects.*;
 
 import static mindustry.Vars.renderer;
 
-public class MeltingCrafter extends KoruhCrafter{
+public class MeltingCrafter extends LevelKoruhCrafter{
     public float meltAmount = 0.01f;
     public float cooldown = 0.01f;
     public Liquid lava = UnityLiquids.lava;
@@ -36,7 +36,7 @@ public class MeltingCrafter extends KoruhCrafter{
         bars.add("heat", (MeltingCrafterBuild entity) -> new Bar(() -> Core.bundle.get("bar.heat"), () -> Pal.ammo, () -> Mathf.clamp(entity.melt)));
     }
 
-    public class MeltingCrafterBuild extends KoruhCrafterBuild{
+    public class MeltingCrafterBuild extends LevelKoruhCrafterBuild{
         public float melt = 0f;
 
         @Override
@@ -48,7 +48,7 @@ public class MeltingCrafter extends KoruhCrafter{
         public void updateTile(){
             super.updateTile();
 
-            if(exp > 0 && melt > 0){
+            if(expc > 0 && melt > 0){
                 melt -= delta() * cooldown;
                 if(melt < 0) melt = 0;
             }
