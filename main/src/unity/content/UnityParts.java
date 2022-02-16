@@ -31,23 +31,23 @@ public class UnityParts{
         //region units
         ///DO NOT CHANGE ORDER (will break saves)
         panel = new ModularPartType("panel"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.titanium,7,UnityItems.nickel,5));
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.titanium, 7 ,UnityItems.nickel, 5));
             health(40);
             mass(20);
             armor(1);
         }};
         smallRoot = new ModularPartType("root-small"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,10));
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 10));
             health(100);
             mass(10);
             producesPower(15);
             addsWeaponSlots(2);
-            itemCapacity(20);//the default
+            itemCapacity(20); //the default
             root = true;
             hasCellDecal = true;
         }};
         gun = new ModularWeaponMountType("gun"){{
-           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,10));
+           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 10));
            health(10);
            mass(20);
            usesPower(5);
@@ -58,13 +58,13 @@ public class UnityParts{
            }});
         }};
         cannon = new ModularWeaponMountType("cannon"){{
-           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,40,Items.titanium,50,Items.graphite,20,UnityItems.nickel,20));
+           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 40, Items.titanium, 50, Items.graphite, 20, UnityItems.nickel, 20));
            health(40);
            mass(100);
            usesPower(20);
            w = 2;
            h = 2;
-           weapon(2,new Weapon("unity-part-cannon"){{
+           weapon(2, new Weapon("unity-part-cannon"){{
                rotate = true;
                rotateSpeed = 6f;
                reload = 60f;
@@ -82,35 +82,35 @@ public class UnityParts{
            }});
         }};
         smallEngine = new ModularPartType("engine-small"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.lead,10,Items.silicon,5));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.lead, 10, Items.silicon, 5));
             health(10);
             mass(15);
             producesPower(20);
         }};
         smallWheel = new ModularWheelType("wheel-small"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,5));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 5));
             health(15);
             mass(15);
-            wheel(1,30,1.5f);
+            wheel(1, 30, 1.5f);
             usesPower(7);
         }};
         smallTracks = new ModularWheelType("tracks-small"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,15,UnityItems.nickel,10));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 15,UnityItems.nickel, 10));
             w = 1;
             h = 3;
             health(60);
             mass(45);
-            wheel(6,180,0.7f);
+            wheel(6, 180, 0.6f);
             usesPower(20);
         }};
         howitzer = new ModularWeaponMountType("howitzer"){{
-            requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,80,Items.titanium,120,Items.graphite,80,UnityItems.nickel,50));
+            requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 80, Items.titanium, 120, Items.graphite, 80, UnityItems.nickel, 50));
             health(75);
             mass(550);
             usesPower(80);
             w = 3;
             h = 4;
-            weapon(5,new Weapon("unity-part-howitzer"){{
+            weapon(5, new Weapon("unity-part-howitzer"){{
                 rotate = true;
                 rotateSpeed = 4f;
                 reload = 80f;
@@ -135,7 +135,7 @@ public class UnityParts{
             }});
         }};
         mediumPanel = new ModularPartType("medium-panel"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,20,Items.titanium,50));
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 20, Items.titanium, 50));
             w = 2;
             h = 2;
             health(200);
@@ -143,14 +143,14 @@ public class UnityParts{
             armor(15);
         }};
         gunBridge = new ModularPartType("gun-bridge"){{
-            requirements(PartCategories.weaponsUnit,ItemStack.with(Items.graphite,10,UnityItems.nickel,10));
+            requirements(PartCategories.weaponsUnit, ItemStack.with(Items.graphite, 10, UnityItems.nickel, 10));
             usesPower(20);
             mass(20);
             addsWeaponSlots(4);
             hasCellDecal = true;
         }};
         engine = new ModularPartType("engine"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(UnityItems.cupronickel,90,Items.lead,50, Items.silicon, 30));
+            requirements(PartCategories.movementUnit, ItemStack.with(UnityItems.cupronickel, 90, Items.lead, 50, Items.silicon, 30));
             w = 3;
             h = 3;
             health(90);
@@ -158,7 +158,7 @@ public class UnityParts{
             producesPower(400);
         }};
         mediumRoot = new ModularPartType("root-medium"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,25,UnityItems.cupronickel,15));
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 25, UnityItems.cupronickel, 15));
             w = 2;
             h = 2;
             health(250);
@@ -169,7 +169,7 @@ public class UnityParts{
             hasCellDecal = true;
         }};
         largeRoot = new ModularPartType("root-large"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,75,Items.titanium,50,UnityItems.nickel,30,UnityItems.superAlloy,15));
+            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon, 75, Items.titanium, 50, UnityItems.nickel, 30, UnityItems.superAlloy, 15));
             w = 3;
             h = 3;
             health(500);
@@ -181,7 +181,7 @@ public class UnityParts{
             hasCellDecal = true;
         }};
         largePanel = new ModularPartType("large-panel"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,50,Items.titanium,100,UnityItems.nickel,50));
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 50, Items.titanium, 100, UnityItems.nickel, 50));
             w = 3;
             h = 3;
             health(600);
@@ -189,7 +189,7 @@ public class UnityParts{
             armor(150);
         }};
         mediumWheel = new ModularWheelType("wheel-medium"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,50,Items.titanium,25));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 50, Items.titanium, 25));
             w = 2;
             h = 4;
             health(75);
@@ -198,22 +198,22 @@ public class UnityParts{
             usesPower(50);
         }};
         largeWheel = new ModularWheelType("wheel-large"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,400,Items.titanium,150,Items.thorium,90,UnityItems.cupronickel,100));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 400, Items.titanium, 150, Items.thorium, 90, UnityItems.cupronickel, 100));
             w = 3;
             h = 8;
             health(150);
             mass(200);
-            wheel(1,650,1f);
+            wheel(1, 650, 1f);
             usesPower(250);
         }};
         pointDefense = new ModularWeaponMountType("point-defense"){{
-            requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon,60, UnityItems.nickel,30));
+            requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 60, UnityItems.nickel, 30));
             w = 2;
             h = 3;
             health(60);
             mass(60);
             usesPower(15);
-            weapon(3,new PointDefenseWeapon("unity-part-point-defense"){{
+            weapon(3, new PointDefenseWeapon("unity-part-point-defense"){{
                 rotate = true;
                 reload = 18f;
                 targetInterval = 0f;
@@ -229,40 +229,40 @@ public class UnityParts{
             }});
         }};
         largeTracks = new ModularWheelType("tracks-large"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,50,Items.thorium,40,UnityItems.nickel,30));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 50, Items.thorium, 40, UnityItems.nickel, 30));
             w = 2;
             h = 9;
             health(180);
             mass(200);
-            wheel(6,950,0.6f);
+            wheel(6, 950, 0.6f);
             usesPower(60);
         }};
         tankTracks = new ModularWheelType("tank-tracks"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,250,Items.titanium,100,UnityItems.nickel,100,UnityItems.cupronickel,50));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 250, Items.titanium, 100, UnityItems.nickel, 100, UnityItems.cupronickel, 50));
             w = 3;
             h = 16;
             health(210);
             mass(250);
-            wheel(6,2000,0.6f);
+            wheel(6, 2000, 0.6f);
             usesPower(200);
         }};
         tankTracksLarge = new ModularWheelType("tank-tracks-large"){{
-            requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,700,Items.titanium,500,Items.thorium,200,UnityItems.nickel,300,UnityItems.cupronickel,200,UnityItems.superAlloy,100));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 700, Items.titanium, 500, Items.thorium, 200, UnityItems.nickel, 300, UnityItems.cupronickel, 200, UnityItems.superAlloy, 100));
             w = 5;
             h = 30;
             health(500);
             mass(500);
-            wheel(6,10000,0.6f);
+            wheel(6, 10000, 0.6f);
             usesPower(1200);
         }};
         tankCannon = new ModularWeaponMountType("tank-cannon"){{
-           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon, 500, Items.titanium, 500, Items.thorium, 250, UnityItems.nickel, 300, UnityItems.cupronickel, 200));
+           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 500, Items.titanium, 500, Items.thorium, 250, UnityItems.nickel, 300, UnityItems.cupronickel, 200));
            health(750);
            mass(1800);
            usesPower(400);
            w = 9;
            h = 12;
-           weapon(30,new MultiBarrelWeapon("unity-part-tonk-cannon"){{
+           weapon(30, new MultiBarrelWeapon("unity-part-tonk-cannon"){{
                rotate = true;
                rotateSpeed = 1.5f;
                recoil = 0f;
@@ -293,28 +293,28 @@ public class UnityParts{
     }
 
     public static void loadDoodads(){
-        unitDoodads.add(new PanelDoodadPalette(true,true,1,1,"1x1",12));
-        unitDoodads.add(new PanelDoodadPalette(false,true,2,2,"2x2",5));
-        unitDoodads.add(new PanelDoodadPalette(false,true,3,3,"3x3",4));
-        unitDoodads.add(new PanelDoodadPalette(true,true,3,2,"3x2",3));
+        unitDoodads.add(new PanelDoodadPalette(true, true, 1, 1, "1x1", 12));
+        unitDoodads.add(new PanelDoodadPalette(false, true, 2, 2, "2x2", 5));
+        unitDoodads.add(new PanelDoodadPalette(false, true, 3, 3, "3x3", 4));
+        unitDoodads.add(new PanelDoodadPalette(true, true, 3, 2, "3x2", 3));
 
-        for(int i=0;i<unitDoodads.size;i++){
+        for(int i = 0; i < unitDoodads.size; i++){
             unitDoodads.get(i).load();
         }
     }
 
     static PanelDoodadType getUnitDoodad(String name, String outlinename, int... pos){
-        int w = 1,h = 1,x1=pos[0],x2=pos[0],y1=pos[1],y2=pos[1];
-        Point2[] pts = new Point2[pos.length/2];
-        for(int i = 0;i<pts.length;i++){
-            pts[i] = new Point2(pos[i*2] ,pos[i*2+1]);
-            x1 = Math.min(x1,pos[i*2]);
-            x2 = Math.max(x2,pos[i*2]);
-            y1 = Math.min(y1,pos[i*2+1]);
-            y2 = Math.max(y2,pos[i*2+1]);
+        int w = 1, h = 1, x1 = pos[0], x2 = pos[0], y1 = pos[1], y2 = pos[1];
+        Point2[] pts = new Point2[pos.length / 2];
+        for(int i = 0; i < pts.length; i++){
+            pts[i] = new Point2(pos[i * 2] ,pos[i * 2 + 1]);
+            x1 = Math.min(x1, pos[i * 2]);
+            x2 = Math.max(x2, pos[i * 2]);
+            y1 = Math.min(y1, pos[i * 2 + 1]);
+            y2 = Math.max(y2, pos[i * 2 + 1]);
         }
-        w = x2-x1+1;
-        h = y2-y1+1;
-        return new PanelDoodadType(pts,Core.atlas.find("unity-doodad-"+name),Core.atlas.find("unity-doodad-"+outlinename),w,h);
+        w = x2 - x1 + 1;
+        h = y2 - y1 + 1;
+        return new PanelDoodadType(pts, Core.atlas.find("unity-doodad-" + name), Core.atlas.find("unity-doodad-" + outlinename), w, h);
     }
 }
