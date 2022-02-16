@@ -18,6 +18,7 @@ import static mindustry.Vars.*;
 
 public final class Utils{
     public static final PowIn pow6In = new PowIn(6);
+    public static final PowOut pow25Out = new PowOut(25);
 
     public static final float sqrtHalf = Mathf.sqrt(0.5f);
 
