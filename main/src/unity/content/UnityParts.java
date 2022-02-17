@@ -17,7 +17,7 @@ import unity.type.weapons.*;
 public class UnityParts{
     //unit
     //misc
-    public static ModularPartType panel, mediumPanel, smallRoot, mediumRoot, largeRoot, largePanel;
+    public static ModularPartType panel, mediumPanel, smallRoot, mediumRoot, largeRoot, largePanel,storage;
     //weapons
     public static ModularPartType gun, cannon, howitzer, pointDefense, tankCannon;
     public static ModularPartType gunBridge;
@@ -119,10 +119,10 @@ public class UnityParts{
                 inaccuracy = 6;
                 shotDelay = 2f;
                 shootSound = Sounds.artillery;
-                bullet = new ArtilleryBulletType(7f, 50){{
+                bullet = new ArtilleryBulletType(5f, 50){{
                     width = 15f;
                     height = 25f;
-                    lifetime = 30;
+                    lifetime = 40;
                     shootEffect = Fx.shootBig;
                     splashDamage = 50;
                     splashDamageRadius = 55;
@@ -165,6 +165,7 @@ public class UnityParts{
             mass(40);
             producesPower(50);
             addsWeaponSlots(6);
+            itemCapacity(50);
             root = true;
             hasCellDecal = true;
         }};
@@ -177,6 +178,7 @@ public class UnityParts{
             mass(150);
             producesPower(100);
             addsWeaponSlots(10);
+            itemCapacity(100);
             root = true;
             hasCellDecal = true;
         }};
@@ -186,7 +188,7 @@ public class UnityParts{
             h = 3;
             health(600);
             mass(200);
-            armor(150);
+            armor(1000);
         }};
         mediumWheel = new ModularWheelType("wheel-medium"){{
             requirements(PartCategories.movementUnit,ItemStack.with(Items.silicon,50,Items.titanium,25));
@@ -255,7 +257,7 @@ public class UnityParts{
             wheel(6,10000,0.6f);
             usesPower(1200);
         }};
-        tankCannon = new ModularWeaponMountType("tank-cannon"){{
+        tankCannon = new ModularWeaponMountType("arbiter"){{
            requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon, 500, Items.titanium, 500, Items.thorium, 250, UnityItems.nickel, 300, UnityItems.cupronickel, 150));
            health(750);
            mass(1800);
@@ -266,7 +268,7 @@ public class UnityParts{
                rotate = true;
                rotateSpeed = 1.5f;
                recoil = 0f;
-               reload = 120f;
+               reload = 160f;
                shootY = 36f;
                barrels = 1;
                barrelRecoil = 7f;
@@ -274,10 +276,13 @@ public class UnityParts{
                shootSound = Sounds.bang;
                cooldownTime = 120f;
                shake = 4f;
-               bullet = new BasicBulletType(12f, 200){{
+               bullet = new BasicBulletType(12f, 1000){{
                    width = 25f;
                    height = 80f;
                    lifetime = 40f;
+                   pierce = true;
+                   pierceBuilding = true;
+                   pierceCap = 8;
                    shootEffect = ShootFx.tonkCannon;
                    smokeEffect = ShootFx.tonkCannonSmoke;
                    hitEffect = Fx.massiveExplosion;
@@ -288,6 +293,12 @@ public class UnityParts{
                    trailColor = Pal.bulletYellowBack;
                }};
            }});
+        }};
+        storage = new ModularPartType("storage"){{
+            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,75,Items.titanium,50,UnityItems.nickel,30,Items.thorium,15));
+            w = 2;
+            h = 2;
+            itemCapacity(20);
         }};
         //endregion
     }

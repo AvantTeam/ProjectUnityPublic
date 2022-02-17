@@ -46,7 +46,7 @@ public class YoungchaBlocks{
     //modules
         basicPanel,
     //other
-    sandboxAssembler; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
+    sandboxAssembler, monomialHangar; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
     public static void load(){
         oreNickel = new UnityOreBlock(UnityItems.nickel){{
@@ -182,6 +182,7 @@ public class YoungchaBlocks{
             rotate = true;
             health = 700;
             solid = true;
+            floating = true;
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero,4, 1000 + HeatGraphNode.celsiusZero,0.2f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
             requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
@@ -284,6 +285,13 @@ public class YoungchaBlocks{
             size = 3;
             health = 1700;
             sandbox = true;
+        }};
+        monomialHangar  = new ModularUnitAssembler("monomial-hangar"){{
+            requirements(Category.units, BuildVisibility.hidden,  with(Items.copper,100,Items.graphite,20, Items.silicon,20));
+            size = 3;
+            health = 1700;
+            unitModuleWidth = 3;
+            unitModuleHeight = 4;
         }};
 
 

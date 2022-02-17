@@ -12,7 +12,7 @@ import unity.world.graph.GraphConnector.FixedGraphConnector.*;
 import java.lang.reflect.*;
 
 import static arc.math.geom.Geometry.*;
-import static mindustry.Vars.tilesize;
+import static mindustry.Vars.*;
 
 //the uh block settings part of graphs ig
 public class GraphBlockConfig{
@@ -101,12 +101,23 @@ public class GraphBlockConfig{
                 for(int i = 0;i<fcc.connectionIndexes.length;i++){
                     if(fcc.connectionIndexes[i]!=0){
                         Point2 p2 = getConnectSidePos(i,this.block.size,req.rotation);
-                        Draw.rect(tr,(req.x+p2.x)*tilesize,(req.x+p2.y)*tilesize);
+                        int cx = req.x+p2.x;
+                        int cy = req.y+p2.y;
+                        boolean[] d = {false};
+                        list.each(b->{
+                            if(d[0]){return;}
+                            if(cx>=b.x && cy>=b.y && b.x+b.block.size>cx && b.y+b.block.size>cy){
+                                d[0] = true;
+                            }
+                        });
+                        if(d[0]){
+                            continue;
+                        }
+                        Draw.rect(tr,cx*tilesize,cy*tilesize);
                     }
                 }
             }
         }
-
     }
 
     //this came from js, but im not sure if it relative to the center or the bl corner of the building.

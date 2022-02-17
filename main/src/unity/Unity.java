@@ -16,6 +16,7 @@ import unity.mod.*;
 import unity.parts.*;
 import unity.ui.*;
 import unity.util.*;
+import unity.world.graph.*;
 
 import static mindustry.Vars.*;
 
@@ -72,6 +73,7 @@ public class Unity extends Mod{
                 for(Faction faction : Faction.all){
                     faction.load();
                 }
+                Graphs.load();
                 UnityParts.loadDoodads();
             });
         }

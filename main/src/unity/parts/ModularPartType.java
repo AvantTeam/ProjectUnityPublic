@@ -14,6 +14,7 @@ import mindustry.world.meta.*;
 import unity.parts.stat.*;
 import unity.parts.stat.AdditiveStat.*;
 import unity.util.*;
+import unity.world.blocks.payloads.*;
 
 //like Block, this is a singleton
 public class ModularPartType implements Displayable{
@@ -46,6 +47,8 @@ public class ModularPartType implements Displayable{
     //cost
     public float constructTimeMultiplier = 1; // base time based on item cost
     public ItemStack[] cost = {};
+    public int costTotal = 0;
+    public ModuleBlock moduleCost = null;
     //module cost..
 
 
@@ -101,6 +104,10 @@ public class ModularPartType implements Displayable{
     public void requirements(String category,ItemStack[] itemcost){
         this.category = category;
         this.cost = itemcost;
+        costTotal = 0;
+        for(var i:itemcost){
+            costTotal+=i.amount;
+        }
     }
 
     public boolean canBeUsedIn(int type){
@@ -174,6 +181,9 @@ public class ModularPartType implements Displayable{
     public void addsWeaponSlots(float amount){
         stats.add(new WeaponSlotStat(amount));
     }
+    public void addsAbilitySlots(float amount){
+            stats.add(new AbilitySlotStat(amount));
+        }
     public void healthMul(float amount){
         stats.add(new HealthStat(amount));
     }

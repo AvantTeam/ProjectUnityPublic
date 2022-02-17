@@ -70,7 +70,12 @@ public class UnityUI{
             return;
         }
         partsEditor = new PartsEditorDialog();
-
+        Events.on(EventType.WorldLoadEvent.class, e->{
+            included.clear();
+            for(Faction f:Faction.all){
+                included.add(f);
+            }
+        });
         Events.run(Trigger.update,()->{
             if(Vars.ui.hudfrag.blockfrag==null){
                 return;

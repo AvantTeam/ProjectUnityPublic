@@ -5,7 +5,9 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.util.*;
 import arc.util.io.*;
+import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
@@ -60,7 +62,9 @@ public class TorqueDrill extends Drill implements GraphBlock{
     public void drawPlace(int x, int y, int rotation, boolean valid){
         super.drawPlace(x, y, rotation, valid);
     }
-
+    @Override public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
+         super.drawRequestRegion(req,list);
+         config.drawConnectionPoints(req,list); }
     @Override public Block getBuild(){
             return this;
         }

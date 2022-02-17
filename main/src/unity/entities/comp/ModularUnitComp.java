@@ -1,5 +1,6 @@
 package unity.entities.comp;
 
+import arc.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
@@ -12,9 +13,11 @@ import mindustry.content.*;
 import mindustry.entities.abilities.*;
 import mindustry.entities.bullet.*;
 import mindustry.entities.units.*;
+import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.world.*;
+import mindustry.world.blocks.environment.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
 import unity.content.effects.*;
@@ -40,7 +43,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     @Import
     boolean dead;
     @Import
-    float health, maxHealth, rotation, armor;
+    float health, maxHealth, rotation, armor,drownTime;
     @Import
     int id;
     @Import
@@ -55,6 +58,8 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public transient Seq<Unit> controlling;
     @Import
     public transient Formation formation;
+    @Import
+    public transient Floor lastDrownFloor;
 
     transient ModularConstruct construct;
     transient boolean constructLoaded = false;
@@ -70,6 +75,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public transient float rotateSpeed = 0;
     public transient float massStat = 0;
     public transient float weaponrange = 0;
+    public transient int itemcap = 0;
 
     @Override
     public void add(){
@@ -156,7 +162,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         rotateSpeed = Mathf.clamp(10f * speed / (float)Math.max(construct.parts.length, construct.parts[0].length), 0, 5);
 
         armor = statmap.getValue("armour", "realValue");
-
+        itemcap = (int)statmap.getValue("itemcapacity");
     }
 
     @Replace
@@ -236,6 +242,11 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     }
 
     @Replace
+    public int itemCapacity(){
+        return itemcap;
+    }
+
+    @Replace
     public boolean hasWeapons(){
         return mounts.length > 0;
     }
@@ -312,4 +323,24 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public void read(Reads read){
         savedHp = health;
     }
+
+    @Replace
+    public void updateDrowning() {
+       Floor floor = drownFloor();
+       if (floor != null && floor.isLiquid && floor.drownTime > 0) {
+           lastDrownFloor = floor;
+           drownTime += Time.delta / floor.drownTime / type.drownTimeMultiplier / (hitSize() / 8f);
+           if (Mathf.chanceDelta(0.05F)) {
+               floor.drownUpdateEffect.at(x(), y(), hitSize(), floor.mapColor);
+           }
+           if (drownTime >= 0.999F && !net.client()) {
+               kill();
+               Events.fire(new UnitDrownEvent(self()));
+           }
+       } else {
+           drownTime -= Time.delta / 50.0F;
+       }
+       drownTime = Mathf.clamp(drownTime);
+    }
+
 }

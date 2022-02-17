@@ -60,6 +60,16 @@ public class AdditiveStat extends ModularPartStat{
             super("weaponslotuse",slot);
         }
     }
+    public static class AbilitySlotStat extends AdditiveStat{
+       public AbilitySlotStat(float slot){
+           super("abilityslots",slot);
+       }
+    }
+   public static class AbilitySlotUseStat extends AdditiveStat{
+       public AbilitySlotUseStat(float slot){
+           super("abilityslotuse",slot);
+       }
+   }
     public static class ItemCapacityStat extends AdditiveStat{
         public ItemCapacityStat(float slot){
             super("itemcapacity",slot);

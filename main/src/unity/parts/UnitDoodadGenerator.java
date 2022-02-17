@@ -46,10 +46,10 @@ public class UnitDoodadGenerator{
             int[][] seedspace = new int[w][h];
             int[][] seedspacebuf = new int[w][h];
             for(int i = 0; i < Math.max(Mathf.floor(Mathf.sqrt(tiles) / 2), 1); i++){
-                int cnx = rand.random(0, Math.round(w / 2f) - 1);
+                int cnx = rand.random(0, Mathf.floor(w)-1);
                 int cny = rand.random(0, h - 1);
                 while(!filled[cnx][cny]){
-                    cnx = rand.random(0, Math.round(w / 2f) - 1);
+                    cnx = rand.random(0, Mathf.floor(w)-1);
                     cny = rand.random(0, h - 1);
                 }
                 seeds.add(new Point2(cnx, cny));

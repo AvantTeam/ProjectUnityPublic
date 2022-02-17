@@ -13,9 +13,9 @@ public class Graphs{
         if(Vars.headless){
             return;
         }
-        graphIcons.put(TorqueGraph.class, Core.atlas.find("graph-torque-icon"));
-        graphIcons.put(HeatGraph.class, Core.atlas.find("graph-heat-icon"));
-        graphIcons.put(CrucibleGraph.class, Core.atlas.find("graph-crucible-icon"));
+        graphIcons.put(TorqueGraph.class, Core.atlas.find("unity-graph-torque-icon"));
+        graphIcons.put(HeatGraph.class, Core.atlas.find("unity-graph-heat-icon"));
+        graphIcons.put(CrucibleGraph.class, Core.atlas.find("unity-graph-crucible-icon"));
 
     }
 }

@@ -236,13 +236,13 @@ public class PartsEditorElement extends Element{
                 if(part==null){
                     continue;
                 }
-                if(!part.isHere(i,j)){
+                if(!(Math.max(part.getX(),minx)==i && Math.max(part.getY(),miny)==j)){
                     continue;
                 }
                 Draw.color(bgCol);
-                rectCorner(i*32,j*32, part.type.w*32, part.type.h*32);
+                rectCorner(part.getX()*32,part.getY()*32, part.type.w*32, part.type.h*32);
                 Draw.color(builder.valid[i][j]?Color.white:Color.red);
-                rectCorner(part.type.icon,i*32,j*32, part.type.w*32, part.type.h*32);
+                rectCorner(part.type.icon,part.getX()*32,part.getY()*32, part.type.w*32, part.type.h*32);
             }
         }
 
@@ -284,7 +284,7 @@ public class PartsEditorElement extends Element{
         Lines.rect(gx+x*scl,gy+y*scl, w*scl, h*scl);
     }
     public void line(float x,float y,float x2,float y2){
-        Lines.rect(gx+x*scl,gy+y*scl, gx+x2*scl,gy+y2*scl);
+        Lines.line(gx+x*scl,gy+y*scl, gx+x2*scl,gy+y2*scl);
     }
 
     public float gx(){

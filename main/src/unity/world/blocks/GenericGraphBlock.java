@@ -5,7 +5,9 @@ import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.util.*;
 import arc.util.io.*;
+import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.world.*;
@@ -26,24 +28,19 @@ public class GenericGraphBlock extends Block implements GraphBlock{
     public TextureRegion loadTex(String n){
         return Core.atlas.find(name+"-"+n);
     }
-
-    @Override
-    public void load(){
-        super.load();
-    }
-
-    @Override
-    public void setStats(){
+    @Override public void setStats(){
         super.setStats();
     }
-
     @Override public Block getBuild(){
         return this;
     }
-
     @Override public GraphBlockConfig getConfig(){
         return config;
     }
+    @Override public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
+        super.drawRequestRegion(req,list);
+        config.drawConnectionPoints(req,list); }
+
 
     public class GenericGraphBuild extends Building implements GraphBuild{
         OrderedMap<Class<? extends Graph>,GraphNode> graphNodes = new OrderedMap<>();

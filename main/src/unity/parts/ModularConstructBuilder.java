@@ -239,6 +239,9 @@ public class ModularConstructBuilder{
     }
 
     public boolean placePart(ModularPartType selected, int x, int y){
+        if(!canFit(selected,x,y)){
+            return false;
+        }
         for(int i =x ;i<x+selected.w;i++){
             for(int j =y ;j<y+selected.h;j++){
                 if(parts[i][j]!=null){
