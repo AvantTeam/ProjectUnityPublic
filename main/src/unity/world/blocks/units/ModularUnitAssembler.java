@@ -11,6 +11,7 @@ import mindustry.*;
 import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
@@ -20,6 +21,7 @@ import mindustry.world.blocks.payloads.*;
 import mindustry.world.modules.*;
 import unity.*;
 import unity.content.*;
+import unity.gen.*;
 import unity.parts.*;
 import unity.parts.PanelDoodadType.*;
 import unity.parts.types.*;
@@ -45,6 +47,7 @@ public class ModularUnitAssembler extends PayloadBlock{
         config(byte[].class, (ModularUnitAssemblerBuild build, byte[] data) -> build.blueprint.set(data));
         config(Boolean.class, (ModularUnitAssemblerBuild build, Boolean data) -> {if(data){build.spawnUnit();}});
         clipSize = Math.max(unitModuleWidth,unitModuleHeight)*partSize;
+        outputsPayload = true;
     }
 
     @Override
@@ -175,8 +178,18 @@ public class ModularUnitAssembler extends PayloadBlock{
                 return;
             }
             var t = ((UnityUnitType)UnityUnitTypes.modularUnit).spawn(team, x, y,blueprint.exportCompressed());
-            t.rotation = 90;
+            t.rotation = rotdeg();
             Events.fire(new UnitCreateEvent(t, this));
+        }
+
+        public void createUnit(){
+            var t = UnityUnitTypes.modularUnit.create(team);
+            ModularConstruct.cache.put(t,blueprint.exportCompressed());
+            ((ModularUnitUnit) t).constructdata(ModularConstruct.cache.get(t));
+            payload = new UnitPayload(t);
+            payVector.setZero();
+            Events.fire(new UnitCreateEvent(payload.unit, this));
+
         }
 
         //todo: TEMP, REMOVE WHEN CONSTRUCTORS IMPLEMENTED.
@@ -207,12 +220,13 @@ public class ModularUnitAssembler extends PayloadBlock{
                 }
                 ////////////////====================== testing >
 
-                if(built.size>=construct.partlist.size){
-                    spawnUnit();
+                if(built.size>=construct.partlist.size && payload==null){
+                    createUnit();
                     built.clear();
                     currentlyConstructing.clear();
                 }
             }
+            moveOutPayload();
         }
         //arm needs to get an avalible job, then move, then build it
         public ModuleConstructing getJob(Building b,Item e){
@@ -241,7 +255,7 @@ public class ModularUnitAssembler extends PayloadBlock{
             }
             return null; //no job for you
         }
-
+        //YoungchaBlocks.monomialHangar.buildVisibility = BuildVisibility.shown
 
         public boolean constructModule(ModuleConstructing module, Item item){
             boolean b = module.submitItem(item);
@@ -255,12 +269,13 @@ public class ModularUnitAssembler extends PayloadBlock{
         @Override
         public void draw(){
             Draw.rect(region,x,y);
+            Draw.rect(outRegion, x, y, rotdeg());
             drawTeamTop();
             DrawTransform dt = new DrawTransform();
             dt.setTranslate(x,y);
             dt.setRotation(rotdeg());
             ModularWheelType.rollDistance = 0;
-            if(construct!=null && !sandbox){
+            if(construct!=null && !sandbox && payload==null){
                 //9 slice?
 
                 Draw.color(0, 0, 0, 0.4f);
@@ -270,11 +285,7 @@ public class ModularUnitAssembler extends PayloadBlock{
                 Draw.color();
                 for(var part:construct.partlist){
                     if(built.contains(Point2.pack(part.getX(),part.getY()))){
-                        if(part.type.open){
-                            part.type.draw(dt,part);
-                        }else{
-                            Draw.rect(panelling[part.panelingIndexes[0]], x + part.ax * partSize, y + part.ay * partSize);
-                        }
+                        part.type.draw(dt,part);
                     }else{
                         float dx = x + (part.ax - 0.5f) * partSize;
                         float dy = y + (part.ay - 0.5f) * partSize;
@@ -282,6 +293,9 @@ public class ModularUnitAssembler extends PayloadBlock{
                     }
                 }
             }
+            Draw.z(Layer.blockOver);
+            payRotation = rotdeg();
+            drawPayload();
         }
 
         @Override

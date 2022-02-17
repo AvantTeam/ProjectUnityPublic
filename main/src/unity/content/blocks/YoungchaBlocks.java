@@ -183,7 +183,7 @@ public class YoungchaBlocks{
             health = 700;
             solid = true;
             floating = true;
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 1500 + HeatGraphNode.celsiusZero,4, 1000 + HeatGraphNode.celsiusZero,0.2f));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 4, 1500 + HeatGraphNode.celsiusZero,1000 + HeatGraphNode.celsiusZero,0.015f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
             requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
         }};
@@ -292,6 +292,7 @@ public class YoungchaBlocks{
             health = 1700;
             unitModuleWidth = 3;
             unitModuleHeight = 4;
+            rotate = true;
         }};
 
 

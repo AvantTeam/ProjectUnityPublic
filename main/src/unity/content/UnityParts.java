@@ -249,7 +249,7 @@ public class UnityParts{
             usesPower(200);
         }};
         tankTracksLarge = new ModularWheelType("tank-tracks-large"){{
-            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 700, Items.titanium, 500, Items.thorium, 200, UnityItems.nickel, 300, UnityItems.cupronickel, 200, UnityItems.superAlloy, 100));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 700, Items.titanium, 500, UnityItems.nickel, 300, UnityItems.cupronickel, 200, UnityItems.superAlloy, 100));
             w = 5;
             h = 30;
             health(500);
@@ -258,7 +258,7 @@ public class UnityParts{
             usesPower(1200);
         }};
         tankCannon = new ModularWeaponMountType("arbiter"){{
-           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon, 500, Items.titanium, 500, Items.thorium, 250, UnityItems.nickel, 300, UnityItems.cupronickel, 150));
+           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon, 500, Items.titanium, 500, UnityItems.superAlloy, 200, UnityItems.nickel, 300, UnityItems.cupronickel, 150));
            health(750);
            mass(1800);
            usesPower(400);
@@ -294,14 +294,17 @@ public class UnityParts{
                }};
            }});
         }};
-        ///chainsaw
-        /// 
+
         storage = new ModularPartType("storage"){{
             requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,75,Items.titanium,50,UnityItems.nickel,30,Items.thorium,15));
             w = 2;
             h = 2;
             itemCapacity(20);
+            health(50);
+            mass(150);
         }};
+
+
         //endregion
     }
 

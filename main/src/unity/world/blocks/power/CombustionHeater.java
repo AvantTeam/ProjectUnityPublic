@@ -8,12 +8,15 @@ import mindustry.type.*;
 import mindustry.world.consumers.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
+import unity.world.graph.*;
 
 import static arc.Core.atlas;
 
 public class CombustionHeater extends GenericGraphBlock{
     public final TextureRegion[] baseRegions = new TextureRegion[4];
     TextureRegion heatRegion;
+    public float baseTemp = 1000 + HeatGraphNode.celsiusZero;
+    public float tempPerFlammability = 1750;
 
     public CombustionHeater(String name){
         super(name);
@@ -61,7 +64,7 @@ public class CombustionHeater extends GenericGraphBlock{
             }else{
                 productionEfficiency = 0f;
             }
-
+            heatNode().targetTemp = baseTemp + tempPerFlammability*(productionEfficiency-1);
             heatNode().efficency = productionEfficiency;
         }
 

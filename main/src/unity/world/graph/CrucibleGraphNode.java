@@ -139,6 +139,9 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
             }
             ///craft
             for(var recipe: CrucibleRecipes.recipes){
+                if(recipe.minTemp>heat.getTemp()){
+                    continue;
+                }
                 float maxam = capacity-getFluid(recipe.output).total();
                 for(int i = 0;i<recipe.items.length;i++){
                     var fluid = getFluid(recipe.items[i].item);

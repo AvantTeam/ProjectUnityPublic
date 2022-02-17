@@ -70,7 +70,7 @@ public class UnityUI{
             return;
         }
         partsEditor = new PartsEditorDialog();
-        Events.on(EventType.WorldLoadEvent.class, e->{
+        Events.on(EventType.SaveLoadEvent.class, e->{
             included.clear();
             for(Faction f:Faction.all){
                 included.add(f);

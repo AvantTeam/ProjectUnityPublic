@@ -225,7 +225,8 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             Vec2 nvt = new Vec2();
             final Vec2 pos = new Vec2();
             construct.partlist.each(part -> {
-                if(!(Mathf.random() > 0.1 || !(part.type instanceof ModularWheelType))){
+                boolean b = part.getY()-1 <0 || (construct.parts[part.getX()][part.getY()-1]!=null  && construct.parts[part.getX()][part.getY()-1].type instanceof ModularWheelType);
+                if(!(Mathf.random() > 0.1 || !(part.type instanceof ModularWheelType)) && b){
                     pos.set(part.cx * ModularPartType.partSize, part.ay * ModularPartType.partSize);
                     dt.transform(pos);
                     nvt.set(nv.x + Mathf.range(3), nv.y + Mathf.range(3));
