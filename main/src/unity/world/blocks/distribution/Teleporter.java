@@ -53,7 +53,10 @@ public class Teleporter extends Block{
             if(value != -1) teleporters[build.team.id][value].add(build);
             build.toggle = value;
         });
-        configClear((TeleporterBuild build) -> build.toggle = -1);
+        configClear((TeleporterBuild build) -> {
+            if(build.toggle != -1) teleporters[build.team.id][build.toggle].remove(build);
+            build.toggle = -1;
+        });
     }
 
     @Override
@@ -81,7 +84,7 @@ public class Teleporter extends Block{
 
     @Override
     public void drawRequestConfigCenter(BuildPlan req, Object content, String region){
-        if(!(content instanceof Integer temp)) return;
+        if(!(content instanceof Integer temp) || temp < 0 || temp >= selection.length) return;
         Draw.color(selection[temp]);
         Draw.rect(blankRegion, req.drawx(), req.drawy());
     }

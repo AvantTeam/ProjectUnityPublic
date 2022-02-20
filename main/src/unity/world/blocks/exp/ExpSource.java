@@ -9,6 +9,7 @@ import mindustry.gen.*;
 import mindustry.world.*;
 import mindustry.world.meta.*;
 import unity.entities.*;
+import unity.gen.*;
 import unity.world.blocks.exp.*;
 
 import static arc.Core.atlas;
@@ -24,6 +25,11 @@ public class ExpSource extends Block {
         super(name);
         update = true;
         solid = rotate = false;
+        configurable = true;
+
+        config(Boolean.class, (ExpSourceBuild entity, Boolean b) -> {
+            if(b) entity.clicked();
+        });
     }
 
     @Override
@@ -42,7 +48,7 @@ public class ExpSource extends Block {
         @Override
         public void updateTile(){
             if(enabled && timer.get(produceTimer, reload)){
-                ExpOrbs.spreadExp(x, y, amount, 6f);
+                //ExpOrbs.spreadExp(x, y, amount, 6f);
                 for(Building b : proximity){
                     if(b instanceof ExpHolder exp) exp.handleExp(99999999);
                 }
@@ -64,6 +70,17 @@ public class ExpSource extends Block {
         public void onDestroyed(){
             ExpOrbs.spreadExp(x, y, amount * 5, 8f);
             super.onDestroyed();
+        }
+
+        @Override
+        public boolean configTapped(){
+            configure(true);
+            UnitySounds.expChime.at(this);
+            return false;
+        }
+
+        public void clicked(){
+            ExpOrbs.spreadExp(x, y, amount, 6f);
         }
     }
 }

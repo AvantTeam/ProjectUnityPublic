@@ -38,6 +38,15 @@ public class UnityFx{
         });
     }),
 
+    orbDies = new Effect(20f, e -> {
+        color(UnityPal.exp);
+        integer = 0;
+        Angles.randLenVectors(e.id, 4, 2f + 6f * e.finpow(), (x, y) -> {
+            integer++;
+            spark(e.x+x, e.y+y, e.fout()*3f, 0.7f+e.fout(), e.id * integer);
+        });
+    }),
+
     expGain = new Effect(75f, 400f, e -> {
         if(!(e.data instanceof Position pos)) return;
 

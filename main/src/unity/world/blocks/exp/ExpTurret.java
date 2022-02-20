@@ -44,7 +44,7 @@ public class ExpTurret extends Turret {
     public int pregradeLevel = -1;
 
     public float orbScale = 0.8f;
-    public int expScale = 1;
+    public int expScale = -1;
     public Effect upgradeEffect = UnityFx.expPoof, upgradeBlockEffect = UnityFx.expShineRegion;
     public Sound upgradeSound = Sounds.message;
     public Color fromColor = Pal.lancerLaser, toColor = UnityPal.exp;
@@ -66,6 +66,7 @@ public class ExpTurret extends Turret {
     @Override
     public void init(){
         super.init();
+        if(expScale < 0) expScale = passive ? 5 : 2;
         if(expFields == null) expFields = new EField[]{};
         maxExp = requiredExp(maxLevel);
         if(expLevel(maxExp) < maxLevel) maxExp++; //floating point error
@@ -218,7 +219,7 @@ public class ExpTurret extends Turret {
     }
 
     public int expLevel(int e){
-        return Math.min(maxLevel, (int)(Mathf.sqrt(e / (5f * expScale))));
+        return Math.min(maxLevel, (int)(Mathf.sqrt(e / (float)(expScale))));
     }
 
     public float expCap(int l){
@@ -228,7 +229,7 @@ public class ExpTurret extends Turret {
     }
 
     public int requiredExp(int l){
-        return l * l * 5 * expScale;
+        return l * l * expScale;
     }
 
     public void setEFields(int l){
@@ -432,6 +433,11 @@ public class ExpTurret extends Turret {
         @Override
         public float handleDamage(float amount){
             return super.handleDamage(amount) * Mathf.clamp(1f - damageReduction.fromLevel(level()));
+        }
+
+        @Override
+        public boolean canPickup(){
+            return pregrade == null && super.canPickup();
         }
 
         @Override
