@@ -7,15 +7,34 @@ import mindustry.*;
 
 public class Graphs{
     //finally i use this class
-    public static ObjectMap<Class<? extends Graph>, TextureRegion> graphIcons = new ObjectMap<>();
-
+    public static ObjectMap<Class<? extends Graph>, GraphInfo> graphInfo = new ObjectMap<>();
+    static {
+        graphInfo.put(TorqueGraph.class, new GraphInfo(TorqueGraph.class,"torque"));
+        graphInfo.put(HeatGraph.class, new GraphInfo(HeatGraph.class,"heat"));
+        graphInfo.put(CrucibleGraph.class, new GraphInfo(CrucibleGraph.class,"crucible"));
+    }
     public static void load(){
         if(Vars.headless){
             return;
         }
-        graphIcons.put(TorqueGraph.class, Core.atlas.find("unity-graph-torque-icon"));
-        graphIcons.put(HeatGraph.class, Core.atlas.find("unity-graph-heat-icon"));
-        graphIcons.put(CrucibleGraph.class, Core.atlas.find("unity-graph-crucible-icon"));
+        graphInfo.each((k, v)->{
+            v.load();
+        });
 
+    }
+
+    public static class GraphInfo{
+        TextureRegion icon;
+        Class<? extends Graph> clazz;
+        String name;
+
+        public GraphInfo(Class<? extends Graph> clazz, String name){
+            this.clazz = clazz;
+            this.name = name;
+        }
+
+        public void load(){
+            icon = Core.atlas.find("unity-graph-"+name+"-icon");
+        }
     }
 }

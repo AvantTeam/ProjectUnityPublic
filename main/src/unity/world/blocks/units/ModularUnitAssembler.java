@@ -47,7 +47,7 @@ public class ModularUnitAssembler extends PayloadBlock{
         config(byte[].class, (ModularUnitAssemblerBuild build, byte[] data) -> build.blueprint.set(data));
         config(Boolean.class, (ModularUnitAssemblerBuild build, Boolean data) -> {if(data){build.spawnUnit();}});
         clipSize = Math.max(unitModuleWidth,unitModuleHeight)*partSize;
-        outputsPayload = true;
+        outputsPayload = !sandbox;
     }
 
     @Override
@@ -269,7 +269,9 @@ public class ModularUnitAssembler extends PayloadBlock{
         @Override
         public void draw(){
             Draw.rect(region,x,y);
-            Draw.rect(outRegion, x, y, rotdeg());
+            if(!sandbox){
+                Draw.rect(outRegion, x, y, rotdeg());
+            }
             drawTeamTop();
             DrawTransform dt = new DrawTransform();
             dt.setTranslate(x,y);

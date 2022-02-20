@@ -53,11 +53,8 @@ public class TorqueDrill extends Drill implements GraphBlock{
         }
     }
 
-    @Override
-    public void setStats(){
-        super.setStats();
-    }
 
+    @Override public void setStats(){ super.setStats(); config.setStats(stats); }
     @Override
     public void drawPlace(int x, int y, int rotation, boolean valid){
         super.drawPlace(x, y, rotation, valid);

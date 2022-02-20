@@ -52,8 +52,7 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         }
     }
 
-    @Override
-    public void setStats(){ super.setStats();}
+    @Override public void setStats(){ super.setStats(); config.setStats(stats); }
 
     @Override
     public void drawPlace(int x, int y, int rotation, boolean valid){

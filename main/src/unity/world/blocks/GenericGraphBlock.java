@@ -28,9 +28,7 @@ public class GenericGraphBlock extends Block implements GraphBlock{
     public TextureRegion loadTex(String n){
         return Core.atlas.find(name+"-"+n);
     }
-    @Override public void setStats(){
-        super.setStats();
-    }
+    @Override public void setStats(){ super.setStats(); config.setStats(stats); }
     @Override public Block getBuild(){
         return this;
     }

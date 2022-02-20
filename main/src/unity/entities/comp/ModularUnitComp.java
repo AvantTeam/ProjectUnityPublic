@@ -214,8 +214,9 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             constructdata = Arrays.copyOf(construct.data, construct.data.length);
         }
         float vellen = this.vel().len();
-        driveDist += vellen;
-        if(construct != null && vellen > 0.01f){
+
+        if(construct != null && vellen > 0.01f && elevation<0.01){
+            driveDist += vellen;
             DrawTransform dt = new DrawTransform(new Vec2(this.x(), this.y()), rotation);
             float dustvel = 0;
             if(moving){

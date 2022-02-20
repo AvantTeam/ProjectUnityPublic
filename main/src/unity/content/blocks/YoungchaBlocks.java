@@ -1,12 +1,17 @@
 package unity.content.blocks;
 
+import arc.*;
+import arc.graphics.*;
+import arc.graphics.g2d.*;
 import mindustry.content.*;
+import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.environment.*;
 import mindustry.world.meta.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
+import unity.graphics.*;
 import unity.world.blocks.*;
 import unity.world.blocks.distribution.*;
 import unity.world.blocks.envrionment.*;
@@ -24,7 +29,7 @@ public class YoungchaBlocks{
     public static @FactionDef("youngcha")
     Block
     oreNickel, concreteBlank, concreteFill, concreteNumber, concreteStripe, concrete, stoneFullTiles, stoneFull,
-    stoneHalf, stoneTiles;
+    stoneHalf, stoneTiles, pit;
     //non environmental
     public static @FactionDef("youngcha")
     Block
@@ -68,7 +73,22 @@ public class YoungchaBlocks{
         stoneFull = new Floor("stone-full");
         stoneHalf = new Floor("stone-half");
         stoneTiles = new Floor("stone-tiles");
+        pit = new Floor("pit"){
+            {
+                buildVisibility = BuildVisibility.editorOnly;
+                cacheLayer = UnityShaders.pitLayer;
+                placeableOn = false;
+                solid = true;
+                variants = 0;
+                canShadow = false;
+                mapColor = Color.black;
 
+            }
+            @Override
+            public TextureRegion[] icons(){
+                return new TextureRegion[]{Core.atlas.find(name + "-icon", name)};
+            }
+        };
 
         driveShaft = new DriveShaft("drive-shaft"){{
             health = 200;

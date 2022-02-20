@@ -1,15 +1,15 @@
 package unity.world.graph;
 
+import arc.*;
 import arc.func.*;
 import arc.graphics.g2d.*;
 import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.entities.units.*;
+import mindustry.graphics.*;
 import mindustry.world.*;
-import unity.world.graph.GraphConnector.FixedGraphConnector.*;
-
-import java.lang.reflect.*;
+import mindustry.world.meta.*;
 
 import static arc.math.geom.Geometry.*;
 import static mindustry.Vars.*;
@@ -86,6 +86,20 @@ public class GraphBlockConfig{
         }
     }
 
+    public void setStats(Stats stats){
+        stats.add(Stat.abilities,table -> {
+            for(var gcnfig:nodeConfig){
+                table.row();
+                table.add(Core.bundle.get("ui.graph."+Graphs.graphInfo.get(gcnfig.key).name)).growX().left().color(Pal.accent);
+                table.row();
+                table.image().growX().pad(5).padLeft(0).padRight(0).height(3).color(Pal.accent);
+                GraphNode gn = gcnfig.value.get(null);
+                table.row();
+                table.table(gn::displayStats).fillX();
+            }
+        });
+    }
+
     public Block getBlock(){
         return block;
     }
@@ -93,7 +107,7 @@ public class GraphBlockConfig{
     public void drawConnectionPoints(BuildPlan req, Eachable<BuildPlan> list){
         //soon
         for(ConnectionConfig c:connections){
-            TextureRegion tr = Graphs.graphIcons.get(c.graphType);
+            TextureRegion tr = Graphs.graphInfo.get(c.graphType).icon;
             if(tr == null){
                 return;
             }

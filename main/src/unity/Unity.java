@@ -12,6 +12,7 @@ import unity.annotations.Annotations.*;
 import unity.content.*;
 import unity.content.blocks.*;
 import unity.gen.*;
+import unity.graphics.*;
 import unity.mod.*;
 import unity.parts.*;
 import unity.ui.*;
@@ -75,6 +76,11 @@ public class Unity extends Mod{
                 }
                 Graphs.load();
                 UnityParts.loadDoodads();
+            });
+            Events.on(FileTreeInitEvent.class, e -> Core.app.post(UnityShaders::load));
+
+            Events.on(DisposeEvent.class, e -> {
+                UnityShaders.dispose();
             });
         }
 

@@ -6,6 +6,7 @@ import arc.util.*;
 import arc.util.io.*;
 import mindustry.gen.*;
 import mindustry.world.*;
+import mindustry.world.meta.*;
 
 //orginally GraphModule
 public class GraphNode<T extends Graph>{
@@ -43,6 +44,7 @@ public class GraphNode<T extends Graph>{
     }
 
     public void displayBars(Table table){}
+    public void displayStats(Table table){};
 
     public void removeEdge(GraphNode g){
     }
