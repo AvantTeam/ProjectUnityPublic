@@ -1,5 +1,6 @@
 package unity.content.blocks;
 
+import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
@@ -11,6 +12,7 @@ import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.world.*;
+import mindustry.world.blocks.environment.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.draw.*;
 import mindustry.world.meta.*;
@@ -35,7 +37,11 @@ import static mindustry.type.ItemStack.empty;
 import static mindustry.type.ItemStack.with;
 
 public class KoruhBlocks {
+    public static final Category expCategory = Category.distribution;
     public static @FactionDef("koruh") Block
+    //environment
+    lava, shallowLava,
+
     //crafting
     denseSmelter, solidifier, steelSmelter, titaniumExtractor, coalExtractor;
 
@@ -45,7 +51,7 @@ public class KoruhBlocks {
     public static @FactionDef("koruh") Block stoneWall, denseWall, steelWall, steelWallLarge, diriumWall, diriumWallLarge, shieldProjector, diriumProjector,
 
     //distribution
-    steelConveyor, teleporter;
+    steelConveyor, teleporter, teleunit;
 
     public static @FactionDef("koruh")
     @Dupe(base = ExpTurret.class, parent = KoruhConveyor.class)
@@ -58,7 +64,7 @@ public class KoruhBlocks {
     //uraniumReactor,
 
     //exp
-    public static @FactionDef("koruh") Block expFountain, expVoid, expTank, expChest, expRouter, expTower, expTowerDiagonal, bufferTower, expHub, expNode, expNodeLarge;// expOutput, expUnloader;
+    public static @FactionDef("koruh") Block expFountain, expVoid, expTank, expChest, expRouter, expTower, expTowerDiagonal, bufferTower, expHub, expNode, expNodeLarge, skillCenter;// expOutput, expUnloader;
 
     //turret
     public static @FactionDef("koruh")
@@ -70,6 +76,51 @@ public class KoruhBlocks {
     public static @FactionDef("koruh") Block inferno;
 
     public static void load(){
+        Blocks.stone.itemDrop = UnityItems.stone;
+        Blocks.craters.itemDrop = UnityItems.stone;
+
+        lava = new Floor("lava-deposit"){
+            {
+                speedMultiplier = 0.1f;
+                variants = 0;
+                liquidDrop = UnityLiquids.lava;
+                liquidMultiplier = 1f;
+                isLiquid = true;
+                status = UnityStatusEffects.molten;
+                statusDuration = 120f;
+                drownTime = 30f;
+                cacheLayer = UnityShaders.lavaLayer;
+                albedo = 0f;
+                emitLight = true;
+                lightRadius = 18f;
+                lightColor = UnityPal.lava.cpy().a(0.7f);
+                attributes.set(Attribute.heat, 1.5f);
+            }
+
+            @Override
+            public TextureRegion[] icons(){
+                return new TextureRegion[]{Core.atlas.find(name + "-icon", name)};
+            }
+        };
+
+        shallowLava = new Floor("lava-shallow"){{
+            buildVisibility = BuildVisibility.hidden;
+            speedMultiplier = 0.5f;
+            variants = 3;
+            liquidDrop = UnityLiquids.lava;
+            liquidMultiplier = 0.6f;
+            isLiquid = true;
+            status = UnityStatusEffects.molten;
+            statusDuration = 90f;
+            drownTime = 100f;
+            cacheLayer = UnityShaders.lavaLayer;
+            albedo = 0f;
+            emitLight = true;
+            lightRadius = 18f;
+            lightColor = UnityPal.lava.cpy().a(0.4f);
+            attributes.set(Attribute.heat, 1f);
+        }};
+
         denseSmelter = new KoruhCrafter("dense-smelter"){{
             requirements(Category.crafting, with(Items.copper, 30, Items.lead, 20, UnityItems.stone, 35));
 
@@ -221,14 +272,14 @@ public class KoruhBlocks {
 
             health = 320;
             hasItems = true;
-            craftTime = 250f;
+            craftTime = 200f;
             craftEffect = UnityFx.diriumCraft;
             itemCapacity = 40;
             ambientSound = Sounds.techloop;
             ambientSoundVolume = 0.02f;
 
             outputItem = new ItemStack(UnityItems.dirium, 1);
-            consumes.items(with(Items.titanium, 6, Items.pyratite, 3, Items.surgeAlloy, 3, UnityItems.steel, 9));
+            consumes.items(with(Items.titanium, 2, Items.coal, 4, UnityItems.uranium, 1, UnityItems.steel, 2));
             consumes.power(8.28f);
 
             expUse = 40;
@@ -451,16 +502,26 @@ public class KoruhBlocks {
             requirements(Category.distribution, with(Items.lead, 22, Items.silicon, 10, Items.phaseFabric, 32, UnityItems.dirium, 32));
         }};
 
-        /*teleunit = new TeleUnit("teleunit"){{
+        teleunit = new UnitTeleporter("teleunit"){{
             requirements(Category.units, with(Items.lead, 180, Items.titanium, 80, Items.silicon, 90, Items.phaseFabric, 64, UnityItems.dirium, 48));
             size = 3;
             ambientSound = Sounds.techloop;
             ambientSoundVolume = 0.02f;
             consumes.power(3f);
-        }};*/
+        }};
+
+        skillCenter = new SkillCenter("researchskill"){{
+            requirements(Category.effect, BuildVisibility.hidden, with(Items.copper, 180, Items.lead, 80, UnityItems.stone, 180, UnityItems.denseAlloy, 48));
+            size = 3;
+            ambientSound = Sounds.techloop;
+            ambientSoundVolume = 0.02f;
+            consumes.power(1f);
+
+            expCapacity = 1000;
+        }};
 
         laser = new ExpPowerTurret("laser-turret"){{
-            requirements(Category.turret, with(Items.copper, 90, Items.silicon, 40, Items.titanium, 15));
+            requirements(Category.turret, with(Items.copper, 40, Items.silicon, 20, UnityItems.denseAlloy, 15));
             size = 2;
             health = 600;
 
@@ -482,7 +543,7 @@ public class KoruhBlocks {
         }};
 
         laserCharge = new ExpPowerTurret("charge-laser-turret"){{
-            requirements(Category.turret, with(UnityItems.denseAlloy, 60, Items.graphite, 15));
+            requirements(Category.turret, with(UnityItems.denseAlloy, 20, Items.graphite, 15));
             size = 2;
             health = 1400;
 
@@ -520,7 +581,7 @@ public class KoruhBlocks {
 
         laserFrost = new ExpLiquidTurret("frost-laser-turret"){{
             ammo(Liquids.cryofluid, UnityBullets.frostLaser);
-            requirements(Category.turret, with(UnityItems.denseAlloy, 60, Items.metaglass, 15));
+            requirements(Category.turret, with(UnityItems.denseAlloy, 20, Items.metaglass, 15));
             size = 2;
             health = 1000;
 
@@ -538,7 +599,7 @@ public class KoruhBlocks {
         }};
 
         laserFractal = new ExpPowerTurret("fractal-laser-turret"){{
-            requirements(Category.turret, with(UnityItems.steel, 50, Items.graphite, 90, Items.thorium, 95));
+            requirements(Category.turret, with(UnityItems.steel, 10, Items.graphite, 30, Items.thorium, 35));
             size = 3;
             health = 2000;
 
@@ -580,7 +641,7 @@ public class KoruhBlocks {
         }};
 
         laserBranch = new BurstChargePowerTurret("swarm-laser-turret"){{
-            requirements(Category.turret, with(UnityItems.steel, 50, Items.silicon, 90, Items.thorium, 95));
+            requirements(Category.turret, with(UnityItems.steel, 10, Items.silicon, 20, Items.thorium, 45));
 
             size = 3;
             health = 2400;
@@ -627,7 +688,7 @@ public class KoruhBlocks {
         }};
 
         laserKelvin = new OmniLiquidTurret("kelvin-laser-turret"){{
-            requirements(Category.turret, with(Items.phaseFabric, 50, Items.metaglass, 90, Items.thorium, 95));
+            requirements(Category.turret, with(Items.phaseFabric, 10, Items.metaglass, 30, Items.thorium, 35));
             size = 3;
             health = 2100;
 
@@ -652,7 +713,7 @@ public class KoruhBlocks {
         }};
 
         laserBreakthrough = new ExpPowerTurret("bt-laser-turret"){{
-            requirements(Category.turret, with(UnityItems.dirium, 190, Items.silicon, 230, Items.thorium, 450, UnityItems.steel, 230));
+            requirements(Category.turret, with(UnityItems.dirium, 90, Items.silicon, 130, Items.thorium, 150, UnityItems.steel, 130));
             size = 4;
             health = 2800;
 
@@ -708,7 +769,7 @@ public class KoruhBlocks {
         }};
 
         inferno = new ExpItemTurret("inferno"){{
-            requirements(Category.turret, with(UnityItems.stone, 150, UnityItems.denseAlloy, 65, Items.graphite, 60));
+            requirements(Category.turret, with(UnityItems.stone, 50, UnityItems.denseAlloy, 45, Items.graphite, 40));
             ammo(
                     Items.scrap, Bullets.slagShot,
                     Items.coal, UnityBullets.coalBlaze,
@@ -731,27 +792,27 @@ public class KoruhBlocks {
         }};
 
         expHub = new ExpHub("exp-output"){{
-            requirements(Category.effect, with(UnityItems.stone, 30, Items.copper, 15));
+            requirements(expCategory, with(UnityItems.stone, 30, Items.copper, 15));
             expCapacity = 100;
         }};
 
         expRouter = new ExpRouter("exp-router"){{
-            requirements(Category.effect, with(UnityItems.stone, 5));
+            requirements(expCategory, with(UnityItems.stone, 5));
         }};
 
         expTower = new ExpTower("exp-tower"){{
-            requirements(Category.effect, with(UnityItems.denseAlloy, 10, Items.silicon, 5));
+            requirements(expCategory, with(UnityItems.denseAlloy, 10, Items.silicon, 5));
             expCapacity = 100;
         }};
 
         expTowerDiagonal = new DiagonalTower("diagonal-tower"){{
-            requirements(Category.effect, with(UnityItems.steel, 10, Items.silicon, 5));
+            requirements(expCategory, with(UnityItems.steel, 10, Items.silicon, 5));
             range = 7;
             expCapacity = 150;
         }};
 
         bufferTower = new ExpTower("buffer-tower"){{
-            requirements(Category.effect, with(Items.thorium, 5, Items.graphite, 10));
+            requirements(expCategory, with(Items.thorium, 5, Items.graphite, 10));
             manualReload = reloadTime = 20f;
             expCapacity = 180;
             buffer = true;
@@ -759,13 +820,13 @@ public class KoruhBlocks {
         }};
 
         expNode = new ExpNode("exp-node"){{
-            requirements(Category.effect, with(UnityItems.denseAlloy, 30, Items.silicon, 30, UnityItems.steel, 8));
+            requirements(expCategory, with(UnityItems.denseAlloy, 30, Items.silicon, 30, UnityItems.steel, 8));
             expCapacity = 200;
             consumes.power(0.6f);
         }};
 
         expNodeLarge = new ExpNode("exp-node-large"){{
-            requirements(Category.effect, with(UnityItems.denseAlloy, 120, Items.silicon, 120, UnityItems.steel, 24));
+            requirements(expCategory, with(UnityItems.denseAlloy, 120, Items.silicon, 120, UnityItems.steel, 24));
             expCapacity = 600;
             range = 10;
             health = 200;
@@ -788,11 +849,11 @@ public class KoruhBlocks {
         }};
 
         expFountain = new ExpSource("exp-fountain"){{
-            requirements(Category.effect, BuildVisibility.sandboxOnly, with());
+            requirements(expCategory, BuildVisibility.sandboxOnly, with());
         }};
 
         expVoid = new ExpVoid("exp-void"){{
-            requirements(Category.effect, BuildVisibility.sandboxOnly, with());
+            requirements(expCategory, BuildVisibility.sandboxOnly, with());
         }};
     }
 }

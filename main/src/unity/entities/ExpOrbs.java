@@ -101,7 +101,7 @@ public class ExpOrbs{
             lightColor = expColor;
             hitEffect = Fx.none;
             shootEffect = Fx.none;
-            despawnEffect = UnityFx.orbDespawn;
+            despawnEffect = UnityFx.orbDies;
             layer = Layer.bullet - 0.01f;
         }
 
@@ -129,7 +129,7 @@ public class ExpOrbs{
             if(tile == null || tile.build == null) return;
 
             if(tile.build instanceof ExpHolder exp && exp.acceptOrb() && exp.handleOrb(expAmount)){
-                b.remove();
+                accepted(b);
             }
             else if(tile.block() instanceof Conveyor conv){
                 if(conv.absorbLasers){ //this will be used as a flag for exp conveyors
@@ -145,6 +145,12 @@ public class ExpOrbs{
                 b.trns(-1.1f * b.vel.x, -1.1f * b.vel.y);
                 b.vel.scl(0f);
             }
+        }
+
+        private void accepted(Bullet b){
+            b.hit = true;
+            UnityFx.orbDespawn.at(b);
+            b.remove();
         }
 
         private void conveyor(Bullet b, Conveyor block, ConveyorBuild build){

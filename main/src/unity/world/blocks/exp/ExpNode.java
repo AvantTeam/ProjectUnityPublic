@@ -102,7 +102,7 @@ public class ExpNode extends ExpTank {
                     tmps.add(exp);
                     tmpm = exp.getExp();
                 }*/
-                if(other != null && other != this && other.team == team && other instanceof ExpHolder exp && !exp.hubbable() && other instanceof LevelHolder){
+                if(other != null && other != this && other.team == team && other instanceof ExpHolder exp && !exp.hubbable() && other instanceof LevelHolder && !tmps.contains(exp)){
                     tmps.add(exp);
                     if(exp.getExp() + 1 > tmpm) tmpm = exp.getExp() + 1;
                 }
@@ -118,7 +118,7 @@ public class ExpNode extends ExpTank {
             }
             int expm = exp;
             for(ExpHolder e : tmps){
-                float score = (1f - (e.getExp() + 1) / (float)(tmpm + 1));
+                float score = (1f - (e.getExp() + 1) / (float)(tmpm));
                 if(score == 0) score = 0.1f;
                 int amount = Mathf.ceilPositive(score / scoresum * expm);
                 if(exp < amount) continue;
