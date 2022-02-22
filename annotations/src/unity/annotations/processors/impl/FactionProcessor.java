@@ -1,7 +1,9 @@
 package unity.annotations.processors.impl;
 
+import arc.audio.*;
 import arc.struct.*;
 import com.squareup.javapoet.*;
+import mindustry.*;
 import mindustry.ctype.*;
 import unity.annotations.Annotations.*;
 import unity.annotations.processors.*;
@@ -56,6 +58,19 @@ public class FactionProcessor extends BaseProcessor{
                     Modifier.PRIVATE, Modifier.STATIC
                 )
                     .addJavadoc("Maps {@link $T} with {@link $T}", cName(Object.class), tName(faction))
+                    .initializer("new $T<>()", cName(ObjectMap.class))
+                .build()
+            )
+            .addField(
+                FieldSpec.builder(
+                    ParameterizedTypeName.get(
+                        cName(ObjectMap.class),
+                        tName(Music.class),
+                        tName(String.class)
+                    ),
+                    "music", Modifier.PRIVATE, Modifier.STATIC
+                )
+                    .addJavadoc("Maps {@link $T} with its category", cName(Music.class))
                     .initializer("new $T<>()", cName(ObjectMap.class))
                 .build()
             )
@@ -133,6 +148,29 @@ public class FactionProcessor extends BaseProcessor{
                     .endControlFlow()
                     .addCode(lnew())
                     .addStatement("return contents")
+                .build()
+            )
+            .addMethod(
+                MethodSpec.methodBuilder("getMusicCategory").addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .addJavadoc(
+                        CodeBlock.builder()
+                            .add("Gets the category of a specific {@link $T}" + lnew(), cName(Music.class))
+                            .add("@param mus The {@link $T}" + lnew(), cName(Music.class))
+                            .add("@return The category")
+                        .build()
+                    )
+                    .returns(ParameterizedTypeName.get(cName(Seq.class), cName(Music.class)))
+                    .addParameter(cName(Music.class), "mus")
+                    .addStatement("$T category = music.get(mus)", cName(String.class))
+                    .addStatement("if(category == null) return $T.control.sound.ambientMusic", cName(Vars.class))
+                    .addCode(lnew())
+                    .beginControlFlow("return switch(category)")
+                        .addStatement("case $S -> $T.control.sound.ambientMusic", "ambient", cName(Vars.class))
+                        .addStatement("case $S -> $T.control.sound.darkMusic", "dark", cName(Vars.class))
+                        .addStatement("case $S -> $T.control.sound.bossMusic", "boss", cName(Vars.class))
+                        .addCode(lnew())
+                        .addStatement("default -> throw new $T($S + category)", cName(IllegalArgumentException.class), "Unknown category: ")
+                    .endControlFlow("")
                 .build()
             );
 
