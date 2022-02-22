@@ -9,6 +9,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
 import arc.util.pooling.Pool.*;
+import mindustry.entities.*;
 import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
@@ -18,6 +19,7 @@ import static mindustry.Vars.*;
 
 public final class Utils{
     public static final PowIn pow6In = new PowIn(6);
+    public static final PowOut pow25Out = new PowOut(25);
 
     public static final float sqrtHalf = Mathf.sqrt(0.5f);
 
@@ -36,6 +38,8 @@ public final class Utils{
     private static final BoolGrid collideLineCollided = new BoolGrid();
     private static final IntSeq lineCast = new IntSeq(), lineCastNext = new IntSeq();
     private static final Seq<Hit> hitEffects = new Seq<>();
+    private static Building tmpBuilding;
+    private static Unit tmpUnit;
     private static boolean hit, hitB;
 
     private Utils(){
@@ -479,6 +483,77 @@ public final class Utils{
         }
 
         hitEffects.clear();
+    }
+
+    /**
+     * Casts forward in a line.
+     * @return the first encountered model.
+     * There's an issue with the one in 126.2, which I fixed in a pr. This can be removed after the next Mindustry release.
+     */
+    public static Healthc linecast(Bullet hitter, float x, float y, float angle, float length){
+        tV.trns(angle, length);
+
+        tmpBuilding = null;
+
+        if(hitter.type.collidesGround){
+            world.raycastEachWorld(x, y, x + tV.x, y + tV.y, (cx, cy) -> {
+                Building tile = world.build(cx, cy);
+                if(tile != null && tile.team != hitter.team){
+                    tmpBuilding = tile;
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        rect.setPosition(x, y).setSize(tV.x, tV.y);
+        float x2 = tV.x + x, y2 = tV.y + y;
+
+        if(rect.width < 0){
+            rect.x += rect.width;
+            rect.width *= -1;
+        }
+
+        if(rect.height < 0){
+            rect.y += rect.height;
+            rect.height *= -1;
+        }
+
+        float expand = 3f;
+
+        rect.y -= expand;
+        rect.x -= expand;
+        rect.width += expand * 2;
+        rect.height += expand * 2;
+
+        tmpUnit = null;
+
+        Units.nearbyEnemies(hitter.team, rect, e -> {
+            if((tmpUnit != null && e.dst2(x, y) > tmpUnit.dst2(x, y)) || !e.checkTarget(hitter.type.collidesAir, hitter.type.collidesGround)) return;
+
+            e.hitbox(hitRect);
+            Rect other = hitRect;
+            other.y -= expand;
+            other.x -= expand;
+            other.width += expand * 2;
+            other.height += expand * 2;
+
+            Vec2 vec = Geometry.raycastRect(x, y, x2, y2, other);
+
+            if(vec != null){
+                tmpUnit = e;
+            }
+        });
+
+        if(tmpBuilding != null && tmpUnit != null){
+            if(Mathf.dst2(x, y, tmpBuilding.getX(), tmpBuilding.getY()) <= Mathf.dst2(x, y, tmpUnit.getX(), tmpUnit.getY())){
+                return tmpBuilding;
+            }
+        }else if(tmpBuilding != null){
+            return tmpBuilding;
+        }
+
+        return tmpUnit;
     }
 
     static class Hit implements Poolable{

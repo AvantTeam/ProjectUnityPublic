@@ -12,6 +12,7 @@ import unity.annotations.Annotations.*;
 import unity.content.*;
 import unity.content.blocks.*;
 import unity.gen.*;
+import unity.graphics.*;
 import unity.mod.*;
 import unity.parts.*;
 import unity.ui.*;
@@ -62,6 +63,7 @@ public class Unity extends Mod{
 
             // Disclaimer, because apparently we're stupid enough to need this
             Events.on(ClientLoadEvent.class, e -> {
+                UnitySettings.init();
                 Vars.ui.showOkText("@mod.disclaimer.title", "@mod.disclaimer.text", () -> {});
 
                 //bc they are not a contentType
@@ -74,7 +76,19 @@ public class Unity extends Mod{
                 }
                 UnityParts.loadDoodads();
             });
+
+            Events.on(FileTreeInitEvent.class, e -> Core.app.post(UnityShaders::load));
+
+            Events.on(DisposeEvent.class, e -> {
+                UnityShaders.dispose();
+            });
         }
+
+        Events.on(ContentInitEvent.class, e -> {
+            if(!headless){
+                Regions.load();
+            }
+        });
 
         Utils.init();
 
@@ -110,8 +124,10 @@ public class Unity extends Mod{
         Faction.init();
         UnityItems.load();
         UnityStatusEffects.load();
+        UnityLiquids.load();
         UnityBullets.load();
         UnityUnitTypes.load();
+        KoruhBlocks.load();
         YoungchaBlocks.load();
         UnityParts.load();
 
