@@ -77,7 +77,9 @@ public class KoruhBlocks {
 
     public static void load(){
         Blocks.stone.itemDrop = UnityItems.stone;
+        ((Floor)Blocks.stone).playerUnmineable = true;
         Blocks.craters.itemDrop = UnityItems.stone;
+        ((Floor)Blocks.craters).playerUnmineable = true;
 
         lava = new Floor("lava-deposit"){
             {
@@ -119,6 +121,7 @@ public class KoruhBlocks {
             lightRadius = 18f;
             lightColor = UnityPal.lava.cpy().a(0.4f);
             attributes.set(Attribute.heat, 1f);
+            blendGroup = lava;
         }};
 
         denseSmelter = new KoruhCrafter("dense-smelter"){{
@@ -510,9 +513,9 @@ public class KoruhBlocks {
             consumes.power(3f);
         }};
 
-        skillCenter = new SkillCenter("researchskill"){{
-            requirements(Category.effect, BuildVisibility.hidden, with(Items.copper, 180, Items.lead, 80, UnityItems.stone, 180, UnityItems.denseAlloy, 48));
-            size = 3;
+        skillCenter = new SkillCenter("skill-center"){{
+            requirements(Category.effect, with(Items.copper, 180, Items.lead, 80, UnityItems.stone, 180, UnityItems.denseAlloy, 48));
+            size = 4;
             ambientSound = Sounds.techloop;
             ambientSoundVolume = 0.02f;
             consumes.power(1f);
