@@ -1,6 +1,7 @@
 package unity.graphics.menu;
 
 import arc.*;
+import arc.graphics.Blending;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.util.*;
@@ -43,6 +44,18 @@ public class UnityMenuRenderer extends MenuRenderer{
 
         Draw.color(0, 0, 0, 1 - dark);
         Fill.crect(0, 0, Core.graphics.getWidth(), Core.graphics.getHeight());
+
+        Draw.blend(Blending.additive);
+        Draw.color(1, 1, 1, 0.5f);
+
+        float offset = (Time.time * 1.1f) % 160;
+        for(int x = 0; x < Core.graphics.getWidth() / 160 + 1; x++){
+            for(int y = 0; y < Core.graphics.getHeight() / 160 + 1; y++ ){
+                Fill.circle(160 * x - offset, y * 160, 2);
+            }
+        }
+
+        Draw.blend();
         Draw.color();
 
         if(time > slideDuration){

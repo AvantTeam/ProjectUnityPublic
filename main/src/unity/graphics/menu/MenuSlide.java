@@ -42,17 +42,21 @@ public class MenuSlide implements Disposable{
                 Block wall =  Blocks.air;
                 Block overlay = Blocks.air;
 
-                Tile tile;
-                tiles.set(x, y, (tile = new CachedTile()));
-                tile.x = (short)x;
-                tile.y = (short)y;
-
-                tile.setFloor(floor.asFloor());
-                tile.setBlock(wall);
-                tile.setOverlay(overlay);
+                setTile(x, y, wall, overlay, floor, tiles);
             }
         }
     };
+
+    protected static void setTile(int x, int y, Block wall, Block overlay, Block floor, Tiles tiles){
+        Tile tile;
+        tiles.set(x, y, (tile = new CachedTile()));
+        tile.x = (short)x;
+        tile.y = (short)y;
+
+        tile.setFloor(floor.asFloor());
+        tile.setBlock(wall);
+        tile.setOverlay(overlay);
+    }
 
     protected void cache(){
         // draw shadows
