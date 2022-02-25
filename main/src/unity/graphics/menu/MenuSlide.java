@@ -38,12 +38,9 @@ public class MenuSlide implements Disposable{
     protected void generate(Tiles tiles){
         for(int x = 0; x < tiles.width; x++){
             for(int y = 0; y < tiles.height; y++){
-                Block floor = Blocks.stone;
+                Block floor = Blocks.air;
                 Block wall =  Blocks.air;
-
-                if(x % 10 == 0){
-                    wall = Blocks.stoneWall;
-                }
+                Block overlay = Blocks.air;
 
                 Tile tile;
                 tiles.set(x, y, (tile = new CachedTile()));
@@ -52,7 +49,7 @@ public class MenuSlide implements Disposable{
 
                 tile.setFloor(floor.asFloor());
                 tile.setBlock(wall);
-                tile.setOverlay(Blocks.air);
+                tile.setOverlay(overlay);
             }
         }
     };
@@ -68,7 +65,6 @@ public class MenuSlide implements Disposable{
                 Fill.rect(tile.x + 0.5f, tile.y + 0.5f, 1, 1);
             }
         }
-
         Draw.color();
         shadows.end();
 
@@ -82,7 +78,6 @@ public class MenuSlide implements Disposable{
             tile.floor().drawBase(tile);
             tile.overlay().drawBase(tile);
         }
-
         cacheFloor = batch.endCache();
         batch.beginCache();
 
@@ -90,7 +85,6 @@ public class MenuSlide implements Disposable{
         for(Tile tile : world.tiles){
             tile.block().drawBase(tile);
         }
-
         cacheWall = batch.endCache();
 
         Core.batch = prev;
