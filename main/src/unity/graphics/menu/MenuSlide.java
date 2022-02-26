@@ -17,15 +17,25 @@ public class MenuSlide implements Disposable{
     protected Mat mat = new Mat();
     protected Camera camera = new Camera();
     protected TextureRegion shadowTexture;
+    protected int cacheFloor, cacheWall;
 
     protected int width, height;
+    protected int seed;
 
+    private static Rand rand = new Rand();
 
-    protected int cacheFloor, cacheWall;
+    static {
+        rand.setSeed(Time.millis());
+    }
+
+    protected int seed(){
+        return rand.nextInt();
+    }
 
     public void generateWorld(int width, int height){
         this.width = width;
         this.height = height;
+        seed = seed();
         world.beginMapLoad();
         Tiles tiles = world.resize(width, height);
         shadows = new FrameBuffer(width, height);

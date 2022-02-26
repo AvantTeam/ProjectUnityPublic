@@ -1,10 +1,8 @@
 package unity.graphics.menu;
 
-import arc.*;
 import arc.math.*;
 import arc.util.noise.*;
 import mindustry.content.*;
-import mindustry.type.*;
 import mindustry.world.*;
 import unity.content.blocks.*;
 
@@ -14,7 +12,6 @@ public class MenuSlides{
     stone = new MenuSlide(){
         @Override
         protected void generate(Tiles tiles){
-            int seed = Mathf.random(100000);
             boolean tech = Mathf.chance(0.25);
             for(int x = 0; x < tiles.width; x++){
                 for(int y = 0; y < tiles.height; y++){
@@ -53,7 +50,6 @@ public class MenuSlides{
     grass = new MenuSlide(){
         @Override
         protected void generate(Tiles tiles){
-            int seed = Mathf.random(100000);
             for(int x = 0; x < tiles.width; x++){
                 for(int y = 0; y < tiles.height; y++){
                     Tile t = tiles.get(x, y);
