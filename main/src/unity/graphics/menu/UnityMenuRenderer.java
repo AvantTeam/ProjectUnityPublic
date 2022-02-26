@@ -7,14 +7,12 @@ import arc.math.*;
 import arc.util.*;
 import mindustry.graphics.*;
 
-import java.util.*;
-
 import static mindustry.Vars.*;
 
 public class UnityMenuRenderer extends MenuRenderer{
-    public float slideDuration = 1200, transitionTime = 60;
+    public float slideDuration = 2400, transitionTime = 120, scrollSpeed = 3;
     private float time;
-    private final int width = !mobile ? 200 : 120, height = !mobile ? 50 : 40;
+    private int width = !mobile ? 100 : 60, height = !mobile ? 50 : 40;
     private final int viewWidth = !mobile ? 100 : 60;
     private int index = 0;
 
@@ -24,6 +22,7 @@ public class UnityMenuRenderer extends MenuRenderer{
     };
 
     public UnityMenuRenderer(){
+        width += (int)Math.ceil((slideDuration * scrollSpeed) / 60) + 5;
         unityGenerate();
     }
 
@@ -37,9 +36,11 @@ public class UnityMenuRenderer extends MenuRenderer{
             menus[ii] = temp;
         }
 
+        Time.mark();
         for(MenuSlide menu : menus){
             menu.generateWorld(width, height);
         }
+        Log.info("Total " + Time.elapsed());
     }
 
     @Override
@@ -58,7 +59,7 @@ public class UnityMenuRenderer extends MenuRenderer{
         Draw.blend(Blending.additive);
         Draw.color(1, 1, 1, 0.5f);
 
-        float offset = (Time.time * 1.1f) % 160;
+        float offset = (Time.time * scrollSpeed * 0.8f) % 160;
         for(int x = 0; x < Core.graphics.getWidth() / 160 + 1; x++){
             for(int y = 0; y < Core.graphics.getHeight() / 160 + 1; y++ ){
                 Fill.circle(160 * x - offset, y * 160, 2);

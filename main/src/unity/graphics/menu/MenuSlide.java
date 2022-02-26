@@ -12,12 +12,13 @@ import mindustry.world.*;
 
 import static mindustry.Vars.*;
 public class MenuSlide implements Disposable{
-    protected CacheBatch batch;
-    protected FrameBuffer shadows;
     protected Mat mat = new Mat();
     protected Camera camera = new Camera();
+
     protected TextureRegion shadowTexture;
     protected int cacheFloor, cacheWall;
+    protected CacheBatch batch;
+    protected FrameBuffer shadows;
 
     protected int width, height;
     protected int seed;
@@ -36,12 +37,19 @@ public class MenuSlide implements Disposable{
         this.width = width;
         this.height = height;
         seed = seed();
+
+        Time.mark();
         world.beginMapLoad();
-        Tiles tiles = world.resize(width, height);
+
+        // Effectively clear the entire world so generation doesnt overlap.
+        world.tiles = new Tiles(width, height);
+
         shadows = new FrameBuffer(width, height);
 
-        generate(tiles);
+        generate(world.tiles);
+
         world.endMapLoad();
+        Log.info("Generated in " + Time.elapsed());
         cache();
     };
 
@@ -52,14 +60,14 @@ public class MenuSlide implements Disposable{
                 Block wall =  Blocks.air;
                 Block overlay = Blocks.air;
 
-                setTile(x, y, wall, overlay, floor, tiles);
+                setTile(x, y, wall, overlay, floor);
             }
         }
     };
 
-    protected static void setTile(int x, int y, Block wall, Block overlay, Block floor, Tiles tiles){
+    protected static void setTile(int x, int y, Block wall, Block overlay, Block floor){
         Tile tile;
-        tiles.set(x, y, (tile = new CachedTile()));
+        world.tiles.set(x, y, (tile = new CachedTile()));
         tile.x = (short)x;
         tile.y = (short)y;
 
@@ -108,7 +116,7 @@ public class MenuSlide implements Disposable{
     };
 
     public void render(float time, float duration, int viewWidth, int viewHeight){
-        float movement = width / duration;
+        float movement = ((width - viewWidth) * tilesize) / duration;
         float scaling = Math.max(Scl.scl(4f), Math.max(Core.graphics.getWidth() / ((viewWidth - 1f) * tilesize), Core.graphics.getHeight() / ((viewHeight - 1f) * tilesize)));
         camera.position.set(viewWidth * tilesize / 2f + movement * time, viewHeight * tilesize / 2f);
         camera.resize(Core.graphics.getWidth() / scaling,
@@ -118,14 +126,20 @@ public class MenuSlide implements Disposable{
         Draw.flush();
         Draw.proj(camera);
         batch.setProjection(camera.mat);
+
+        // render floors
         batch.beginDraw();
         batch.drawCache(cacheFloor);
         batch.endDraw();
+
+        // render shadows
         Draw.color();
         Draw.rect(Draw.wrap(shadows.getTexture()),
         width * tilesize / 2f - 4f, height * tilesize / 2f - 4f,
         width * tilesize, -height * tilesize);
         Draw.flush();
+
+        // render walls
         batch.beginDraw();
         batch.drawCache(cacheWall);
         batch.endDraw();

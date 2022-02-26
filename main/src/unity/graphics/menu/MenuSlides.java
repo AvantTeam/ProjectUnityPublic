@@ -41,7 +41,7 @@ public class MenuSlides{
                         }
                     }
 
-                    setTile(x, y, wall, Blocks.air, floor, tiles);
+                    setTile(x, y, wall, Blocks.air, floor);
                 }
             }
         }
@@ -52,12 +52,10 @@ public class MenuSlides{
         protected void generate(Tiles tiles){
             for(int x = 0; x < tiles.width; x++){
                 for(int y = 0; y < tiles.height; y++){
-                    Tile t = tiles.get(x, y);
-
                     Block floor = YoungchaBlocks.concreteNumber;
                     Block wall = Blocks.air;
 
-                    if(t == null || t.floor() != YoungchaBlocks.concreteNumber){
+                    if(tiles.get(x, y) == null){
                         floor = YoungchaBlocks.concreteFill;
                         if(Mathf.chance(0.1)){
                             floor = YoungchaBlocks.concreteFill;
@@ -71,8 +69,8 @@ public class MenuSlides{
                         floor = YoungchaBlocks.concreteStripe;
 
                         if(c1 && c2){
-                            setTile(x + 1, y + 1, Blocks.air, Blocks.air, YoungchaBlocks.concreteNumber, tiles);
-                            setTile(x + 2, y + 1, Blocks.air, Blocks.air, YoungchaBlocks.concreteNumber, tiles);
+                            setTile(x + 1, y + 1, Blocks.air, Blocks.air, YoungchaBlocks.concreteNumber);
+                            setTile(x + 2, y + 1, Blocks.air, Blocks.air, YoungchaBlocks.concreteNumber);
                         }
 
                         if(Simplex.noise2d(seed + 3, 2, 0.6, 1/22.0, x, y) > 0.5){
@@ -92,7 +90,7 @@ public class MenuSlides{
                         }
                     }
 
-                    setTile(x, y, wall, Blocks.air, floor, tiles);
+                    setTile(x, y, wall, Blocks.air, floor);
                 }
             }
         }
