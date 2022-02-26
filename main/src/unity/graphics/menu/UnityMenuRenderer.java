@@ -7,6 +7,8 @@ import arc.math.*;
 import arc.util.*;
 import mindustry.graphics.*;
 
+import java.util.*;
+
 import static mindustry.Vars.*;
 
 public class UnityMenuRenderer extends MenuRenderer{
@@ -27,6 +29,14 @@ public class UnityMenuRenderer extends MenuRenderer{
 
     // causes method signature conflicts if i just named it "generate()"
     public void unityGenerate(){
+        // shuffle the menus
+        for(int i = menus.length - 1; i >= 0; i--){
+            int ii = (int)Mathf.randomSeed(Time.nanos(), i);
+            MenuSlide temp = menus[i];
+            menus[i] = menus[ii];
+            menus[ii] = temp;
+        }
+
         for(MenuSlide menu : menus){
             menu.generateWorld(width, height);
         }
