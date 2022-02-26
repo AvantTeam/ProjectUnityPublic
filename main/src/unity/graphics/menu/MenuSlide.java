@@ -15,7 +15,6 @@ public class MenuSlide implements Disposable{
     protected Mat mat = new Mat();
     protected Camera camera = new Camera();
 
-    protected TextureRegion shadowTexture;
     protected int cacheFloor, cacheWall;
     protected CacheBatch batch;
     protected FrameBuffer shadows;
@@ -110,9 +109,6 @@ public class MenuSlide implements Disposable{
         cacheWall = batch.endCache();
 
         Core.batch = prev;
-
-        // cache shadows
-        shadowTexture = Draw.wrap(shadows.getTexture());
     };
 
     public void render(float time, float duration, int viewWidth, int viewHeight){

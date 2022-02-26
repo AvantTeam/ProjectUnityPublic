@@ -56,7 +56,6 @@ public class UnityMenuRenderer extends MenuRenderer{
         Draw.color(0, 0, 0, 1 - dark);
         Fill.crect(0, 0, Core.graphics.getWidth(), Core.graphics.getHeight());
 
-        Draw.blend(Blending.additive);
         Draw.color(1, 1, 1, 0.5f);
 
         float offset = (Time.time * scrollSpeed * 0.8f) % 160;
@@ -65,9 +64,6 @@ public class UnityMenuRenderer extends MenuRenderer{
                 Fill.circle(160 * x - offset, y * 160, 2);
             }
         }
-
-        Draw.blend();
-        Draw.color();
 
         if(time > slideDuration){
             if(index + 1 < menus.length){
