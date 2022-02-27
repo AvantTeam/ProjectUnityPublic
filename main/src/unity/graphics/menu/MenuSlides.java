@@ -9,7 +9,7 @@ import unity.content.blocks.*;
 public class MenuSlides{
     public static MenuSlide
 
-    stone = new MenuSlide(){
+    stone = new MenuSlide(false){
         @Override
         protected void generate(Tiles tiles){
             boolean tech = Mathf.chance(0.25);
@@ -47,7 +47,7 @@ public class MenuSlides{
         }
     },
 
-    grass = new MenuSlide(){
+    grass = new MenuSlide(false){
         @Override
         protected void generate(Tiles tiles){
             for(int x = 0; x < tiles.width; x++){
@@ -89,6 +89,20 @@ public class MenuSlides{
                             wall = Blocks.pine;
                         }
                     }
+
+                    setTile(x, y, wall, Blocks.air, floor);
+                }
+            }
+        }
+    },
+
+    warzone = new MenuSlide(true){
+        @Override
+        protected void generate(Tiles tiles){
+            for(int x = 0; x < tiles.width; x++){
+                for(int y = 0; y < tiles.height; y++){
+                    Block floor = Blocks.stone;
+                    Block wall = Blocks.air;
 
                     setTile(x, y, wall, Blocks.air, floor);
                 }

@@ -2,6 +2,7 @@ package unity.graphics.menu;
 
 import arc.*;
 import arc.graphics.*;
+import arc.graphics.Texture.*;
 import arc.graphics.g2d.*;
 import arc.graphics.gl.*;
 import arc.math.*;
@@ -18,6 +19,9 @@ public class MenuSlide implements Disposable{
     protected int cacheFloor, cacheWall;
     protected CacheBatch batch;
     protected FrameBuffer shadows;
+    protected FrameBuffer dark;
+
+    protected boolean doDark;
 
     protected int width, height;
     protected int seed;
@@ -26,6 +30,10 @@ public class MenuSlide implements Disposable{
 
     static {
         rand.setSeed(Time.millis());
+    }
+
+    public MenuSlide(boolean dark){
+        this.doDark = dark;
     }
 
     protected int seed(){
@@ -44,6 +52,10 @@ public class MenuSlide implements Disposable{
         world.tiles = new Tiles(width, height);
 
         shadows = new FrameBuffer(width, height);
+
+        if(doDark){
+            dark = new FrameBuffer(width, height);
+        }
 
         generate(world.tiles);
 
@@ -88,6 +100,26 @@ public class MenuSlide implements Disposable{
         }
         Draw.color();
         shadows.end();
+
+        // draw darkness if enabled
+        if(doDark){
+            Draw.proj().setOrtho(0, 0, dark.getWidth(), dark.getHeight());
+            dark.begin(Color.clear);
+            for(Tile tile :  world.tiles){
+                float darkness = world.getDarkness(tile.x, tile.y);
+
+                if(darkness > 0){
+                    Draw.colorl(0.2f, Math.min((darkness + 0.5f) / 4f, 1f));
+                    Fill.rect(tile.x + 0.5f, tile.y + 0.5f, 1, 1);
+                }
+            }
+
+            Draw.flush();
+            Draw.color();
+            dark.end();
+
+            dark.getTexture().setFilter(TextureFilter.linear);
+        }
 
         Batch prev = Core.batch;
 
@@ -139,6 +171,15 @@ public class MenuSlide implements Disposable{
         batch.beginDraw();
         batch.drawCache(cacheWall);
         batch.endDraw();
+
+        // render darkness if enabled
+        if(doDark){
+            Draw.color();
+            Draw.rect(Draw.wrap(dark.getTexture()),
+            width * tilesize / 2f - 4f, height * tilesize / 2f - 4f,
+            width * tilesize, -height * tilesize);
+            Draw.flush();
+        }
 
         Draw.proj(mat);
         Draw.color(0f, 0f, 0f, 0.3f);
