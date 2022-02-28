@@ -10,7 +10,7 @@ import mindustry.graphics.*;
 import static mindustry.Vars.*;
 
 public class UnityMenuRenderer extends MenuRenderer{
-    public float slideDuration = 2400, transitionTime = 120, scrollSpeed = 3;
+    public float slideDuration = 60 * 40, transitionTime = 120, scrollSpeed = 1;
     private float time;
     private int width = !mobile ? 100 : 60, height = !mobile ? 50 : 40;
     private final int viewWidth = !mobile ? 100 : 60;
