@@ -68,22 +68,7 @@ public class Unity extends Mod{
             // Disclaimer, because apparently we're stupid enough to need this
             Events.on(ClientLoadEvent.class, e -> {
                 UnitySettings.init();
-                //Vars.ui.showOkText("@mod.disclaimer.title", "@mod.disclaimer.text", () -> {});
-                BaseDialog dialog = new BaseDialog("@mod.disclaimer.title");
-                dialog.cont.add("@mod.disclaimer.text").width(500f).wrap().pad(4f).get().setAlignment(Align.center, Align.center);
-                dialog.buttons.defaults().size(200f, 54f).pad(2f);
-                dialog.setFillParent(false);
-                TextButton b = dialog.buttons.button("@ok", dialog::hide).get();
-                //Add a delay to when the ok button can be pressed. Read the damn disclaimer and don't ignore it like you do with every terms and conditions list you see.
-                b.setDisabled(() -> b.color.a < 1);
-                b.actions(
-                    Actions.alpha(0),
-                    Actions.delay(10),
-                    Actions.fadeIn(2)
-                );
-                b.getStyle().disabledFontColor = b.getStyle().fontColor;
-                b.getStyle().disabled = b.getStyle().up;
-                dialog.show();
+                new DisclaimerDialog().show();
 
                 //bc they are not a contentType
                 ModularPartType.loadStatic();
