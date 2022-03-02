@@ -78,8 +78,8 @@ public class Unity extends Mod{
                 b.setDisabled(() -> b.color.a < 1);
                 b.actions(
                     Actions.alpha(0),
-                    Actions.delay(5),
-                    Actions.fadeIn(3)
+                    Actions.delay(10),
+                    Actions.fadeIn(2)
                 );
                 b.getStyle().disabledFontColor = b.getStyle().fontColor;
                 b.getStyle().disabled = b.getStyle().up;
