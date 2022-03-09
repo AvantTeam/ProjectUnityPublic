@@ -1,6 +1,5 @@
 package unity.world.blocks.production;
 
-import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
@@ -13,13 +12,9 @@ import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
-import mindustry.world.blocks.distribution.*;
-import mindustry.world.blocks.distribution.Sorter.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
-import unity.world.blocks.GenericGraphBlock.*;
 import unity.world.graph.*;
-import unity.world.graph.GraphConnector.*;
 
 import static mindustry.Vars.*;
 
@@ -107,7 +102,7 @@ public class CruciblePump extends GenericGraphBlock{
             Draw.color(crucibleNode().getColor());
             Fill.rect(x, y, tilesize, tilesize);
             Draw.color();
-            Draw.rect(base, x, y, -getCorrectRotation());
+            Draw.rect(base, x, y, -get2SpriteRotation());
             if(config != null){
                 Draw.color(config.color);
                 UnityDrawf.drawRectOffsetHorz(arrow, x, y,arrow.width*Draw.scl,arrow.height*Draw.scl, rotdeg(),(torque.rotation*0.5f/360f)%1f);

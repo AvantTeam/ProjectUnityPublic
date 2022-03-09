@@ -9,7 +9,9 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.ui.*;
+import mindustry.world.blocks.power.PowerGenerator.*;
 import mindustry.world.meta.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
@@ -44,6 +46,22 @@ public class SeebeckGenerator extends GenericGraphBlock{
         heat[2] = Core.atlas.find(name+"-heat-center");
     }
 
+    @Override
+    public void setStats(){
+        super.setStats();
+        stats.add(Stat.basePowerGeneration, Core.bundle.get("stat.unity-seebeckStrength"),seebeckStrength * 60.0f);
+    }
+
+    @Override
+    public void setBars(){
+        super.setBars();
+        bars.add("power", (SeebeckGeneratorBuild entity) -> new Bar(() ->
+        Core.bundle.format("bar.poweroutput",
+        Strings.fixed(entity.getPowerProduction() * 60 * entity.timeScale(), 1)),
+        () -> Pal.powerBar,
+        () -> entity.getPowerProduction()/maxPower));
+    }
+
     public class SeebeckGeneratorBuild extends GenericGraphBuild{
         float leftheat,rightheat;
         float[] heatdiff = {0};
@@ -52,6 +70,7 @@ public class SeebeckGenerator extends GenericGraphBlock{
         public float getPowerProduction(){
             return Mathf.clamp(powergen,0,maxPower);
         }
+
 
         @Override
         public void updateTile(){

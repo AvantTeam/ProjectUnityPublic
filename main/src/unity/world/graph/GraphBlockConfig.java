@@ -10,6 +10,7 @@ import mindustry.entities.units.*;
 import mindustry.graphics.*;
 import mindustry.world.*;
 import mindustry.world.meta.*;
+import unity.world.graph.GraphConnector.*;
 
 import static arc.math.geom.Geometry.*;
 import static mindustry.Vars.*;
@@ -45,6 +46,18 @@ public class GraphBlockConfig{
         }
     }
 
+    public <T extends Graph> void distanceConnection(Class<T> tClass, int connections){
+        try{
+            var constructor = tClass.getConstructor();
+            addConnectionConfig(new DistanceConnectionConfig(tClass,()-> {
+                try{ return constructor.newInstance(); } catch(Exception e) { e.printStackTrace(); }
+                return null;
+            },connections));
+        }catch(Exception e){
+            throw new IllegalStateException("Graph doesn't have a empty constructor or constructor is invalid/inaccessible");
+        }
+    }
+
     public static abstract class ConnectionConfig<T extends Graph>{
         public GraphBlockConfig config;
         Class<T> graphType;
@@ -63,6 +76,19 @@ public class GraphBlockConfig{
 
         public Class<T> getGraphType(){
             return graphType;
+        }
+    }
+
+    public static class DistanceConnectionConfig<T extends Graph>  extends ConnectionConfig<T>{
+        int connections;
+        public DistanceConnectionConfig(Class<T> tClass, Prov<T> newGraph, int connections){
+            super(tClass, newGraph);
+            this.connections=connections;
+        }
+
+        @Override
+        public GraphConnector getConnector(GraphNode gn){
+            return new DistanceGraphConnector(connections,gn, newGraph.get());
         }
     }
 
@@ -95,7 +121,7 @@ public class GraphBlockConfig{
                 table.image().growX().pad(5).padLeft(0).padRight(0).height(3).color(Pal.accent);
                 GraphNode gn = gcnfig.value.get(null);
                 table.row();
-                table.table(gn::displayStats).fillX();
+                table.table(gn::displayStats).growX();
             }
         });
     }

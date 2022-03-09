@@ -123,4 +123,11 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
     public void addHeatEnergy(float e){
             heatenergy += e;
         }
+
+    @Override
+    public void displayStats(Table table){
+        addBundleStatLevelLine(table,"stat.unity-emissiveness",emissiveness*60,new float[]{0.5f,1f,3f,10,20});
+        addBundleStatLine(table,"stat.unity-heatcapacity",heatcapacity);
+        addBundleStatLine(table,"stat.unity-heatconductivity",conductivity*60);
+    }
 }

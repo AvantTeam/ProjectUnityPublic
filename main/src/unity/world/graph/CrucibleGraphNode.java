@@ -48,14 +48,14 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
         table.table(bt -> {
             bt.left().defaults().padRight(3).left();
             bt.row();
-            bt.add(Core.bundle.format("stat.unity-cruciblecapacity",this.capacity));
+            addStatLine(bt,Stat.liquidCapacity.localized(),Core.bundle.format("stat.unity-cruciblecapacity",this.capacity));
             if(doesCrafting){
                 for(var melt:CrucibleRecipes.items){
                     bt.row();
                     bt.add(new CrucibleMeltStatElement(melt.key));
                 }
             }
-        }).padTop(-9).padLeft(0).left().get().background( Tex.underline);
+        }).padTop(-9).fillX().padLeft(0).left().get().background( Tex.underline);
         //stats.add(Stat.abilities,);
     }
     @Override

@@ -42,6 +42,10 @@ public interface GraphBuild{
                     getNodes().put(connectionConfig.getGraphType(), (GraphNode)gnode);
                 }
                 var node = getGraphNode(connectionConfig.getGraphType());
+                node.connectors++;
+            }
+            for(var connectionConfig : cfg.connections){
+                var node = getGraphNode(connectionConfig.getGraphType());
                 node.connector.add(connectionConfig.getConnector(node));
             }
         }
@@ -78,13 +82,13 @@ public interface GraphBuild{
 
     default void updateGraphs(){
         if(getPrevRotation()==-1){
-            setPrevRotation(getBuild().rotation);
             connectToGraph();
+            setPrevRotation(getBuild().rotation);
         }
 
         if(getPrevRotation() != getBuild().rotation && getBuild().block.rotate){
-            setPrevRotation(getBuild().rotation);
             onRotate();
+            setPrevRotation(getBuild().rotation);
         }
 
         eachNode((cls, graphNode) -> {
@@ -130,7 +134,7 @@ public interface GraphBuild{
         }
 
     //conv for drawing
-    default float getCorrectRotation(){
+    default float get2SpriteRotation(){
         return (getBuild().rotdeg() + 90f) % 180f - 90f;
     }
 }

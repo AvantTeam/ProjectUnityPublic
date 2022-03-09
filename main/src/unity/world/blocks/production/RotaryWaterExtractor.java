@@ -18,7 +18,6 @@ import unity.world.graph.*;
 import static arc.Core.*;
 
 public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
-    public float maxSpeed;
     ////interface
     public GraphBlockConfig config = new GraphBlockConfig(this);
     @Override public Block getBuild(){
@@ -37,6 +36,7 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         solid = true;
         noUpdateDisabled = false;
         rotate = true;
+        drawArrow = false;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
 
         @Override
         public float efficiency(){
-            return super.efficiency()*Mathf.clamp(getGraph(TorqueGraph.class).lastVelocity/maxSpeed);
+            return super.efficiency()*Mathf.clamp(getGraph(TorqueGraph.class).lastVelocity/torqueNode().maxSpeed);
         }
 
         @Override

@@ -152,7 +152,7 @@ void main() {
     if (az>=52.0){ //truss top
         vec2 tpos = coords+dir*52.0*length;
         vec4 truss = textureRegion(u_truss, fract(tpos/24.0)).rgba;
-        float shadlen = 60.0/8.0;
+        float shadlen = 30.0/8.0;
         float sz = tileMarchCoord(vec2(0.707,0.707),shadlen,tpos,v);
         if(sz<shadlen-1){
             truss.rgb *= 0.5;

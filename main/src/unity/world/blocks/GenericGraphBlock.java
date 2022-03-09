@@ -100,6 +100,20 @@ public class GenericGraphBlock extends Block implements GraphBlock{
                             Draw.color(Pal.accent);
                             Drawf.circles(extcon.getNode().build().x, extcon.getNode().build().y, tilesize * 0.3f);
                         });
+                        if(cong.getGraph() instanceof TorqueGraph tg){
+                            tg.propagate(g->{
+                                if(g==cong.getGraph()){
+                                    return;
+                                }
+                                g.each((c) -> {
+                                    GraphConnector extcon = (GraphConnector)c;
+                                    Draw.color(Pal.reactorPurple);
+                                    Drawf.circles(extcon.getNode().build().x, extcon.getNode().build().y, tilesize * 0.3f);
+                                });
+                            });
+                        }
+
+
                         cong.getGraph().eachEdge(e -> {
                             GraphEdge edge = (GraphEdge)e;
                             UnityDrawf.line(Pal.accent, edge.n1.getNode().build().x, edge.n1.getNode().build().y, edge.n2.getNode().build().x, edge.n2.getNode().build().y);

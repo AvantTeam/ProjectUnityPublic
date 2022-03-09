@@ -173,6 +173,26 @@ public final class UnityDrawf{
         Lines.line(x, y, x2, y2);
         Draw.reset();
     }
+    public static void arc(float x, float y, float r, float fromRadian,float toRadian){
+        int seg = (int)Math.max(1,Lines.circleVertices(r)*Math.abs(toRadian-fromRadian)/(2*Mathf.pi));
+        Vec2 ptop = new Vec2(), pbottom = new Vec2(); Vec2 ctop = new Vec2(), cbottom = new Vec2();
+        float c = Mathf.cos(fromRadian);
+        float s = Mathf.sin(fromRadian);
+        float thick = Lines.getStroke()*0.5f;
+        ptop.set(c*(r+thick)+x,s*(r+thick)+y);
+        pbottom.set(c*(r-thick)+x,s*(r-thick)+y);
+        for(int i = 0;i<seg;i++){
+            float t = Mathf.lerp(fromRadian,toRadian,(i+1f)/seg);
+            c = Mathf.cos(t);
+            s = Mathf.sin(t);
+            ctop.set(c*(r+thick)+x,s*(r+thick)+y);
+            cbottom.set(c*(r-thick)+x,s*(r-thick)+y);
+            Fill.quad(Core.atlas.white(), ptop.x,ptop.y,ctop.x,ctop.y,cbottom.x,cbottom.y,pbottom.x,pbottom.y);
+            ptop.set(ctop);
+            pbottom.set(cbottom);
+        }
+
+    }
     
     public static void mulVec(float[] mat, Vec3 vec){
         float x = vec.x * mat[M00] + vec.y * mat[M01] + vec.z * mat[M02] + mat[M03];

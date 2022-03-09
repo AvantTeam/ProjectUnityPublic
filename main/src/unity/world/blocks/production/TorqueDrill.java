@@ -18,7 +18,6 @@ import static arc.Core.atlas;
 
 public class TorqueDrill extends Drill implements GraphBlock{
     public GraphBlockConfig config = new GraphBlockConfig(this);
-    public float maxSpeed = 50;
     public float maxEfficiency = 2.0f;
 
     public final TextureRegion[] bottomRegions = new TextureRegion[2], topRegions = new TextureRegion[2], oreRegions = new TextureRegion[2];
@@ -27,6 +26,7 @@ public class TorqueDrill extends Drill implements GraphBlock{
     public TorqueDrill(String name){
         super(name);
         rotate = true;
+        drawArrow = false;
     }
     @Override
     public TextureRegion[] icons(){
@@ -115,7 +115,7 @@ public class TorqueDrill extends Drill implements GraphBlock{
 
         @Override
         public float efficiency(){
-            return super.efficiency() * Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,maxSpeed,0,maxEfficiency),0,maxEfficiency);
+            return super.efficiency() * Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,torqueNode().maxSpeed,0,maxEfficiency),0,maxEfficiency);
         }
 
         @Override
