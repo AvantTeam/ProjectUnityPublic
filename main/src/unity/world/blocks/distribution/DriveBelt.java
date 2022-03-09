@@ -57,6 +57,14 @@ public class DriveBelt extends GenericGraphBlock{
                 }
             }
         });
+        config(Point2[].class,(DriveBeltBuild build, Point2[] value) -> {
+            build.connector.disconnect();
+            //set new
+            for(Point2 p : value){
+                int newPos = Point2.pack(p.x + build.tileX(), p.y + build.tileY());
+                configurations.get(Integer.class).get(build, newPos);
+            }
+        });
     }
     //stealing from power node
     public void getPotentialLinks(Tile tile, Team team, Cons<Building> others){
@@ -225,6 +233,14 @@ public class DriveBelt extends GenericGraphBlock{
             Draw.reset();
         }
 
+        @Override
+        public Point2[] config(){
+            Point2[] out = new Point2[connector.maxConnections];
+            for(int i = 0; i < out.length; i++){
+                out[i] = connector.connection[i]==null?new Point2():connector.connection[i].cpy();
+            }
+            return out;
+        }
 
         @Override
         public boolean onConfigureTileTapped(Building other){
