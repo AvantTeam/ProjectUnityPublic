@@ -7,6 +7,8 @@ import mindustry.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
+import mindustry.ui.dialogs.*;
+import mindustry.ui.dialogs.JoinDialog.*;
 import mindustry.world.blocks.environment.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
@@ -14,6 +16,7 @@ import unity.content.blocks.*;
 import unity.gen.*;
 import unity.graphics.*;
 import unity.mod.*;
+import unity.net.*;
 import unity.parts.*;
 import unity.ui.*;
 import unity.util.*;
@@ -76,11 +79,32 @@ public class Unity extends Mod{
                 }
                 Graphs.load();
                 UnityParts.loadDoodads();
+
+                if(dev.isDev()){
+                    Seq<Server> servers = ReflectUtils.getFieldValue(Vars.ui.join, JoinDialog.class,"servers");
+                    boolean found = false;
+                    for(Server s:servers){
+                        if(s.ip.equals("mindustry.xeloboyo.art") || s.ip.equals("172.105.174.77")){
+                            found = true;
+                        }
+                    }
+                    if(!found){
+                        Server xeloserver = new Server();
+                        xeloserver.ip = "mindustry.xeloboyo.art";
+                        servers.add(xeloserver);
+                    }
+                }
             });
             Events.on(FileTreeInitEvent.class, e -> Core.app.post(UnityShaders::load));
 
             Events.on(DisposeEvent.class, e -> {
                 UnityShaders.dispose();
+            });
+        }else{
+            Events.run(Trigger.update , ()->{
+                if(Utils.isCrash){
+                    throw new RuntimeException("DEATH");
+                }
             });
         }
 
@@ -109,6 +133,7 @@ public class Unity extends Mod{
         dev.init();
         music.init();
         ui.init();
+        UnityCalls.registerPackets();;
     }
 
     @Override

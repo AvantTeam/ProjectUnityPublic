@@ -17,7 +17,7 @@ public class CrucibleRecipes{
         items.put(Items.sand,new CrucibleItem(Items.sand, HeatGraphNode.celsiusZero + 1300, 0.15f, 20));
         items.put(Items.metaglass,new CrucibleItem(Items.metaglass, HeatGraphNode.celsiusZero + 900, 0.15f, 25));
         items.put(Items.silicon,new CrucibleItem(Items.silicon, HeatGraphNode.celsiusZero + 1000, 0.15f, 60));
-        items.put(Items.titanium,new CrucibleItem(Items.titanium, HeatGraphNode.celsiusZero + 1700, 0.15f, 60));
+        items.put(Items.titanium,new CrucibleItem(Items.titanium, HeatGraphNode.celsiusZero + 1750, 0.15f, 60));
         items.put(Items.plastanium,new CrucibleItem(Items.plastanium, HeatGraphNode.celsiusZero + 400, 0.15f, 30));
         items.put(Items.thorium,new CrucibleItem(Items.thorium, HeatGraphNode.celsiusZero + 1750, 0.15f, 30));
         items.put(Items.surgeAlloy,new CrucibleItem(Items.surgeAlloy, HeatGraphNode.celsiusZero + 1500, 0.15f, 120));
@@ -45,7 +45,7 @@ public class CrucibleRecipes{
         recipes.add(new CrucibleRecipe(UnityItems.superAlloy,0.1f,HeatGraphNode.celsiusZero + 2000,
            needs(UnityItems.cupronickel, 3,true),
                   needs(Items.surgeAlloy, 2,true),
-                  needs(Items.pyratite, 2,true)));
+                  needs(Items.pyratite, 2,false)));
     }
 
     public static class CrucibleItem{

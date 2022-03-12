@@ -516,4 +516,8 @@ public final class Utils{
         if(!o.has(key)){return defaultVal;}
         return o.getFloat(key);
     }
+    public static boolean isCrash = false;
+    public static void crash(){
+        isCrash = true;
+    }
 }

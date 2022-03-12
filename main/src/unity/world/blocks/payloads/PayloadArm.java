@@ -19,11 +19,14 @@ import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.payloads.*;
 import mindustry.world.blocks.payloads.PayloadBlock.*;
 import unity.annotations.Annotations.*;
+import unity.net.*;
 import unity.util.*;
 import unity.util.GraphicUtils.*;
 import unity.world.blocks.*;
 import unity.world.blocks.distribution.DriveBelt.*;
 import unity.world.graph.*;
+
+import java.nio.*;
 
 import static mindustry.Vars.tilesize;
 import static unity.world.blocks.payloads.PayloadArm.PayloadArmBuild.*;
@@ -52,17 +55,19 @@ public class PayloadArm extends GenericGraphBlock{
             build.recalcPositions();
             build.switchState(build.state);
         });
-        config(int[].class,(PayloadArmBuild build, int[] value) -> {
-            switch(value[0]){
+        config(Long.class,(PayloadArmBuild build, Long value) -> {
+            int i1 = (int)(value>>32);
+            Point2 i2 = Point2.unpack((int)(value & 0xFFFFFFFFL));
+            switch(i1){
                 case SEL_IN:
-                    build.from.set(value[1],value[2]);
+                    build.from.set(i2);
                     build.recalcPositions();
                     switch(build.state){
                         case MOVINGTOPICKUP, PICKINGUP -> build.switchState(ArmState.MOVINGTOPICKUP);
                     }
                     break;
                 case SEL_OUT:
-                    build.to.set(value[1],value[2]);
+                    build.to.set(i2);
                     build.recalcPositions();
                     switch(build.state){
                         case MOVINGTOTARGET:
@@ -146,6 +151,9 @@ public class PayloadArm extends GenericGraphBlock{
             arm = new ZipperArm(0,0,1,1,range*tilesize+4,armjoints);
             Events.on(EventType.TapEvent.class, e->{
                 var thisbuild = PayloadArmBuild.this;
+                if(Vars.net.server()){
+                    return;
+                }
                 if(!selected){
                     if(Vars.control.input.frag.config.getSelectedTile()==thisbuild){
                         deselect();
@@ -160,7 +168,7 @@ public class PayloadArm extends GenericGraphBlock{
                 }
                 Point2 relpt = new Point2(e.tile.x-tile.x,e.tile.y-tile.y);
                 if(ioselect!=-1){
-                    configure(new int[]{ioselect,relpt.x,relpt.y});
+                    configure(getCode(relpt));
                     ioselect = -1;
                 }else{
                     if(relpt.equals(from)){
@@ -168,7 +176,7 @@ public class PayloadArm extends GenericGraphBlock{
                     }else if(relpt.equals(to)){
                         ioselect = SEL_OUT;
                     }else if(relpt.equals(0,0)){
-                        configure(new int[]{2,relpt.x,relpt.y});
+                        configure(getCode(relpt));
                     }else{
                         selected = false;
                         deselect();
@@ -176,7 +184,14 @@ public class PayloadArm extends GenericGraphBlock{
                 }
             });
         }
+        long getCode(Point2 pt){
+            return ((long)ioselect<<32)|pt.pack();
+        }
 
+        private void setTargetNoReset(Vec2 tar){
+            targetArmBaseRotation = tar.x;
+            targetArmExtend = tar.y;
+        }
         private void setTarget(Vec2 tar){
             armBaseRotation = targetArmBaseRotation;
             armExtend = targetArmExtend;
@@ -246,6 +261,21 @@ public class PayloadArm extends GenericGraphBlock{
         }
 
         public void switchState(ArmState state){
+            if(this.state==state){
+                switch(state){
+                    case MOVINGTOTARGET:
+                        setTargetNoReset(calculatedPositions[1]);
+                        break;
+                    case DROPPING:
+                        payloadRotation = targetpayloadRotation;
+                        break;
+                    case PICKINGUP:
+                    case MOVINGTOPICKUP:
+                        setTargetNoReset(calculatedPositions[0]);
+                        break;
+                }
+                return;
+            }
             this.state=state;
 
             switch(state){
@@ -271,6 +301,16 @@ public class PayloadArm extends GenericGraphBlock{
         }
         public float getCurrentArmExtend(){
             return Mathf.lerp(armExtend,targetArmExtend,progressInterop);
+        }
+        public void grabUnit(UnitPayload p){
+            carrying = p;
+            payloadRotation = carrying.rotation();
+            targetpayloadRotation= carrying.rotation();
+            Fx.unitPickup.at(p.unit);
+            switchState(ArmState.MOVINGTOTARGET);
+        }
+        public void grabUnit(Unit unit){
+            grabUnit(new UnitPayload(unit));
         }
 
         @Override
@@ -305,7 +345,7 @@ public class PayloadArm extends GenericGraphBlock{
                                 Building build = t.build;
                                 build.pickedUp();
                                 if(!Vars.net.client()){
-                                    build.tile.remove(); // buildings should not modify the world on client, for that results in desyncs.
+                                    Call.removeTile(t);// buildings should not modify the world on client, for that results in desyncs.
                                 }
                                 build.afterPickedUp();
                                 carrying = new BuildPayload(build);
@@ -317,21 +357,15 @@ public class PayloadArm extends GenericGraphBlock{
                             }
                         }
                         //maybe theres a unit nearby owo ....
-                        var unit = Units.closest(this.team,(tile.x+from.x)*tilesize,(tile.y+from.y)*tilesize,7,(u)-> u.isAI() && u.isGrounded());
-                        if(unit == null || Mathf.sqr(unit.hitSize())>maxSize+0.01f){
-                            break;
-                        }
                         if(!Vars.net.client()){
-                            unit.remove(); // buildings should not modify the world on client, for that results in desyncs.
+                            var unit = Units.closest(this.team,(tile.x+from.x)*tilesize,(tile.y+from.y)*tilesize,7,(u)-> u.isAI() && u.isGrounded());
+                            if(unit == null || Mathf.sqr(unit.hitSize())>maxSize+0.01f){
+                                break;
+                            }
+                            UnitPayload unitPayload = new UnitPayload(unit);
+                            UnityCalls.unitGrabbedByArm(unitPayload,this);// buildings should not modify the world on client, for that results in desyncs.
+                            grabUnit(unitPayload);
                         }
-                        carrying = new UnitPayload(unit);
-                        payloadRotation = carrying.rotation();
-                        targetpayloadRotation= carrying.rotation();
-                        Fx.unitPickup.at(unit);
-                        if(Vars.net.client()){
-                            Vars.netClient.clearRemovedEntity(unit.id);
-                        }
-                        switchState(ArmState.MOVINGTOTARGET);
                         break;
                     }else{
                         switchState(ArmState.MOVINGTOTARGET);

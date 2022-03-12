@@ -196,7 +196,7 @@ public class UnityParts{
             h = 4;
             health(75);
             mass(100);
-            wheel(1,180,1.3f);
+            wheel(6,180,1.3f);
             usesPower(50);
         }};
         largeWheel = new ModularWheelType("wheel-large"){{
@@ -205,7 +205,7 @@ public class UnityParts{
             h = 8;
             health(150);
             mass(200);
-            wheel(1, 650, 1f);
+            wheel(15, 650, 1f);
             usesPower(250);
         }};
         pointDefense = new ModularWeaponMountType("point-defense"){{
@@ -236,7 +236,7 @@ public class UnityParts{
             h = 9;
             health(180);
             mass(200);
-            wheel(6, 950, 0.6f);
+            wheel(30, 950, 0.6f);
             usesPower(60);
         }};
         tankTracks = new ModularWheelType("tank-tracks"){{
@@ -245,7 +245,7 @@ public class UnityParts{
             h = 16;
             health(210);
             mass(250);
-            wheel(6, 2000, 0.6f);
+            wheel(60, 2000, 0.6f);
             usesPower(200);
         }};
         tankTracksLarge = new ModularWheelType("tank-tracks-large"){{
@@ -254,7 +254,7 @@ public class UnityParts{
             h = 30;
             health(500);
             mass(500);
-            wheel(6, 10000, 0.6f);
+            wheel(300, 10000, 0.6f);
             usesPower(1200);
         }};
         tankCannon = new ModularWeaponMountType("arbiter"){{
