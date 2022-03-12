@@ -10,6 +10,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
+import mindustry.*;
 import mindustry.entities.units.*;
 import mindustry.game.*;
 import mindustry.gen.*;
@@ -66,6 +67,18 @@ public class DriveBelt extends GenericGraphBlock{
             }
         });
     }
+
+    @Override
+    public void drawPlace(int x, int y, int rotation, boolean valid){
+        super.drawPlace(x, y, rotation, valid);
+        Tile tile = Vars.world.tile(x, y);
+        if (tile != null){
+            Lines.stroke(1.0F);
+            Draw.color(Pal.placing);
+            Drawf.circles((float)(x * 8) + this.offset, (float)(y * 8) + this.offset, this.maxRange * 8.0F);
+        }
+    }
+
     //stealing from power node
     public void getPotentialLinks(Tile tile, Team team, Cons<Building> others){
         Boolf<Building> valid =
@@ -242,6 +255,7 @@ public class DriveBelt extends GenericGraphBlock{
             return out;
         }
 
+
         @Override
         public boolean onConfigureTileTapped(Building other){
 
@@ -278,7 +292,6 @@ public class DriveBelt extends GenericGraphBlock{
             Draw.z(Layer.blockOver);
             Drawf.shadow(rotator,x-1,y-1,r);
             Drawf.spinSprite(rotator,x,y,r);
-            Draw.z();
             Draw.z(Layer.power);
             for(var pt: connector.connections){
                 if(pt!=null &&  pt.other(connector).getNode().build() instanceof DriveBeltBuild db){
@@ -287,7 +300,6 @@ public class DriveBelt extends GenericGraphBlock{
                     }
                 }
             }
-            Draw.z();
             drawTeamTop();
         }
 

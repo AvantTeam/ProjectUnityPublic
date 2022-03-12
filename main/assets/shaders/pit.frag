@@ -62,7 +62,7 @@ float tileMarch(vec2 tpos, vec2 rdir, float maxlen, vec2 tile, vec2 tilestep){
     ivec2 rt = ivec2(0, 0);
     //first step shouldnt have anything
     float len = 0.0;
-    for (int i = 0;i<maxlen*2.0+2;i++){
+    for (float i = 0.0;i<maxlen*2.0+2;i++){
         float st = sqaureRay(tpos, irdir);
         tpos += st*epsilonp1*rdir;
         vec2 l = fract(tpos);
@@ -109,7 +109,7 @@ void main() {
     vec2 v = vec2(1.0/u_resolution.x, 1.0/u_resolution.y);
     vec2 coords = vec2(c.x * u_resolution.x + u_campos.x, c.y * u_resolution.y + u_campos.y);
     vec2 tile =  mod(coords+vec2(4.0), 8.0)/vec2(8.0);
-    vec2 dir = (c-vec2(0.5))*vec2(1, u_resolution.y/u_resolution.x);
+    vec2 dir = (c-vec2(0.5))*vec2(1.0, u_resolution.y/u_resolution.x);
     float length = length(dir);
     dir/=length;
     float slen = samplelen*length;

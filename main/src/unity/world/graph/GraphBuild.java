@@ -137,4 +137,7 @@ public interface GraphBuild{
     default float get2SpriteRotation(){
         return (getBuild().rotdeg() + 90f) % 180f - 90f;
     }
+    default float get2SpriteRotationVert(){
+        return (getBuild().rotdeg()) % 180f;
+    }
 }

@@ -56,7 +56,7 @@ public class GenericGraphBlock extends Block implements GraphBlock{
                 connectToGraph();
             }
         }
-
+        @Override public void pickedUp(){ disconnectFromGraph(); placed = false; super.pickedUp(); }
         @Override public void onRemoved(){ disconnectFromGraph();super.onRemoved(); }
         @Override public void onDestroyed(){ disconnectFromGraph(); super.onDestroyed(); }
 

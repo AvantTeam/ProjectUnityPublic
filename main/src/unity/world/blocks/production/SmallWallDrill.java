@@ -4,6 +4,7 @@ import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
+import mindustry.*;
 import mindustry.graphics.*;
 import mindustry.world.*;
 import mindustry.world.meta.*;
@@ -39,10 +40,11 @@ public class SmallWallDrill extends GenericTorqueWallDrill{
         @Override
         public void updateTile(){
             super.updateTile();
-            if(Mathf.chanceDelta(0.02*efficiency())){
+            float eff = efficiency();
+            if(Mathf.chanceDelta(0.02*eff)){
                 updateEffect.at(x + Mathf.range(size * 2f), y + Mathf.range(size * 2f));
             }
-            if(Mathf.chanceDelta(0.5*efficiency())){
+            if(Mathf.chanceDelta(0.5*eff)){
                 float s2 = size*0.5f;
                 float ang = targetDrillAngle + rotdeg();
                 float vx = -Mathf.cos(ang)+Mathf.range(0.5f);
@@ -55,7 +57,7 @@ public class SmallWallDrill extends GenericTorqueWallDrill{
                 if(Mathf.chance(0.1)){
                     updateEffect.at(rx + Mathf.range(1), ry + Mathf.range(1), 0, col);
                 }else{
-                    OtherFx.dust.at(rx + Mathf.range(1), ry + Mathf.range(1), 0, col, new Vec2(vx * 8.0f, vy * 8.0f));
+                    OtherFx.dust.at(rx + Mathf.range(1), ry + Mathf.range(1), 0, col, new Vec2(vx * 14.0f * eff, vy * 14.0f * eff));
                 }
             }
             //Effect
@@ -71,13 +73,23 @@ public class SmallWallDrill extends GenericTorqueWallDrill{
             Draw.rect(floor,x,y);
             Lines.stroke(3);
             Lines.line(armbase,x + Geometry.d4x(rotation) * (s2*0.5f) * tilesize,y + Geometry.d4y(rotation) * (s2*0.5f) * tilesize,rx,ry,false);
+            if(lastItem!=null){
+                float progress = time/drillTime;
+                Draw.rect(
+                    lastItem.fullIcon,
+                    Mathf.lerp(rx,x + Geometry.d4x(rotation) * (s2*0.5f) * tilesize,progress),
+                    Mathf.lerp(ry,y + Geometry.d4y(rotation) * (s2*0.5f) * tilesize,progress),
+                    Vars.itemSize,
+                    Vars.itemSize
+                );
+            }
+
             Draw.rect(base[rotation],x,y);
             Drawf.spinSprite(rotator,x,y,r*0.2f);
             Draw.z(Layer.blockOver);
             Draw.rect(bore,rx + Mathf.sinDeg(-ang)*s2*4f,ry + Mathf.cosDeg(ang)*s2*4f,-r*0.2f);
             Draw.rect(bore,rx - Mathf.sinDeg(-ang)*s2*4f,ry - Mathf.cosDeg(ang)*s2*4f,r*0.2f);
             Draw.rect(arm,rx,ry,ang);
-            Draw.z();
             drawTeamTop();
         }
     }

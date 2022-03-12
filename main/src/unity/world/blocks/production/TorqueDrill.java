@@ -89,7 +89,7 @@ public class TorqueDrill extends Drill implements GraphBlock{
         @Override public void displayBars(Table table){ super.displayBars(table); displayGraphBars(table); }
         @Override public void write(Writes write){ super.write(write);writeGraphs(write); }
         @Override public void read(Reads read, byte revision){ super.read(read, revision); readGraphs(read); }
-
+        @Override public void pickedUp(){ disconnectFromGraph(); placed = false; super.pickedUp(); }
         @Override
         public void placed(){
             super.placed();

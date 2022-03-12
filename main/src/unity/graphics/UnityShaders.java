@@ -20,8 +20,12 @@ public class UnityShaders {
 
     public static void load(){
         if(!headless){
-            lava = new ModSurfaceShader("lava");
-            pit = new PitShader("unity-concrete-blank1","unity-stone-sheet","unity-truss");
+            try{
+                lava = new ModSurfaceShader("lava");
+                pit = new PitShader("unity-concrete-blank1", "unity-stone-sheet", "unity-truss");
+            }catch(Exception e){
+                Log.err("There was an exception loading the shaders: @",e);
+            }
             loaded = true;
         }
         Log.info("[accent]<FTE + POST (CACHELAYER)>[]");

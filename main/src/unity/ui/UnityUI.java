@@ -41,6 +41,7 @@ public class UnityUI{
     boolean includeVanilla = true;
     String searchstr="",prevstr="";
     boolean collapsed = true;
+    boolean wasRefreshed = false;
 
     Cons<Table> advancedOptions = table -> {
         table.clearChildren();
@@ -88,9 +89,11 @@ public class UnityUI{
                 if(top.find("faction table")!=null){
                     return;
                 }
-                included.clear();
-                for(Faction f:Faction.all){
-                    included.add(f);
+                if(!wasRefreshed){
+                    included.clear();
+                    for(Faction f : Faction.all){
+                        included.add(f);
+                    }
                 }
                 Table advtable = new Table();
                 top.row();
@@ -166,7 +169,11 @@ public class UnityUI{
         if(b==null){
             b = (ImageButton)table.find("category-" + Category.distribution.name());
         }
-        b.fireClick();
+        if(b!=null){
+            b.fireClick();
+        }else{
+            ReflectUtils.invokeMethod(Vars.ui.hudfrag.blockfrag,ReflectUtils.findMethod(Vars.ui.hudfrag.blockfrag.getClass(),"rebuild",true));
+        }
 
 
     }

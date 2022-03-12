@@ -37,6 +37,7 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         noUpdateDisabled = false;
         rotate = true;
         drawArrow = false;
+        hasPower = false;
     }
 
     @Override
@@ -87,7 +88,7 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
 
         @Override public void onRemoved(){ disconnectFromGraph();super.onRemoved(); }
         @Override public void onDestroyed(){ disconnectFromGraph(); super.onDestroyed(); }
-
+        @Override public void pickedUp(){ disconnectFromGraph(); placed = false; super.pickedUp(); }
 
         @Override public OrderedMap<Class<? extends Graph>, GraphNode> getNodes(){ return graphNodes; }
         @Override public Building getBuild(){ return this; }

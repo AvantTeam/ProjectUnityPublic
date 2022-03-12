@@ -96,6 +96,22 @@ public class PayloadCaster extends GenericCaster{
         }
 
         @Override
+        public Payload takePayload(){
+            var t = waiting;
+            if(waiting!=null){
+                waiting = null;
+                casting = false;
+                progress = 0;
+            }
+            return t;
+        }
+
+        @Override
+        public Payload getPayload(){
+            return waiting;
+        }
+
+        @Override
         public void tryStartCast(){
             var crucible = crucibleNode();
             if(cast==null){
@@ -139,7 +155,7 @@ public class PayloadCaster extends GenericCaster{
             if(casting){
                 if(waiting ==null){
                     waiting = new BuildPayload(currentlycasting,this.team);
-                    waiting.set(x,y,rotdeg());
+                    waiting.set(x+Geometry.d4x(rotation)*size*4,y+Geometry.d4y(rotation)*size*4,rotdeg());
                 }
                 var build = front();
                 if(build !=null){
@@ -226,7 +242,6 @@ public class PayloadCaster extends GenericCaster{
             Draw.color();
 
             drawTeamTop();
-            Draw.z();
         }
 
         @Override
