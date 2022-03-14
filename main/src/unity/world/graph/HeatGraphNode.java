@@ -23,7 +23,7 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
 
     public boolean heatProducer = false;
     public float targetTemp = 1000; public float prodEfficency = 0.1f;
-    public float minGenerate= Float.NEGATIVE_INFINITY;
+    public float minGenerate= -9999999999999999f;
     public float efficency = 0;
 
     public HeatGraphNode(GraphBuild build, float emissiveness, float conductivity, float heatcapacity, float maxTemp){
@@ -110,7 +110,7 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
         heatenergy += (targetTemp-getTemp())*eff;
     }
     public void generateHeat(){
-        heatenergy += Math.max(minGenerate,targetTemp-getTemp()*efficency*prodEfficency);
+        heatenergy += Math.max(minGenerate,(targetTemp-getTemp())*efficency*prodEfficency);
     }
 
     public float getTemp(){
