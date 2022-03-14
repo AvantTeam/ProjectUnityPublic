@@ -29,7 +29,7 @@ public class YoungchaBlocks{
     public static @FactionDef("youngcha")
     Block
     oreNickel, concreteBlank, concreteFill, concreteNumber, concreteStripe, concrete, stoneFullTiles, stoneFull,
-    stoneHalf, stoneTiles, pit, greySand, nickelGeode;
+    stoneHalf, stoneTiles, pit,waterpit, greySand, nickelGeode,greysandWall;
     //non environmental
     public static @FactionDef("youngcha")
     Block
@@ -95,8 +95,7 @@ public class YoungchaBlocks{
         stoneTiles = new Floor("stone-tiles"){{
             attributes.set(Attribute.water, -0.5f);
         }};
-        pit = new Floor("pit"){
-            {
+        pit = new Floor("pit"){{
                 buildVisibility = BuildVisibility.editorOnly;
                 cacheLayer = UnityShaders.pitLayer;
                 placeableOn = false;
@@ -104,7 +103,26 @@ public class YoungchaBlocks{
                 variants = 0;
                 canShadow = false;
                 mapColor = Color.black;
-
+            }
+            @Override
+            public TextureRegion[] icons(){
+                return new TextureRegion[]{Core.atlas.find(name + "-icon", name)};
+            }
+        };
+        waterpit= new Floor("waterpit"){{
+                buildVisibility = BuildVisibility.editorOnly;
+                cacheLayer = UnityShaders.waterpitLayer;
+                placeableOn = true;
+                isLiquid = true;
+                drownTime = 20f;
+                speedMultiplier = 0.1f;
+                liquidMultiplier = 2f;
+                status = StatusEffects.wet;
+                statusDuration = 120f;
+                variants = 0;
+                liquidDrop = Liquids.water;
+                canShadow = false;
+                mapColor = Liquids.water.color.cpy().lerp(Color.black,0.5f);
             }
             @Override
             public TextureRegion[] icons(){
@@ -115,6 +133,11 @@ public class YoungchaBlocks{
             variants = 2;
             itemDrop = UnityItems.nickel;
             maxsize = 3;
+        }};
+        greysandWall = new LargeStaticWall("grey-sand-wall"){{
+           variants = 3;
+           itemDrop = Items.sand;
+           maxsize = 3;
         }};
 
         ///////
@@ -184,7 +207,7 @@ public class YoungchaBlocks{
             health = 2600;
             size = 3;
 
-            config.nodeConfig.put(TorqueGraph.class, b -> new WindTurbineTorqueGraphNode(0.03f, 20f, 1f, 20f, b));
+            config.nodeConfig.put(TorqueGraph.class, b -> new WindTurbineTorqueGraphNode(0.03f, 20f, 1.5f, 20f, b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }};
         rotaryWaterExtractor = new RotaryWaterExtractor("rotary-water-extractor"){{
@@ -209,7 +232,7 @@ public class YoungchaBlocks{
             requirements(Category.production, with(Items.lead, 60, Items.copper, 150));
             consumes.liquid(Liquids.water, 0.08f).boost();
 
-            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 50f, 50,b));
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 50f, 40,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
         }};
 
@@ -226,8 +249,9 @@ public class YoungchaBlocks{
 
         heatPipe = new HeatPipe("heat-pipe"){{
             requirements(Category.power, with(UnityItems.nickel, 5, Items.copper, 10));
-            health = 300;
+            health = 200;
             solid = false;
+            targetable = false;
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.005f, 0.4f, 1,2500 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 1, 1, 1, 1);
         }};
@@ -238,7 +262,7 @@ public class YoungchaBlocks{
             rotate = true;
             health = 2600;
             solid = true;
-            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.05f, 1000f, 30f,5,b));
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.05f, 1000f, 30f,10,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0);
         }};
 
@@ -309,7 +333,7 @@ public class YoungchaBlocks{
             health = 1700;
             solid = true;
 
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.02f, 0.15f, 9,1800 + HeatGraphNode.celsiusZero));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.015f, 0.15f, 9,1800 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 1,0,1,  1,0,1,  1,0,1,  1,0,1);
             config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,50));
             config.fixedConnection(CrucibleGraph.class, 0,1,0,  0,1,0,  0,1,0,  0,1,0);
@@ -348,7 +372,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,5));
             config.fixedConnection(CrucibleGraph.class, 0,0,0, 0,0,0, 0,1,0, 0,0,0);
 
-            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 100f, b));
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 100f, 15,b));
             config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
         }};
 
@@ -363,7 +387,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,50));
             config.fixedConnection(CrucibleGraph.class, 0,0,0, 0,0,0, 0,1,0, 0,0,0);
 
-            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 100f, b));
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 100f,40, b));
             config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
         }};
 

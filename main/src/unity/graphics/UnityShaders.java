@@ -13,16 +13,17 @@ import static mindustry.Vars.*;
 import static mindustry.graphics.CacheLayer.all;
 
 public class UnityShaders {
-    public static @Nullable ModSurfaceShader lava,pit;
+    public static @Nullable ModSurfaceShader lava,pit,waterpit;
 
-    public static CacheLayer.ShaderLayer lavaLayer,pitLayer;
+    public static CacheLayer.ShaderLayer lavaLayer,pitLayer,waterpitLayer;
     protected static boolean loaded;
 
     public static void load(){
         if(!headless){
             try{
                 lava = new ModSurfaceShader("lava");
-                pit = new PitShader("unity-concrete-blank1", "unity-stone-sheet", "unity-truss");
+                pit = new PitShader("pit","unity-concrete-blank1", "unity-stone-sheet", "unity-truss");
+                waterpit = new PitShader("waterpit","unity-concrete-blank1", "unity-stone-sheet", "unity-truss");
             }catch(Exception e){
                 Log.err("There was an exception loading the shaders: @",e);
             }
@@ -31,8 +32,10 @@ public class UnityShaders {
         Log.info("[accent]<FTE + POST (CACHELAYER)>[]");
         lavaLayer = new CacheLayer.ShaderLayer(lava);
         pitLayer = new CacheLayer.ShaderLayer(pit);
+        waterpitLayer = new CacheLayer.ShaderLayer(waterpit);
         CacheLayer.add(lavaLayer);
         CacheLayer.add(pitLayer);
+        CacheLayer.add(waterpitLayer);
     }
 
     public static void dispose(){
@@ -141,8 +144,8 @@ public class UnityShaders {
         TextureRegion toplayer,bottomlayer,truss;
         String toplayerName,bottomlayerName,trussName;
 
-        public PitShader(String toplayer,String bottomlayer,String truss){
-            super("pit");
+        public PitShader(String name,String toplayer,String bottomlayer,String truss){
+            super(name);
             toplayerName = toplayer;
             bottomlayerName = bottomlayer;
             trussName = truss;

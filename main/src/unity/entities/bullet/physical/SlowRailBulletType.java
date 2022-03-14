@@ -54,6 +54,7 @@ public class SlowRailBulletType extends BasicBulletType{
                 hitTile(b, building, h, true);
                 if(pierceCap > 0) b.collided.add(building.id);
                 b.damage -= sub;
+                b.damage = Math.max(50,b.damage);
             }
             return (hit = (building.block.absorbLasers || (pierceCap > 0 && b.collided.size >= pierceCap) || b.damage <= 0f));
         }, unit -> {
@@ -62,6 +63,7 @@ public class SlowRailBulletType extends BasicBulletType{
                 hitEntity(b, unit, unit.health);
                 if(pierceCap > 0) b.collided.add(unit.id);
                 b.damage -= sub;
+                b.damage = Math.max(50,b.damage);
             }
             return (hit = ((pierceCap > 0 && b.collided.size >= pierceCap) || b.damage <= 0f));
         }, (x, y) -> {

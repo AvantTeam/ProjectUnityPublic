@@ -18,7 +18,7 @@ public class TorqueSource extends GenericGraphBlock{
     }
 
     public class TorqueSourceBuild extends GenericGraphBuild{
-        float targetspeed=0;
+        float targetspeed=10;
 
         @Override
         public void updateTile(){
@@ -32,7 +32,7 @@ public class TorqueSource extends GenericGraphBlock{
             table.add("Speed:");
             table.row();
             //placeholder.
-            table.slider(0,90,1f,targetspeed, this::configure);
+            table.slider(0,90,1f,targetspeed, true,this::configure);
         }
         Color col = new Color();
         @Override
@@ -44,7 +44,6 @@ public class TorqueSource extends GenericGraphBlock{
             Lines.stroke(1f, col);
             Lines.lineAngle(x,y,Mathf.map(t ,0,1,225,-45), Vars.tilesize*0.25f);
             drawTeamTop();
-
         }
 
         @Override

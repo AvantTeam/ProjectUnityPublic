@@ -30,7 +30,10 @@ public interface GraphBuild{
         return this.getGraphNode(c).connector.get(index).getGraph();
     }
 
-    default void init(){
+    default void initGraph(){
+        if(getNodes().size!=0){
+            return;
+        }
         setPrevRotation(getBuild().rotation);
         if(getBuild().block instanceof GraphBlock graphBlock){
             var cfg = graphBlock.getConfig();
@@ -66,7 +69,12 @@ public interface GraphBuild{
         for(var entry : getNodes()){
             entry.value.onPlace();
         }
+        onPlaced();
     }
+    default void onPlaced(){
+
+    }
+
     default void onRotate(){
         for(var entry : getNodes()){
             entry.value.onRotate();

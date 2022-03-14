@@ -12,7 +12,6 @@ public abstract class GenericCaster extends GenericGraphBlock{
 
     public float castTime = 30f;
     public float moveTime = 20f;
-    public float maxSpeed = 50f;
 
     public GenericCaster(String name){
         super(name);
@@ -31,6 +30,8 @@ public abstract class GenericCaster extends GenericGraphBlock{
         public void updateTile(){
             super.updateTile();
             var torque = getGraph(TorqueGraph.class);
+            var torqueNode = torqueNode();
+
             if(!isCasting()){
                 tryStartCast();
             }else{
@@ -39,10 +40,10 @@ public abstract class GenericCaster extends GenericGraphBlock{
                     if(progress>castTime){
                         float f = progress-castTime;
                         progress-=f;
-                        progress+=f* Mathf.curve(torque.lastVelocity,0,maxSpeed);
+                        progress+=f* Mathf.curve(torque.lastVelocity,0,torqueNode.maxSpeed);
                     }
                 }else{
-                    progress+=Time.delta * Mathf.curve(torque.lastVelocity,0,maxSpeed);
+                    progress+=Time.delta * Mathf.curve(torque.lastVelocity,0,torqueNode.maxSpeed);
                         if(progress>=castTime+moveTime){
                         if(canOffloadCast()){
                             offloadCast();

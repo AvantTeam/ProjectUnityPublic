@@ -8,12 +8,12 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.entities.units.*;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.world.*;
 import unity.graphics.*;
 import unity.world.graph.*;
-import unity.world.graph.GraphConnector.*;
 
 import static mindustry.Vars.*;
 
@@ -45,7 +45,9 @@ public class GenericGraphBlock extends Block implements GraphBlock{
         int prevTileRotation = -1;
         boolean placed = false;
 
-        @Override public void created(){ if(!placed){ init(); } }
+        @Override public Building create(Block block, Team team){ var b = super.create(block, team); if(b instanceof GraphBuild gb){gb.initGraph();} return b;}
+
+        @Override public void created(){ initGraph();}
 
         @Override
         public void placed(){

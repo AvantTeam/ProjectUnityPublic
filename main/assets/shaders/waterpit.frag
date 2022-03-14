@@ -13,6 +13,7 @@ varying vec2 v_texCoords;
 
 const float samplelen = 20.0;
 const float epsilonp1 = 1.01;
+const float watertop = 10.0;
 
 uniform vec4 u_toplayer;
 uniform float tvariants;
@@ -59,6 +60,12 @@ float sqaureRay(vec2 rorg, vec2 invrdir){
 //rdir should be normalised
 float tileMarch(vec2 tpos, vec2 rdir, float maxlen, vec2 tile, vec2 tilestep){
     vec2 irdir = vec2(1.0)/rdir;
+    if(rdir.x==0){
+        irdir.x = 9999.0f;
+    }
+    if(rdir.y==0){
+        irdir.y = 9999.0f;
+    }
     ivec2 rt = ivec2(0, 0);
     //first step shouldnt have anything
     float len = 0.0;
@@ -97,6 +104,54 @@ float fade2(vec2 bcoords, vec2 v){
     return 1.0 - (fade*fade*fade);
 }
 
+vec3 getWallTex(vec3 bcoords){
+    vec2 wallcoords = vec2(bcoords.x+bcoords.y,bcoords.z)/8.0;
+    vec2 repeat = fract(wallcoords);
+    vec3 col = vec3(0.0);
+    if (bcoords.z<=8.0){ //textures
+        col = textureRegion(u_toplayer, repeat).rgb;
+    } else {
+        col = textureRegion(u_bottomlayer, repeat, bvariants, floor(bvariants*noise(wallcoords-repeat))).rgb;
+    }
+    col*=(1.0- bcoords.z/(samplelen*8.0));
+    return col;
+}
+
+float wallDist(vec2 coord, vec2 v){
+    vec2 tile = mod(coord, 8.0);
+    vec2 tileuv = (coord - tile - u_campos)*v;
+    vec2 step = vec2(8.0)*v;
+    float dist = 1.0;
+    tile*=0.125;
+    if(texture2D(u_texture, tileuv+vec2(step.x,0.0)).a<0.9){
+        dist = min(dist,1.0 - tile.x);
+    }
+    if(texture2D(u_texture, tileuv-vec2(step.x,0.0)).a<0.9){
+        dist = min(dist,tile.x);
+    }
+    if(texture2D(u_texture, tileuv-vec2(0.0,step.y)).a<0.9){
+        dist = min(dist,tile.y);
+    }
+    if(texture2D(u_texture, tileuv+vec2(0.0,step.y)).a<0.9){
+        dist = min(dist,1.0-tile.y);
+    }
+    if(texture2D(u_texture, tileuv+vec2(-step.x,-step.y)).a<0.9){
+        dist = min(dist,tile.x+tile.y);
+    }
+    if(texture2D(u_texture, tileuv+vec2(-step.x,step.y)).a<0.9){
+        dist = min(dist,tile.x+1.0-tile.y);
+    }
+    if(texture2D(u_texture, tileuv+vec2(step.x,step.y)).a<0.9){
+        dist = min(dist,2.0-tile.x-tile.y);
+    }
+    if(texture2D(u_texture, tileuv+vec2(step.x,-step.y)).a<0.9){
+        dist = min(dist,1.0-tile.x+tile.y);
+    }
+    return dist;
+}
+
+
+
 
 void main() {
 
@@ -109,55 +164,44 @@ void main() {
     vec2 v = vec2(1.0/u_resolution.x, 1.0/u_resolution.y);
     vec2 coords = vec2(c.x * u_resolution.x + u_campos.x, c.y * u_resolution.y + u_campos.y);
     vec2 tile =  mod(coords+vec2(4.0), 8.0)/vec2(8.0);
-    vec2 dir = (c-vec2(0.5))*vec2(1.0, u_resolution.y/u_resolution.x);
+    vec3 dir = normalize(vec3((c-vec2(0.5))*vec2(1.0, u_resolution.y/u_resolution.x),1.0));
     float length = length(dir);
-    dir/=length;
     float slen = samplelen*length;
 
     coords+=vec2(4.0);
     vec2 tiletexv = ((coords-mod(coords, 8.0)) - u_campos)*v;
-    float z = tileMarch(tile, dir, slen, tiletexv, vec2(8.0)*v);
+    float z = tileMarch(tile, dir.xy, length*(watertop+2.0), tiletexv, vec2(8.0)*v);
     if (z>slen){
         z = slen;
     }
     z*=8.0;
-    vec2 bcoords=coords+dir*z;
-    float az = z/=length;
-    tile = mod(bcoords, 8.0);
-    vec2 wallcoords = vec2(bcoords.x+bcoords.y, az)/8.0;
-    vec2 repeat = fract(wallcoords);
-    vec3 col = vec3(0.0);
-    if (az<=8.0){ //textures
-        col = textureRegion(u_toplayer, repeat).rgb;
-    } else {
-        col = textureRegion(u_bottomlayer, repeat, bvariants, floor(bvariants*noise(wallcoords-repeat))).rgb;
-    }
-    col*=(1.0- length*z/(slen*8.0));
-
-    gl_FragColor = vec4(col*fade(bcoords, v), 1.0);
-
-    if (az>=samplelen*7.95){ //glowy
-        vec2 tpos = coords+dir*samplelen*16.0*length;
+    float az = z*dir.z;
+    if (az>=watertop){ //water top
+        vec2 tpos = coords+dir.xy*watertop*length/dir.z;
         vec2 offset = vec2(sin(btime+tpos.x*0.01), cos(btime+tpos.y*0.01));
+        vec2 soffset = vec2(sin(btime+tpos.x*0.002), cos(btime+tpos.y*0.002));
         vec2 offset2 = vec2(texture2D(u_noise, offset).r,texture2D(u_noise, offset+vec2(0.67,0.13)).r)-vec2(0.5);
-        float truss = texture2D(u_texture, (tpos- u_campos + offset2*16.0)*v).a;
-        gl_FragColor.rgb = vec3(0.4, 0.2, 0.1) * fade2(tpos, v) * truss;
-    }
-    if (az>=60.0){ //truss bottom
-        tileMarch(tile, dir, slen, tiletexv, vec2(8.0)*v);
-        vec2 tpos = coords+dir*60.0*length;
-        vec4 truss = textureRegion(u_truss, fract(tpos/24.0)).rgba;
-        gl_FragColor.rgb = mix(gl_FragColor.rgb, truss.rgb * fade(tpos, v) * 0.5, truss.a);
-    }
-    if (az>=52.0){ //truss top
-        vec2 tpos = coords+dir*52.0*length;
-        vec4 truss = textureRegion(u_truss, fract(tpos/24.0)).rgba;
-        float shadlen = 30.0/8.0;
-        float sz = tileMarchCoord(vec2(0.707,0.707),shadlen,tpos,v);
-        if(sz<shadlen-1.0){
-            truss.rgb *= 0.5;
+        vec3 diffract = refract(dir,normalize(vec3(offset2.xy,-1.0)),1.3);
+
+        float sz = tileMarchCoord(diffract.xy,length*(samplelen-watertop/8.0),tpos,v);
+        az = watertop + sz*diffract.z*8.0;
+        vec3 bcoords=vec3(tpos+diffract.xy*sz*8.0,az);
+        vec3 col = getWallTex(bcoords)*vec3(89.0/256.0, 106.0/256.0, 184.0/256.0);
+
+        float wd = wallDist(tpos,v);
+        wd = wd + sin(wd*14.0+btime*30.0 + texture2D(u_noise, soffset+vec2(0.42,0.69)).r*12.0)*0.25;
+        gl_FragColor = vec4(col, 1.0);
+        if(wd + (texture2D(u_noise, offset).r - 0.5)*0.5 < 0.3){
+            gl_FragColor.rgb = mix(gl_FragColor.rgb,vec3(89.0/256.0, 106.0/256.0, 184.0/256.0),0.5);
         }
-        gl_FragColor.rgb = mix(gl_FragColor.rgb, truss.rgb * fade(tpos, v), truss.a);
+        gl_FragColor.rgb*=fade(bcoords.xy, v);
+
+
+    }else{
+        vec2 bcoords=coords+dir.xy*z;
+        vec3 col = getWallTex(vec3(bcoords.xy,az));
+        gl_FragColor = vec4(col*fade(bcoords, v), 1.0);
+
     }
 
 }

@@ -103,7 +103,7 @@ public class CruciblePump extends GenericGraphBlock{
             Fill.rect(x, y, tilesize, tilesize);
             Draw.color();
             Draw.rect(base, x, y, -get2SpriteRotation());
-            if(config != null){
+            if(config != null && torque!=null){
                 Draw.color(config.color);
                 UnityDrawf.drawRectOffsetHorz(arrow, x, y,arrow.width*Draw.scl,arrow.height*Draw.scl, rotdeg(),(torque.rotation*0.5f/360f)%1f);
                 Draw.color();

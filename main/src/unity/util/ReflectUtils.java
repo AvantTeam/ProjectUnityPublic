@@ -159,7 +159,14 @@ public final class ReflectUtils{
             throw new RuntimeException(e);
         }
     }
-
+    /** Reflectively invokes a method without throwing exceptions. */
+    public static <T> T invokeMethod(Object object, String method, Object... args){
+        try{
+            return (T)findMethod(object.getClass(),method,true).invoke(object, args);
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
     /** Reflectively invokes a method without throwing exceptions. */
     public static <T> T invokeMethod(Object object, Method method, Object... args){
         try{

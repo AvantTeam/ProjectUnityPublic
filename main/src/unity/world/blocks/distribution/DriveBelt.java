@@ -2,23 +2,17 @@ package unity.world.blocks.distribution;
 
 import arc.*;
 import arc.func.*;
-import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
-import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import arc.util.pooling.*;
 import mindustry.*;
-import mindustry.entities.units.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
 import mindustry.world.*;
-import mindustry.world.modules.*;
-import unity.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
 import unity.world.graph.*;
@@ -66,6 +60,12 @@ public class DriveBelt extends GenericGraphBlock{
                 configurations.get(Integer.class).get(build, newPos);
             }
         });
+    }
+
+    @Override
+    public void init(){
+        super.init();
+        clipSize = Math.max(clipSize, (maxRange) * tilesize + wheelSize);
     }
 
     @Override
@@ -217,14 +217,13 @@ public class DriveBelt extends GenericGraphBlock{
     public class DriveBeltBuild extends GenericGraphBuild{
         DistanceGraphConnector<TorqueGraph> connector;
         @Override
-        public void init(){
-            super.init();
+        public void initGraph(){
+            super.initGraph();
             var conn = torqueNode().getConnectorOfType(DistanceGraphConnector.class);
             if(conn == null){
                 throw new IllegalStateException(name+" is missing an instance of "+ DistanceGraphConnector.class.getName());
             }
             connector = conn;
-            clipSize = Math.max(clipSize, (maxRange) * tilesize + wheelSize);
         }
 
         @Override

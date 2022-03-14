@@ -92,7 +92,11 @@ public class Unity extends Mod{
                         Server xeloserver = new Server();
                         xeloserver.ip = "mindustry.xeloboyo.art";
                         servers.add(xeloserver);
+                        ReflectUtils.invokeMethod(Vars.ui.join,"setupRemote");
+                        ReflectUtils.invokeMethod(Vars.ui.join,"refreshRemote");
+
                     }
+
                 }
             });
             Events.on(FileTreeInitEvent.class, e -> Core.app.post(UnityShaders::load));
@@ -153,7 +157,7 @@ public class Unity extends Mod{
         UnityEntityMapping.init();
 
 
-        logContent();
+        //logContent();
     }
 
     public void logContent(){

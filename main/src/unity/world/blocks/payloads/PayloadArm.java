@@ -11,22 +11,19 @@ import mindustry.*;
 import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.game.*;
-import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.world.*;
+import mindustry.world.blocks.*;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.payloads.*;
 import mindustry.world.blocks.payloads.PayloadBlock.*;
-import unity.annotations.Annotations.*;
+import mindustry.world.blocks.storage.*;
 import unity.net.*;
 import unity.util.*;
 import unity.util.GraphicUtils.*;
 import unity.world.blocks.*;
-import unity.world.blocks.distribution.DriveBelt.*;
 import unity.world.graph.*;
-
-import java.nio.*;
 
 import static mindustry.Vars.tilesize;
 import static unity.world.blocks.payloads.PayloadArm.PayloadArmBuild.*;
@@ -88,6 +85,12 @@ public class PayloadArm extends GenericGraphBlock{
     }
 
     @Override
+    public void init(){
+        super.init();
+        clipSize = Math.max(clipSize, (range) * tilesize + 2);
+    }
+
+    @Override
     public void load(){
         super.load();
         for(int i = 0;i<rotateIcons.length;i++){
@@ -111,6 +114,9 @@ public class PayloadArm extends GenericGraphBlock{
             Draw.color(Pal.placing);
             Drawf.circles((float)(x * 8) + this.offset, (float)(y * 8) + this.offset, this.range * 8.0F);
         }
+    }
+    public boolean canPickupBlock(Block b){
+        return !(b instanceof ConstructBlock) && !(b instanceof CoreBlock) && b.synthetic();
     }
 
     public class PayloadArmBuild extends GenericGraphBuild{
@@ -138,17 +144,21 @@ public class PayloadArm extends GenericGraphBlock{
         public transient float clawopen = 0;
 
         @Override
-        public void init(){
-            super.init();
+        public void onPlaced(){
+            super.onPlaced();
             if(from==null){
                 from = new Point2(-Geometry.d4x(rotation),-Geometry.d4y(rotation));
                 to = new Point2(Geometry.d4x(rotation),Geometry.d4y(rotation));
                 recalcPositions();
-                targetArmBaseRotation = armBaseRotation = (180+rotdeg())%360;
-                targetArmExtend = armExtend = tilesize;
             }
-            clipSize = Math.max(clipSize, (range) * tilesize + 2);
+        }
+
+        @Override
+        public void initGraph(){
+            super.initGraph();
             arm = new ZipperArm(0,0,1,1,range*tilesize+4,armjoints);
+            targetArmBaseRotation = armBaseRotation = (180+rotdeg())%360;
+            targetArmExtend = armExtend = tilesize;
             Events.on(EventType.TapEvent.class, e->{
                 var thisbuild = PayloadArmBuild.this;
                 if(Vars.net.server()){
@@ -340,7 +350,7 @@ public class PayloadArm extends GenericGraphBlock{
                                     targetpayloadRotation= carrying.rotation();
                                     switchState(ArmState.MOVINGTOTARGET);
                                 }
-                            }else if(t.build.block.size * t.build.block.size * 8 * 8 <= maxSize){
+                            }else if(t.build.block.size * t.build.block.size * 8 * 8 <= maxSize && canPickupBlock(t.block())){
                                 ///theres a block we can grab directly...
                                 Building build = t.build;
                                 build.pickedUp();

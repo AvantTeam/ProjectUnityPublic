@@ -8,6 +8,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.entities.units.*;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
@@ -76,8 +77,8 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         OrderedMap<Class<? extends Graph>,GraphNode> graphNodes = new OrderedMap<>();
         int prevTileRotation = -1;
         boolean placed = false;
-
-        @Override public void created(){ if(!placed){ init(); } }
+        @Override public Building create(Block block, Team team){ var b = super.create(block, team); if(b instanceof GraphBuild gb){gb.initGraph();} return b;}
+        @Override public void created(){ if(!placed){ initGraph(); } }
 
         @Override
         public void placed(){

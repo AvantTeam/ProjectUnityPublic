@@ -199,7 +199,7 @@ public class ModularUnitAssembler extends PayloadBlock{
         public void updateTile(){
             super.updateTile();
             if(blueprint.root!=null && !sandbox){
-                if(doodads.isEmpty()){
+                if(doodads.isEmpty() && !Vars.headless){
                     UnitDoodadGenerator.initDoodads(blueprint.parts.length, doodads, construct);
                 }
                 if(construct==null){

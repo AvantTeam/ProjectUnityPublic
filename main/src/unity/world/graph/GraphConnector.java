@@ -317,6 +317,10 @@ public abstract class GraphConnector<T extends Graph>{
             if(connectionPoints == null){
                 recalcPorts();
             }
+            //disconnect?
+            if(connections.size>0){
+                disconnect();
+            }
             for(GraphEdge edge:connections){
                 if(edge.valid){
                     edge.valid = false;
