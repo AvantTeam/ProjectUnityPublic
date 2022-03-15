@@ -30,6 +30,8 @@ public interface GraphBuild{
         return this.getGraphNode(c).connector.get(index).getGraph();
     }
 
+    default void onInit(){}
+
     default void initGraph(){
         if(getNodes().size!=0){
             return;
@@ -52,6 +54,7 @@ public interface GraphBuild{
                 node.connector.add(connectionConfig.getConnector(node));
             }
         }
+        onInit();
     }
 
 

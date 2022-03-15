@@ -11,9 +11,9 @@ uniform float u_time;
 varying vec2 v_texCoords;
 
 
-const float samplelen = 20.0;
+const float samplelen = 15.0;
 const float epsilonp1 = 1.01;
-const float watertop = 10.0;
+const float watertop = 5.0;
 
 uniform vec4 u_toplayer;
 uniform float tvariants;
@@ -171,9 +171,7 @@ void main() {
     coords+=vec2(4.0);
     vec2 tiletexv = ((coords-mod(coords, 8.0)) - u_campos)*v;
     float z = tileMarch(tile, dir.xy, length*(watertop+2.0), tiletexv, vec2(8.0)*v);
-    if (z>slen){
-        z = slen;
-    }
+
     z*=8.0;
     float az = z*dir.z;
     if (az>=watertop){ //water top
@@ -182,14 +180,17 @@ void main() {
         vec2 soffset = vec2(sin(btime+tpos.x*0.002), cos(btime+tpos.y*0.002));
         vec2 offset2 = vec2(texture2D(u_noise, offset).r,texture2D(u_noise, offset+vec2(0.67,0.13)).r)-vec2(0.5);
         vec3 diffract = refract(dir,normalize(vec3(offset2.xy,-1.0)),1.3);
-
-        float sz = tileMarchCoord(diffract.xy,length*(samplelen-watertop/8.0),tpos,v);
+        slen = length*(samplelen-watertop/8.0);
+        float sz = tileMarchCoord(diffract.xy,slen,tpos,v);
+        if (sz>slen){
+           sz = slen;
+        }
         az = watertop + sz*diffract.z*8.0;
         vec3 bcoords=vec3(tpos+diffract.xy*sz*8.0,az);
         vec3 col = getWallTex(bcoords)*vec3(89.0/256.0, 106.0/256.0, 184.0/256.0);
 
         float wd = wallDist(tpos,v);
-        wd = wd + sin(wd*14.0+btime*30.0 + texture2D(u_noise, soffset+vec2(0.42,0.69)).r*12.0)*0.25;
+        wd = wd + sin(wd*14.0+btime*60.0 + texture2D(u_noise, soffset+vec2(0.42,0.69)).r*15.0)*0.25;
         gl_FragColor = vec4(col, 1.0);
         if(wd + (texture2D(u_noise, offset).r - 0.5)*0.5 < 0.3){
             gl_FragColor.rgb = mix(gl_FragColor.rgb,vec3(89.0/256.0, 106.0/256.0, 184.0/256.0),0.5);

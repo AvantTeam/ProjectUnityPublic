@@ -99,7 +99,7 @@ public class LargeStaticWall extends StaticWall{
             }
             for(int i = rx; i < rx + s; i++){
                 for(int j = ry; j < ry + s; j++){
-                    if(world.tile(i, j).block() != this || taken[i][j]!=0){
+                    if(world.tile(i, j) == null || world.tile(i, j).block() != this || taken[i][j]!=0){
                         return false;
                     }
                 }

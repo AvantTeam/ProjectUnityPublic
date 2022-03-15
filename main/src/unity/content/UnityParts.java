@@ -37,7 +37,7 @@ public class UnityParts{
             armor(1);
         }};
         smallRoot = new ModularPartType("root-small"){{
-            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 10));
+            requirements(PartCategories.miscUnit, ItemStack.with(UnityItems.nickel, 10));
             health(100);
             mass(10);
             producesPower(15);
@@ -82,7 +82,7 @@ public class UnityParts{
            }});
         }};
         smallEngine = new ModularPartType("engine-small"){{
-            requirements(PartCategories.movementUnit, ItemStack.with(Items.lead, 10, Items.silicon, 5));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.lead, 10, Items.titanium, 5));
             health(10);
             mass(15);
             producesPower(20);
@@ -140,7 +140,7 @@ public class UnityParts{
             h = 2;
             health(200);
             mass(120);
-            armor(15);
+            armor(20);
         }};
         gunBridge = new ModularPartType("gun-bridge"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.graphite, 10, UnityItems.nickel, 10));
@@ -166,6 +166,7 @@ public class UnityParts{
             producesPower(50);
             addsWeaponSlots(6);
             itemCapacity(50);
+            armor(100);
             root = true;
             hasCellDecal = true;
         }};
@@ -173,8 +174,8 @@ public class UnityParts{
             requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon, 75, Items.titanium, 50, UnityItems.nickel, 30, UnityItems.superAlloy, 15));
             w = 3;
             h = 3;
-            health(500);
-            armor(2);
+            health(900);
+            armor(4000);
             mass(150);
             producesPower(100);
             addsWeaponSlots(10);
@@ -188,7 +189,7 @@ public class UnityParts{
             h = 3;
             health(600);
             mass(200);
-            armor(1000);
+            armor(2000);
         }};
         mediumWheel = new ModularWheelType("wheel-medium"){{
             requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 50, Items.titanium, 25));

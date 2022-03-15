@@ -217,8 +217,7 @@ public class DriveBelt extends GenericGraphBlock{
     public class DriveBeltBuild extends GenericGraphBuild{
         DistanceGraphConnector<TorqueGraph> connector;
         @Override
-        public void initGraph(){
-            super.initGraph();
+        public void onInit(){
             var conn = torqueNode().getConnectorOfType(DistanceGraphConnector.class);
             if(conn == null){
                 throw new IllegalStateException(name+" is missing an instance of "+ DistanceGraphConnector.class.getName());

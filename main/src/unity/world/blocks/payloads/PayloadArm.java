@@ -16,6 +16,7 @@ import mindustry.graphics.*;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.blocks.distribution.*;
+import mindustry.world.blocks.distribution.Conveyor.*;
 import mindustry.world.blocks.payloads.*;
 import mindustry.world.blocks.payloads.PayloadBlock.*;
 import mindustry.world.blocks.storage.*;
@@ -55,6 +56,7 @@ public class PayloadArm extends GenericGraphBlock{
         config(Long.class,(PayloadArmBuild build, Long value) -> {
             int i1 = (int)(value>>32);
             Point2 i2 = Point2.unpack((int)(value & 0xFFFFFFFFL));
+            i2.sub(256,256);
             switch(i1){
                 case SEL_IN:
                     build.from.set(i2);
@@ -120,6 +122,7 @@ public class PayloadArm extends GenericGraphBlock{
     }
 
     public class PayloadArmBuild extends GenericGraphBuild{
+
         enum ArmState{
             PICKINGUP, MOVINGTOTARGET, ROTATINGTARGET, DROPPING, MOVINGTOPICKUP
         }
@@ -146,19 +149,18 @@ public class PayloadArm extends GenericGraphBlock{
         @Override
         public void onPlaced(){
             super.onPlaced();
-            if(from==null){
-                from = new Point2(-Geometry.d4x(rotation),-Geometry.d4y(rotation));
-                to = new Point2(Geometry.d4x(rotation),Geometry.d4y(rotation));
-                recalcPositions();
-            }
+            recalcPositions();
         }
 
         @Override
-        public void initGraph(){
-            super.initGraph();
+        public void onInit(){
             arm = new ZipperArm(0,0,1,1,range*tilesize+4,armjoints);
             targetArmBaseRotation = armBaseRotation = (180+rotdeg())%360;
             targetArmExtend = armExtend = tilesize;
+            if(from==null){
+                from = new Point2(-Geometry.d4x(rotation), -Geometry.d4y(rotation));
+                to = new Point2(Geometry.d4x(rotation), Geometry.d4y(rotation));
+            }
             Events.on(EventType.TapEvent.class, e->{
                 var thisbuild = PayloadArmBuild.this;
                 if(Vars.net.server()){
@@ -186,6 +188,7 @@ public class PayloadArm extends GenericGraphBlock{
                     }else if(relpt.equals(to)){
                         ioselect = SEL_OUT;
                     }else if(relpt.equals(0,0)){
+                        ioselect = 2;
                         configure(getCode(relpt));
                     }else{
                         selected = false;
@@ -195,7 +198,7 @@ public class PayloadArm extends GenericGraphBlock{
             });
         }
         long getCode(Point2 pt){
-            return ((long)ioselect<<32)|pt.pack();
+            return ((long)ioselect<<32)|(Point2.pack(pt.x+256,pt.y+256));
         }
 
         private void setTargetNoReset(Vec2 tar){
@@ -208,11 +211,14 @@ public class PayloadArm extends GenericGraphBlock{
             targetArmBaseRotation = tar.x;
             targetArmExtend = tar.y;
         }
-
+        public void getRelTilePos(Vec2 in ,int x, int y){
+            float o = ((size+1)%2)*4;
+            in.set(x*tilesize-o,y*tilesize-o);
+        }
         public void recalcPositions(){
-            Tmp.v1.set((tile.x+from.x)*tilesize-x,(tile.y+from.y)*tilesize-y);
+            getRelTilePos(Tmp.v1,from.x,from.y);
             calculatedPositions[0] = new Vec2(Mathf.atan2(Tmp.v1.x,Tmp.v1.y)*Mathf.radiansToDegrees,Tmp.v1.len());
-            Tmp.v1.set((tile.x+to.x)*tilesize-x,(tile.y+to.y)*tilesize-y);
+            getRelTilePos(Tmp.v1,to.x,to.y);
             calculatedPositions[1] = new Vec2(Mathf.atan2(Tmp.v1.x,Tmp.v1.y)*Mathf.radiansToDegrees,Tmp.v1.len());
         }
 
@@ -271,6 +277,9 @@ public class PayloadArm extends GenericGraphBlock{
         }
 
         public void switchState(ArmState state){
+            if(calculatedPositions[0]==null){
+                recalcPositions();;
+            }
             if(this.state==state){
                 switch(state){
                     case MOVINGTOTARGET:
@@ -312,6 +321,13 @@ public class PayloadArm extends GenericGraphBlock{
         public float getCurrentArmExtend(){
             return Mathf.lerp(armExtend,targetArmExtend,progressInterop);
         }
+        public void grabBuild(BuildPayload p){
+            carrying = p;
+            payloadRotation =  p.build.rotdeg();
+            targetpayloadRotation= p.build.rotdeg();
+            Fx.unitPickup.at(p.build);
+            switchState(ArmState.MOVINGTOTARGET);
+        }
         public void grabUnit(UnitPayload p){
             carrying = p;
             payloadRotation = carrying.rotation();
@@ -322,6 +338,11 @@ public class PayloadArm extends GenericGraphBlock{
         public void grabUnit(Unit unit){
             grabUnit(new UnitPayload(unit));
         }
+        public void dropBlock(){
+           switchState(ArmState.MOVINGTOPICKUP);
+           carrying = null;
+       }
+
 
         @Override
         public void updateTile(){
@@ -340,7 +361,10 @@ public class PayloadArm extends GenericGraphBlock{
                             break;
                         }
                         Tile t = Vars.world.tile(tile.x+from.x,tile.y+from.y);
-                        if(t.build!=null){
+                        if(isPayload()){
+                           t = Vars.world.tile(Mathf.floor(x/tilesize)+from.x,Mathf.floor(y/tilesize)+from.y);
+                        }
+                        if(t!=null && t.build!=null){
                             if(t.build.block.outputsPayload || t.build instanceof PayloadBlockBuild){
                                 //theres a payload block to recieve from...
                                 //make sure its in range of the arm first.
@@ -350,25 +374,19 @@ public class PayloadArm extends GenericGraphBlock{
                                     targetpayloadRotation= carrying.rotation();
                                     switchState(ArmState.MOVINGTOTARGET);
                                 }
-                            }else if(t.build.block.size * t.build.block.size * 8 * 8 <= maxSize && canPickupBlock(t.block())){
+                            }else if(!Vars.net.client() && t.build.block.size * t.build.block.size * 8 * 8 <= maxSize && canPickupBlock(t.block())){
                                 ///theres a block we can grab directly...
                                 Building build = t.build;
                                 build.pickedUp();
-                                if(!Vars.net.client()){
-                                    Call.removeTile(t);// buildings should not modify the world on client, for that results in desyncs.
-                                }
-                                build.afterPickedUp();
-                                carrying = new BuildPayload(build);
-                                payloadRotation = build.rotdeg();
-                                targetpayloadRotation= build.rotdeg();
-                                Fx.unitPickup.at(t);
-                                switchState(ArmState.MOVINGTOTARGET);
+                                BuildPayload bp = new BuildPayload(build);
+                                UnityCalls.blockGrabbedByArm(t,bp,this);  // buildings should not modify the world on client, for that results in desyncs.
+                                grabBuild(bp);
                                 break;
                             }
                         }
                         //maybe theres a unit nearby owo ....
-                        if(!Vars.net.client()){
-                            var unit = Units.closest(this.team,(tile.x+from.x)*tilesize,(tile.y+from.y)*tilesize,7,(u)-> u.isAI() && u.isGrounded());
+                        if(!Vars.net.client() && t!=null){
+                            var unit = Units.closest(this.team,t.worldx(),t.worldy(),7,(u)-> u.isAI() && u.isGrounded());
                             if(unit == null || Mathf.sqr(unit.hitSize())>maxSize+0.01f){
                                 break;
                             }
@@ -415,6 +433,12 @@ public class PayloadArm extends GenericGraphBlock{
                         switchState(ArmState.MOVINGTOPICKUP);
                     }
                     Tile t = Vars.world.tile(tile.x+to.x,tile.y+to.y);
+                    if(isPayload()){
+                       t = Vars.world.tile(Mathf.floor(x/tilesize)+to.x,Mathf.floor(y/tilesize)+to.y);
+                    }
+                    if(t == null){
+                        break;
+                    }
                     if(t.build!=null){
                         //theres a payload block to push to...
                         if(t.build.acceptPayload(this, carrying)){
@@ -423,7 +447,7 @@ public class PayloadArm extends GenericGraphBlock{
                             switchState(ArmState.MOVINGTOPICKUP);
                         }
                     }else{
-                        Vec2 targetout = new Vec2((tile.x+to.x)*tilesize, (tile.y+to.y)*tilesize);
+                        Vec2 targetout = new Vec2(t.worldx(), t.worldy());
                         if(carrying instanceof UnitPayload unitp){
                             carrying.set(targetout.x,targetout.y, carrying.rotation());
                             if(unitp.dump()){
@@ -432,11 +456,11 @@ public class PayloadArm extends GenericGraphBlock{
                                 carrying = null;
                             }
                         }else if(carrying instanceof BuildPayload buildp){
-                            if(Build.validPlace(buildp.block(), buildp.build.team, to.x+tile.x,to.y+tile.y, buildp.build.rotation, false )){ // place on the ground
-                                buildp.place(t, buildp.build.rotation);
-                                Fx.placeBlock.at(targetout.x, targetout.y, buildp.block().size);
-                                switchState(ArmState.MOVINGTOPICKUP);
-                                carrying = null;
+                            if(!Vars.net.client()){
+                                if(Build.validPlace(buildp.block(), buildp.build.team, t.x, t.y, buildp.build.rotation, false)){ // place on the ground
+                                    UnityCalls.blockDroppedByArm(t,buildp,this);
+                                    dropBlock();
+                                }
                             }
                         }
                     }
@@ -469,7 +493,7 @@ public class PayloadArm extends GenericGraphBlock{
             Draw.rect(base,x,y,this.get2SpriteRotationVert());
             Draw.z(Layer.power-1);
             if(carrying!=null){
-                if(carrying instanceof BuildPayload bp && (state.equals(ArmState.ROTATINGTARGET) || bp.block() instanceof Conveyor)){
+                if(carrying instanceof BuildPayload bp && (state.equals(ArmState.ROTATINGTARGET) || bp.build instanceof ConveyorBuild)){
                     bp.drawShadow(1.0F);
                     bp.build.tile = Vars.emptyTile;
                     Draw.rect(bp.icon(),bp.x(),bp.y(),bp.build.payloadRotation + bp.build.rotdeg());
@@ -477,6 +501,7 @@ public class PayloadArm extends GenericGraphBlock{
                     carrying.draw();
                 }
             }
+            Draw.color();
             Draw.z(Layer.power);
             for(int i =0;i<4;i++){
                 float ang = i*90 + Mathf.lerp(payloadRotation,targetpayloadRotation,progressInterop);

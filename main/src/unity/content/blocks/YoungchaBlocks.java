@@ -29,7 +29,7 @@ public class YoungchaBlocks{
     public static @FactionDef("youngcha")
     Block
     oreNickel, concreteBlank, concreteFill, concreteNumber, concreteStripe, concrete, stoneFullTiles, stoneFull,
-    stoneHalf, stoneTiles, pit,waterpit, greySand, nickelGeode,greysandWall;
+    stoneHalf, stoneTiles, pit,waterpit, greySand, nickelGeode,greysandWall,concreteWall;
     //non environmental
     public static @FactionDef("youngcha")
     Block
@@ -139,6 +139,14 @@ public class YoungchaBlocks{
            itemDrop = Items.sand;
            maxsize = 3;
         }};
+        concreteWall = new ConnectedWall("concrete-wall"){{
+                variants = 0;
+            }
+            @Override
+            public TextureRegion[] icons(){
+                return new TextureRegion[]{Core.atlas.find(name, name)};
+            }
+        };
 
         ///////
 

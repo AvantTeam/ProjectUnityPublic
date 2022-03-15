@@ -57,5 +57,10 @@ public class TorqueSource extends GenericGraphBlock{
             super.read(read, revision);
             targetspeed = read.f();
         }
+
+        @Override
+        public Object config(){
+            return targetspeed;
+        }
     }
 }

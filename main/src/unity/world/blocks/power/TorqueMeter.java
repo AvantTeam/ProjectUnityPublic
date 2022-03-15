@@ -64,6 +64,7 @@ public class TorqueMeter extends GenericGraphBlock{
             Lines.stroke(1f, col);
             Lines.lineAngle(x,y,Mathf.map(t ,0,1,225,-45), Vars.tilesize*0.25f);
             this.drawTeamTop();
+            Draw.color();
         }
     }
 
