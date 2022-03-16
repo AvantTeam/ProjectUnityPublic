@@ -211,8 +211,10 @@ public final class UnityDrawf{
     static Vec3 tAxis = new Vec3();
     static Vec3 tmpV2 = new Vec3();
     
-    
     public static void drawRectOrtho(TextureRegion region, float x, float y, float ox, float oy, float z, float w, float h, float rotY, float rotZ){
+        drawRectOrtho(region, x, y, ox, oy, z, w, h, rotY, rotZ, (w!=h)?rotZ:0);
+    }
+    public static void drawRectOrtho(TextureRegion region, float x, float y, float ox, float oy, float z, float w, float h, float rotY, float rotZ, float sprrotZ){
         tmpV[3].set(+w*0.5f, +h*0.5f, 0);
         tmpV[0].set(-w*0.5f, +h*0.5f, 0);
         tmpV[1].set(-w*0.5f, -h*0.5f, 0);
@@ -220,11 +222,8 @@ public final class UnityDrawf{
 
         tmpV2.set(ox,oy,z);
         matT.idt();
-
-        if(w!=h){
-            for(int i = 0;i<4;i++){
-                tmpV[i].rotate(Vec3.Z,rotZ);
-            }
+        for(int i = 0;i<4;i++){
+            tmpV[i].rotate(Vec3.Z,sprrotZ);
         }
         tAxis.set(Vec3.Y).rotate(Vec3.Z,-rotZ);
         tmpV2.rotate(Vec3.Z,-rotZ);
@@ -236,19 +235,6 @@ public final class UnityDrawf{
             tmpV[i].add(x,y,0);
         }
 
-        Fill.quad(region,tmpV[0].x,tmpV[0].y, tmpV[1].x,tmpV[1].y, tmpV[2].x,tmpV[2].y, tmpV[3].x,tmpV[3].y);
-    }
-    public static void drawRectOrtho(TextureRegion region, float x, float y, float z, float ox, float oy,float oz, float w, float h, float rotY, float rotZ){
-        tmpV[3].set(+w*0.5f, +h*0.5f, 0);
-        tmpV[0].set(-w*0.5f, +h*0.5f, 0);
-        tmpV[1].set(-w*0.5f, -h*0.5f, 0);
-        tmpV[2].set(+w*0.5f, -h*0.5f, 0);
-        for(int i = 0;i<4;i++){
-            tmpV[i].add(ox,oy,oz);
-            tmpV[i].rotate(Vec3.Y,rotY);
-            tmpV[i].rotate(Vec3.Z,rotZ);
-            tmpV[i].add(x,y,z);
-        }
         Fill.quad(region,tmpV[0].x,tmpV[0].y, tmpV[1].x,tmpV[1].y, tmpV[2].x,tmpV[2].y, tmpV[3].x,tmpV[3].y);
     }
     static TextureRegion t1=new TextureRegion(),t2=new TextureRegion();

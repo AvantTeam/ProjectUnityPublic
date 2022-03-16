@@ -3,6 +3,7 @@ package unity.content.blocks;
 import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
+import arc.math.geom.*;
 import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
@@ -42,6 +43,8 @@ public class YoungchaBlocks{
         augerDrill, wallDrill,
         //payload
         inserterArm,
+        //crafting
+        batchPress,
     ///heat
         //transmission
         heatPipe, steamPiston,
@@ -211,11 +214,11 @@ public class YoungchaBlocks{
                         config.fixedConnection(TorqueGraph.class, 1, 1, 1, 1);
         }};
         windTurbine = new WindTurbine("wind-turbine"){{
-            requirements(Category.power, with(Items.titanium, 20, Items.lead, 80, Items.copper, 70));
+            requirements(Category.power, with(Items.lead, 80, Items.copper, 70));
             health = 2600;
             size = 3;
 
-            config.nodeConfig.put(TorqueGraph.class, b -> new WindTurbineTorqueGraphNode(0.03f, 20f, 1.5f, 20f, b));
+            config.nodeConfig.put(TorqueGraph.class, b -> new WindTurbineTorqueGraphNode(0.03f, 20f, 1.2f, 20f, b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }};
         rotaryWaterExtractor = new RotaryWaterExtractor("rotary-water-extractor"){{
@@ -240,7 +243,7 @@ public class YoungchaBlocks{
             requirements(Category.production, with(Items.lead, 60, Items.copper, 150));
             consumes.liquid(Liquids.water, 0.08f).boost();
 
-            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 50f, 40,b));
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.13f, 50f, 40,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
         }};
 
@@ -253,6 +256,20 @@ public class YoungchaBlocks{
             drillTime = 40;
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.07f, 20f, 50,b));
             config.fixedConnection(TorqueGraph.class, 0, 0,  0, 0,  1, 1,  0, 0);
+        }};
+        batchPress = new BatchPress("graphite-batch-press"){{
+            requirements(Category.crafting, with(UnityItems.nickel, 30, Items.copper, 130, Items.lead, 100));
+            itemPlace = new Vec2[]{new Vec2(-4,-4),new Vec2(0,-4),new Vec2(4,-4),
+                                   new Vec2(-4,0),new Vec2(4,0),
+                                   new Vec2(-4,4),new Vec2(0,4),new Vec2(4,4),
+                                   new Vec2(0,0)};
+            size = 3;
+            health = 2600;
+            craftTime = 100.0F;
+            consumes.item(Items.coal, 9);
+            outputItem = new ItemStack(Items.graphite, 8);
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 60f, 50,b));
+            config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
         }};
 
         heatPipe = new HeatPipe("heat-pipe"){{

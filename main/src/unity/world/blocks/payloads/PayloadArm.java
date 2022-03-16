@@ -59,6 +59,9 @@ public class PayloadArm extends GenericGraphBlock{
             i2.sub(256,256);
             switch(i1){
                 case SEL_IN:
+                    if(i2.equals(0,0)){
+                        break;
+                    }
                     build.from.set(i2);
                     build.recalcPositions();
                     switch(build.state){
@@ -66,6 +69,9 @@ public class PayloadArm extends GenericGraphBlock{
                     }
                     break;
                 case SEL_OUT:
+                    if(i2.equals(0,0)){
+                        break;
+                    }
                     build.to.set(i2);
                     build.recalcPositions();
                     switch(build.state){
@@ -179,7 +185,7 @@ public class PayloadArm extends GenericGraphBlock{
                     return;
                 }
                 Point2 relpt = new Point2(e.tile.x-tile.x,e.tile.y-tile.y);
-                if(ioselect!=-1){
+                if(ioselect!=-1 && !relpt.equals(0,0)){
                     configure(getCode(relpt));
                     ioselect = -1;
                 }else{
@@ -374,7 +380,7 @@ public class PayloadArm extends GenericGraphBlock{
                                     targetpayloadRotation= carrying.rotation();
                                     switchState(ArmState.MOVINGTOTARGET);
                                 }
-                            }else if(!Vars.net.client() && t.build.block.size * t.build.block.size * 8 * 8 <= maxSize && canPickupBlock(t.block())){
+                            }else if(!Vars.net.client() && t.build!=this && t.build.block.size * t.build.block.size * 8 * 8 <= maxSize && canPickupBlock(t.block())){
                                 ///theres a block we can grab directly...
                                 Building build = t.build;
                                 build.pickedUp();
@@ -420,7 +426,7 @@ public class PayloadArm extends GenericGraphBlock{
                     if(progress>=1){
                         progress = 1;
                         if(carrying instanceof BuildPayload buildp){
-                            buildp.build.rotation += rotateTargetBy;
+                            buildp.build.rotation = (buildp.build.rotation+rotateTargetBy)%4;
                         }else if(carrying instanceof UnitPayload unitp){
                             //unitp.unit.rotation
                         }
