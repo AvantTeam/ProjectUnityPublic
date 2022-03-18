@@ -38,13 +38,13 @@ public class YoungchaBlocks{
         //transmission
         driveShaft, shaftRouter, smallTransmission, torqueMeter,driveBeltSmall,driveBeltLarge,
         //power
-        windTurbine, rotaryWaterExtractor, flywheel, torqueSource,
+        crankShaft, windTurbine, rotaryWaterExtractor, flywheel, torqueSource,
         //production
         augerDrill, wallDrill,
         //payload
         inserterArm,
         //crafting
-        batchPress,
+        batchPress, batchMixer,
     ///heat
         //transmission
         heatPipe, steamPiston,
@@ -213,8 +213,15 @@ public class YoungchaBlocks{
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.001f, 999999f, b));
                         config.fixedConnection(TorqueGraph.class, 1, 1, 1, 1);
         }};
+        crankShaft = new CrankShaft("hand-crank"){{
+            requirements(Category.power, with(Items.lead, 5, Items.copper, 15));
+            health = 250;
+            solid = true;
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.02f, 8f, 6,60,b));
+            config.fixedConnection(TorqueGraph.class, 0, 0, 1, 0);
+        }};
         windTurbine = new WindTurbine("wind-turbine"){{
-            requirements(Category.power, with(Items.lead, 80, Items.copper, 70));
+            requirements(Category.power, with(Items.lead, 80, Items.copper, 70,Items.titanium,15));
             health = 2600;
             size = 3;
 
@@ -270,6 +277,18 @@ public class YoungchaBlocks{
             outputItem = new ItemStack(Items.graphite, 8);
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 60f, 50,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
+        }};
+
+        batchMixer = new BatchMixer("pyratite-batch-mixer"){{
+            requirements(Category.crafting, with(UnityItems.nickel, 60, Items.metaglass, 40, Items.graphite, 30));
+            size = 3;
+            health = 2600;
+            itemCapacity = 50;
+            craftTime = 30.0F;
+            consumes.items(new ItemStack(Items.coal, 1),new ItemStack(Items.lead, 1),new ItemStack(Items.sand, 1));
+            outputItem = new ItemStack(Items.pyratite, 2);
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.2f, 100f, 60,b));
+            config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 1, 0,  0, 1, 0,  0, 1, 0);
         }};
 
         heatPipe = new HeatPipe("heat-pipe"){{

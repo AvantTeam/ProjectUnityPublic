@@ -21,7 +21,7 @@ public class CombustionHeater extends GenericGraphBlock{
     public float tempPerFlammability = 1750;
 
     public float minConsumeAmount = 0.005f;
-    public float maxConsumeAmount = 0.03f;
+    public float maxConsumeAmount = 0.015f;
 
     public CombustionHeater(String name){
         super(name);

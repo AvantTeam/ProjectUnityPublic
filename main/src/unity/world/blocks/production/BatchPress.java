@@ -94,7 +94,7 @@ public class BatchPress extends GenericGraphCrafter{
             UnityDrawf.drawRectOrtho(top[rotation%2],x-9 + Mathf.range(shake),y+ Mathf.range(shake),9,0,2,18,18,90 * lidopened,0);
             UnityDrawf.drawRectOrtho(topside,x-9,y,-1,0,18,2,18,90 * lidopened - 90,0);
             if(lidopened<0.01){
-                Draw.color(Color.black,Mathf.clamp(progress,0,0.22f));
+                Draw.color(Color.black,Mathf.clamp(progress*0.6f,0,0.22f));
                 Draw.rect(spinner,x-(4-spinprog*3),y-(4-spinprog*3),spinnerrot);
                 Draw.color();
             }

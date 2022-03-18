@@ -31,10 +31,10 @@ public class UnityParts{
         //region units
         ///DO NOT CHANGE ORDER (will break saves)
         panel = new ModularPartType("panel"){{
-            requirements(PartCategories.miscUnit, ItemStack.with(Items.titanium, 7 ,UnityItems.nickel, 5));
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.copper, 5 ,UnityItems.nickel, 5));
             health(40);
             mass(20);
-            armor(1);
+            armor(2);
         }};
         smallRoot = new ModularPartType("root-small"){{
             requirements(PartCategories.miscUnit, ItemStack.with(UnityItems.nickel, 10));
@@ -47,7 +47,7 @@ public class UnityParts{
             hasCellDecal = true;
         }};
         gun = new ModularWeaponMountType("gun"){{
-           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 10));
+           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.graphite, 10));
            health(10);
            mass(20);
            usesPower(5);
@@ -58,7 +58,7 @@ public class UnityParts{
            }});
         }};
         cannon = new ModularWeaponMountType("cannon"){{
-           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 40, Items.titanium, 50, Items.graphite, 20, UnityItems.nickel, 20));
+           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 40, Items.graphite, 20, UnityItems.nickel, 30));
            health(40);
            mass(100);
            usesPower(20);
@@ -82,13 +82,13 @@ public class UnityParts{
            }});
         }};
         smallEngine = new ModularPartType("engine-small"){{
-            requirements(PartCategories.movementUnit, ItemStack.with(Items.lead, 10, Items.titanium, 5));
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.copper, 10, UnityItems.nickel, 5));
             health(10);
             mass(15);
             producesPower(20);
         }};
         smallWheel = new ModularWheelType("wheel-small"){{
-            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 5));
+            requirements(PartCategories.movementUnit, ItemStack.with(UnityItems.nickel, 5));
             health(15);
             mass(15);
             wheel(1, 30, 1.5f);
@@ -140,7 +140,7 @@ public class UnityParts{
             h = 2;
             health(200);
             mass(120);
-            armor(20);
+            armor(100);
         }};
         gunBridge = new ModularPartType("gun-bridge"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.graphite, 10, UnityItems.nickel, 10));

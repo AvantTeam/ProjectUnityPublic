@@ -16,6 +16,7 @@ public class GenericGraphCrafter extends GenericCrafter implements GraphBlock{
     public GraphBlockConfig config = new GraphBlockConfig(this);
     public GenericGraphCrafter(String name){
         super(name);
+        rotate = true;
         update = true;
     }
 
