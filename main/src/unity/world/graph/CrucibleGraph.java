@@ -1,6 +1,7 @@
 package unity.world.graph;
 
 import arc.struct.*;
+import arc.util.*;
 import mindustry.type.*;
 
 public class CrucibleGraph extends Graph<CrucibleGraph>{
@@ -39,7 +40,7 @@ public class CrucibleGraph extends Graph<CrucibleGraph>{
                     var thisfluid = cgn.getFluid(fluid.key);
                     transfer = thisfluid.total()/cgn.baseSize - otherfluid.total()/cgno.baseSize;
                     if(transfer>0.1f){
-                        transfer *= 0.1f;
+                        transfer *= 0.3f* Time.delta;
                         transfer = Math.min(transfer, Math.min(thisfluid.melted,cgno.capacity-otherfluid.total()));
                     }else{
                         continue;

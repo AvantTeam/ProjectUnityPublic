@@ -70,13 +70,11 @@ public class TorqueDrill extends Drill implements GraphBlock{
         return config;
     }
 
-    @Override
-    public boolean outputsItems(){
+    @Override public boolean outputsItems(){
         return true;
     }
 
-    @Override
-    public boolean rotatedOutput(int x, int y){
+    @Override public boolean rotatedOutput(int x, int y){
         return false;
     }
 

@@ -40,7 +40,8 @@ public class CrankShaft extends GenericGraphBlock{
         @Override
         public void buildConfiguration(Table table){
             super.buildConfiguration(table);
-            table.button(Icon.rotate,()->{configure(new Point2());});
+            var bu  = table.button(Icon.rotate,()->{configure(new Point2());}).get();
+            bu.setDisabled(()->lastCrank>0);
         }
 
         @Override

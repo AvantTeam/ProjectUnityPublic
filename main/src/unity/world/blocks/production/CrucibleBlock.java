@@ -20,6 +20,7 @@ public class CrucibleBlock extends GenericGraphBlock{
     Vec2[] pos;
     public CrucibleBlock(String name){
         super(name);
+        sync = true;
     }
 
     @Override

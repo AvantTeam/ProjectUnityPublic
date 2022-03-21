@@ -1,5 +1,7 @@
 package unity.world.graph;
 
+import arc.util.*;
+
 public class HeatGraph extends Graph<HeatGraph>{
 
     @Override
@@ -39,7 +41,7 @@ public class HeatGraph extends Graph<HeatGraph>{
                 //but essentially the energy only GS equality is eₙ = (e꜀ + kTₛ)/(1+k/c) as T꜀ is e꜀/c
                 for(GraphEdge ge : v.connections){
                     hgn = ((HeatGraphNode)ge.other(v).node);
-                    b = 0.5f * (hgn.conductivity + cond);
+                    b =  (hgn.conductivity + cond) * Time.delta;
                     k += b;
                     e += b * hgn.getTemp();
                 }

@@ -37,7 +37,7 @@ public class BatchMixer extends GenericGraphCrafter{
         public void created(){
             super.created();
             particles = new Seq<>();
-            for(int i =0;i<=40;i++){
+            for(int i =0;i<=50;i++){
                 particles.add(new ItemMixerParticle());
             }
         }
@@ -97,6 +97,7 @@ public class BatchMixer extends GenericGraphCrafter{
                 }
                 int total = items.total();
                 if(total<=particles.size){
+                    //total items less then particles, items get mapped 1:1 to particles
                     int[] index = {0};
                     items.each((item,a)->{
                         for(int i = 0; i < a; i++){
@@ -111,11 +112,12 @@ public class BatchMixer extends GenericGraphCrafter{
                     }
                 }else{
                     float ratio = particles.size/(float)total;
+                    int lratio = Mathf.floor(1f/ratio);
                     float[] index = {0};
                     items.each((item,a)->{
-                        for(int i = 0; i < a; i++){
+                        for(int i = 0; i < a; i+=lratio){
                             particles.get(Mathf.floor(index[0])).i = item;
-                            index[0]+=ratio;
+                            index[0]+=ratio*lratio;
                         }
                     });
                 }

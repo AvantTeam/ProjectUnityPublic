@@ -54,6 +54,7 @@ public class GenericTorqueWallDrill extends GenericGraphBlock{
 
         float targetDrillAngle = 0,targetDrillExtend = 0;
         float drillAngle = 0,drillExtend = 0;
+        int tilesDrilling = 0;
 
         @Override
         public float efficiency(){
@@ -72,6 +73,7 @@ public class GenericTorqueWallDrill extends GenericGraphBlock{
                 }
             }
             int mindist = range+1;
+            tilesDrilling = 0;
             for(int p = 0; p < size; p++){
                 Point2 l = checkPoints[p];
                 Tile dest = null;
@@ -85,6 +87,7 @@ public class GenericTorqueWallDrill extends GenericGraphBlock{
                             mindist = Math.min(mindist,i);
                             oredist[p].ore = drop;
                             oredist[p].tile = dest = other;
+                            tilesDrilling++;
                         }
                         break;
                     }

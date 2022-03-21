@@ -6,6 +6,8 @@ import arc.math.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.io.*;
+import mindustry.content.*;
+import mindustry.entities.*;
 import mindustry.ui.*;
 
 import static unity.graphics.UnityPal.*;
@@ -54,7 +56,12 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
     @Override
     public void displayBars(Table table){
         table.row();
-        table.add(new Bar(() -> Core.bundle.format("bar.unity-temp", Strings.fixed(getTemp() - celsiusZero, 1)), this::heatColor, () -> Mathf.clamp(Math.abs(getTemp() / 273))));
+        table.add(new Bar(
+            () -> Core.bundle.format("bar.unity-temp",
+            Strings.fixed(getTemp() - celsiusZero, 1)),
+            ()->(getTemp()<maxTemp? heatColor(): (Time.time%30>15?Color.scarlet:Color.black)),
+            () -> Mathf.clamp(Math.abs(getTemp() / maxTemp))
+        ));
     }
 
     @Override
@@ -63,6 +70,10 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
         heatenergy += (ambientTemp - getTemp()) * emissiveness * Time.delta / 60f;
         if(heatProducer){
             generateHeat();
+        }
+        if(getTemp()>maxTemp){
+            Puddles.deposit(build().tile, Liquids.slag, 9);
+            build().damage(((getTemp()-maxTemp)/maxTemp)*Time.delta*10f);
         }
     }
 
@@ -112,7 +123,7 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
     }
     public void generateHeat(){
         lastEnergyInput = Math.max(minGenerate,(targetTemp-getTemp())*efficency*prodEfficency);
-        heatenergy += lastEnergyInput;
+        heatenergy += lastEnergyInput*Time.delta;
     }
 
     public float getTemp(){

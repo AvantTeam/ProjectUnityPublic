@@ -30,6 +30,9 @@ public class GenericGraphCrafter extends GenericCrafter implements GraphBlock{
     @Override public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
        super.drawRequestRegion(req,list);
        config.drawConnectionPoints(req,list); }
+    @Override public boolean rotatedOutput(int x, int y){
+            return false;
+        }
 
     public class GenericGraphCrafterBuild extends GenericCrafterBuild implements GraphBuild{
         OrderedMap<Class<? extends Graph>,GraphNode> graphNodes = new OrderedMap<>();

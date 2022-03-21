@@ -5,10 +5,16 @@ import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
 import mindustry.*;
+import mindustry.content.*;
+import mindustry.entities.*;
+import mindustry.entities.bullet.*;
+import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.meta.*;
 import unity.content.effects.*;
+import unity.util.*;
 import unity.world.graph.*;
 
 
@@ -17,6 +23,7 @@ import static mindustry.Vars.tilesize;
 public class SmallWallDrill extends GenericTorqueWallDrill{
     TextureRegion base[];
     TextureRegion floor,rotator,armbase,arm,bore;
+    int hitTimer = timers++;
     public SmallWallDrill(String name){
         super(name);
     }
@@ -34,8 +41,12 @@ public class SmallWallDrill extends GenericTorqueWallDrill{
         armbase = loadTex("armbase");
     }
 
-    public class SmallWallDrillBuild extends GenericTorqueWallDrillBuild{
+    @Override
+    public void init(){
+        super.init();
+    }
 
+    public class SmallWallDrillBuild extends GenericTorqueWallDrillBuild{
 
         @Override
         public void updateTile(){
@@ -44,7 +55,7 @@ public class SmallWallDrill extends GenericTorqueWallDrill{
             if(Mathf.chanceDelta(0.02*eff)){
                 updateEffect.at(x + Mathf.range(size * 2f), y + Mathf.range(size * 2f));
             }
-            if(Mathf.chanceDelta(0.5*eff)){
+            if(Mathf.chanceDelta(0.3*eff)){
                 float s2 = size*0.5f;
                 float ang = targetDrillAngle + rotdeg();
                 float vx = -Mathf.cos(ang)+Mathf.range(0.5f);
@@ -59,6 +70,38 @@ public class SmallWallDrill extends GenericTorqueWallDrill{
                 }else{
                     OtherFx.dust.at(rx + Mathf.range(1), ry + Mathf.range(1), 0, col, new Vec2(vx * 14.0f * eff, vy * 14.0f * eff));
                 }
+            }
+            var tnode = torqueNode();
+            tnode.baseForce = 0;
+            float spd = torqueNode().getGraph().lastVelocity;
+            if(tilesDrilling == 0 && timer(hitTimer,10) && spd>5){
+                float ang = targetDrillAngle + rotdeg();
+                float s2 = size*0.5f;
+                float vx = -Mathf.cos(ang)+Mathf.range(0.5f);
+                float vy = -Mathf.sin(ang)+Mathf.range(0.5f);
+                float rx = x + Geometry.d4x(rotation) * (s2+targetDrillExtend+0.5f) * tilesize, ry = y + Geometry.d4y(rotation) * (s2+targetDrillExtend+0.5f) * tilesize;
+                s2 = size*4;
+                Utils.collideLineRawEnemy(team, rx-vx*s2, ry-vy*s2, rx+vx*s2, ry+vy*s2, 4, true, true, true, (x, y, h, direct) -> {
+                    float t = Mathf.clamp(spd,0,100);
+                    float p = h.health();
+                    float ratio = Math.min(p,t)/h.maxHealth();
+                    h.damage(t);
+                    ratio*=0.1;
+                    if(h instanceof Unit unit){
+                        var req= unit.type.getTotalRequirements();
+                        for(var stack:req){
+                            float am = stack.amount*ratio;
+                            if(am>=1 || Mathf.random()<am){
+                                items.add(stack.item,Math.max(1,Mathf.floor(am)));
+                                lastItem = stack.item;
+                            }
+                        }
+                    }
+                    tnode.baseForce -= t;
+
+                    Fx.hitBulletSmall.at(h.x(),h.y());
+                    return true;
+                });
             }
             //Effect
 

@@ -8,6 +8,7 @@ import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.environment.*;
+import mindustry.world.blocks.power.*;
 import mindustry.world.meta.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
@@ -56,6 +57,7 @@ public class YoungchaBlocks{
     //modules
         basicPanel,
     //other
+        reinforcedPowerNode,//shitty power node just so vanilla can stop existing in this area for lore reasons.
     sandboxAssembler, monomialHangar; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
     public static void load(){
@@ -217,6 +219,7 @@ public class YoungchaBlocks{
             requirements(Category.power, with(Items.lead, 5, Items.copper, 15));
             health = 250;
             solid = true;
+            rotate = true;
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.02f, 8f, 6,60,b));
             config.fixedConnection(TorqueGraph.class, 0, 0, 1, 0);
         }};
@@ -275,7 +278,7 @@ public class YoungchaBlocks{
             craftTime = 100.0F;
             consumes.item(Items.coal, 9);
             outputItem = new ItemStack(Items.graphite, 8);
-            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 60f, 50,b));
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.15f, 60f, 50,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
         }};
 
@@ -283,11 +286,11 @@ public class YoungchaBlocks{
             requirements(Category.crafting, with(UnityItems.nickel, 60, Items.metaglass, 40, Items.graphite, 30));
             size = 3;
             health = 2600;
-            itemCapacity = 50;
+            itemCapacity = 100;
             craftTime = 30.0F;
             consumes.items(new ItemStack(Items.coal, 1),new ItemStack(Items.lead, 1),new ItemStack(Items.sand, 1));
             outputItem = new ItemStack(Items.pyratite, 2);
-            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.2f, 100f, 60,b));
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.3f, 100f, 70,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 1, 0,  0, 1, 0,  0, 1, 0);
         }};
 
@@ -317,7 +320,7 @@ public class YoungchaBlocks{
             health = 2000;
             solid = true;
             consumes.liquid(Liquids.water, 0.1f);
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 9, 1200 + HeatGraphNode.celsiusZero));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 9, 1100 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 0,0,0, 0,0,0 ,0,1,0 ,0,0,0);
         }};
 
@@ -335,7 +338,7 @@ public class YoungchaBlocks{
             rotate = true;
             health = 700;
             solid = true;
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 4, 1500 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.015f));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 4, 2100 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.015f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
         }};
 
@@ -345,7 +348,7 @@ public class YoungchaBlocks{
             health = 1100;
             solid = true;
             floating = true;
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 4, 1500 + HeatGraphNode.celsiusZero,1000 + HeatGraphNode.celsiusZero,0.015f));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 4, 2000 + HeatGraphNode.celsiusZero,1000 + HeatGraphNode.celsiusZero,0.015f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
             requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
         }};
@@ -366,7 +369,7 @@ public class YoungchaBlocks{
             rotate = true;
             health = 1100;
             solid = true;
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.4f, 0.15f, 4,1800 + HeatGraphNode.celsiusZero));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.4f, 0.15f, 4,2400 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 0, 0,  1, 1,  0, 0,  1, 1);
             requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
         }};
@@ -377,7 +380,7 @@ public class YoungchaBlocks{
             health = 1700;
             solid = true;
 
-            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.015f, 0.15f, 9,1800 + HeatGraphNode.celsiusZero));
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.015f, 0.15f, 9,2400 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 1,0,1,  1,0,1,  1,0,1,  1,0,1);
             config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,50));
             config.fixedConnection(CrucibleGraph.class, 0,1,0,  0,1,0,  0,1,0,  0,1,0);
@@ -455,6 +458,14 @@ public class YoungchaBlocks{
             unitModuleWidth = 3;
             unitModuleHeight = 4;
             rotate = true;
+        }};
+
+        reinforcedPowerNode = new PowerNode("reinforced-power-node"){{
+            requirements(Category.power, with(UnityItems.nickel, 70, Items.titanium, 20, UnityItems.cupronickel, 20));
+            size = 2;
+            maxNodes = 5;
+            laserRange = 9.5f;
+            health = 900;
         }};
 
 
