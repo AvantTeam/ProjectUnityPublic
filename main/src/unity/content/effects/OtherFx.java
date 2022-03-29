@@ -23,5 +23,14 @@ public class OtherFx{
             Fill.circle(e.x + x, e.y + y, e.fout() * 3.0F);
             Fill.circle(e.x + x / 2.0F, e.y + y / 2.0F, e.fout());
         });
-    }).layer(Layer.blockOver-1);
+    }).layer(Layer.blockOver-1),
+
+    weldspark = new Effect(12, e->{
+        Draw.color(Color.white, Pal.turretHeat, e.fin());
+        Lines.stroke(e.fout() * 0.6f + 0.6f);
+
+        Angles.randLenVectors(e.id, 3, 15 * e.finpow(), e.rotation, 3, (x, y) -> {
+            Lines.lineAngle(e.x + x, e.y + y, Mathf.angle(x, y), e.fslope() * 5 + 0.5f);
+        });
+    });
 }

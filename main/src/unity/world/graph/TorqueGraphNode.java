@@ -48,7 +48,7 @@ public class TorqueGraphNode extends GraphNode<TorqueGraph>{
     public void displayBars(Table table){
         var n1 = connector.first();
         table.row();
-        table.add(new Bar(() -> Core.bundle.format("bar.unity-torquespeed", Strings.fixed(n1.graph.lastVelocity*10f, 1)), () -> Pal.ammo, () -> Mathf.clamp(n1.graph.lastVelocity)));
+        table.add(new Bar(() -> Core.bundle.format("bar.unity-torquespeed", Strings.fixed(n1.graph.lastVelocity*10f, 1)), () -> Pal.ammo, () -> Mathf.clamp(n1.graph.lastVelocity/Math.max(0.01f,maxSpeed))));
     }
 
     public float getFriction(){

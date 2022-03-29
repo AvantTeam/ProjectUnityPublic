@@ -58,6 +58,7 @@ public class YoungchaBlocks{
         basicPanel,
     //other
         reinforcedPowerNode,//shitty power node just so vanilla can stop existing in this area for lore reasons.
+    unitAssemblyArm,
     sandboxAssembler, monomialHangar; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
     public static void load(){
@@ -451,8 +452,18 @@ public class YoungchaBlocks{
             health = 69420;
             sandbox = true;
         }};
+        unitAssemblyArm = new UnitAssemblerArm("unit-assembly-arm"){{
+            requirements(Category.units, with(UnityItems.nickel,30,Items.graphite,30, UnityItems.cupronickel,30));
+            size = 3;
+            rotate = true;
+            itemCapacity = 30;
+            health = 2600;
+            constructSpeed = 0.14f;
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.2f, 100f,40, b));
+            config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
+        }};
         monomialHangar  = new ModularUnitAssembler("monomial-hangar"){{
-            requirements(Category.units, BuildVisibility.hidden,  with(Items.copper,100,Items.graphite,20, Items.silicon,20));
+            requirements(Category.units, with(Items.copper,100,Items.graphite,20, Items.metaglass,20));
             size = 3;
             health = 2600;
             unitModuleWidth = 3;

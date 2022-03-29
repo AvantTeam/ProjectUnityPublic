@@ -210,6 +210,9 @@ public class PartsEditorDialog extends BaseDialog{
         //todo: temp
         avalibleParts.clear();
         for(var part: ModularPartType.partMap){
+            if(!allowed.get(part.value)){
+                continue;
+            }
             if(!avalibleParts.containsKey(part.value.category)){
                 avalibleParts.put(part.value.category, new Seq<>());
             }
@@ -267,6 +270,11 @@ public class PartsEditorDialog extends BaseDialog{
         int weaponslots = Math.round(statmap.getValue("weaponslots"));
         int weaponslotsused = Math.round(statmap.getValue("weaponslotuse"));
         table.add("[lightgray]" +  Core.bundle.get("ui.parts.stat.weapon-slots") + ": "+(weaponslotsused>weaponslots?"[red]":"[green]")+ weaponslotsused+"/"+weaponslots).left().top().tooltip(Core.bundle.get("ui.parts.stat.weapon-slots-tooltip"));
+
+        table.row();
+        int abilityslots = Math.round(statmap.getValue("abilityslots"));
+        int abilityslotsused = Math.round(statmap.getValue("abilityslotuse"));
+        table.add("[lightgray]" +  Core.bundle.get("ui.parts.stat.ability-slots") + ": "+(abilityslotsused>abilityslots?"[red]":"[green]")+ abilityslotsused+"/"+abilityslots).left().top().tooltip(Core.bundle.get("ui.parts.stat.ability-slots-tooltip"));
     };
 
     public void updateScrollFocus(){

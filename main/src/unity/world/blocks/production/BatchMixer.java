@@ -118,6 +118,7 @@ public class BatchMixer extends GenericGraphCrafter{
                         for(int i = 0; i < a; i+=lratio){
                             particles.get(Mathf.floor(index[0])).i = item;
                             index[0]+=ratio*lratio;
+                            index[0] = Math.min(index[0],particles.size-1);
                         }
                     });
                 }

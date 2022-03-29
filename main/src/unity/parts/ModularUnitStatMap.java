@@ -16,6 +16,7 @@ public class ModularUnitStatMap extends ModularPartStatMap{
         stats.put("abilityslotuse",(new ValueMap()).put("value",0f));
         stats.put("itemcapacity",(new ValueMap()).put("value",0f));
         stats.put("weapons",new ValueList());
+        stats.put("abilities",new ValueList());
         stats.put("wheel",(new ValueMap()));
     }
 }

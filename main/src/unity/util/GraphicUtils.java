@@ -1,12 +1,14 @@
 package unity.util;
 
 import arc.*;
+import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
+import mindustry.gen.*;
 import mindustry.world.*;
 import unity.gen.*;
 
@@ -242,8 +244,28 @@ public final class GraphicUtils{
                     start.y + Tmp.v1.y * dseg * (2*i+1) + prevnorm.y * offset * flip
                 );
             }
+        }
+        public void draw(Cons3<Vec2,Vec2,Integer> con){
+            int index = 0;
+            for(int i = 0;i<joints;i++){
+                if(i==0){
+                    Tmp.v1.set(start.x, start.y);
+                    Tmp.v2.set(jointPositions[0].x, jointPositions[0].y);
+                    con.get(Tmp.v1,Tmp.v2,index++);
+                }
+                if(i==joints-1){
+                    Tmp.v1.set(jointPositions[i].x, jointPositions[i].y);
+                    Tmp.v2.set(end.x, end.y);
+                    con.get(Tmp.v1,Tmp.v2,index++);
+                }else{
+                    Tmp.v1.set(jointPositions[i].x, jointPositions[i].y);
+                    Tmp.v2.set(jointPositions[i+1].x, jointPositions[i+1].y);
+                    con.get(Tmp.v1,Tmp.v2,index++);
+                }
+            }
 
         }
+
     }
 
     //

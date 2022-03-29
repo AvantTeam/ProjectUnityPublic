@@ -54,7 +54,7 @@ public final class UnityUnitTypes{
 
     // Youngcha {unit, modular}.
     public static @EntityDef({Unitc.class, ModularUnitc.class})
-    UnitType modularUnit;
+    UnitType modularUnitSmall;
 
     private UnityUnitTypes(){
         throw new AssertionError();
@@ -1537,11 +1537,13 @@ public final class UnityUnitTypes{
             }});
         }};
 
-        modularUnit = new UnityUnitType("modularUnit"){{
+        modularUnitSmall = new UnityUnitType("modularUnit"){{
             rotateShooting = false;
             omniMovement = false;
             weapons.add(new Weapon("gun")); //blank weapon so mobile doesn't die
             //stats? what stats? :D
+            templates.addAll("g4SFgICEgIGEgIKFgIOBgYCDgYGAgYOFgoCFgoM=","g4OFgICCgIGBgYCEgYGFgYKFgoCCgoE=","g4SFgICEgIGEgIKCgIOBgYCIgYGFgYOFgoCCgoM=",
+            "gYSFgICBgIGCgIKFgIM=","g4SFgICEgIGEgIKFgIOBgYCVgYGFgYOFgoCFgoM=","g4OFgICAgIGFgIKBgYCEgYGCgYKFgoCAgoGFgoI=");
         }};
     }
 }

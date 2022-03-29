@@ -9,9 +9,7 @@ import arc.util.io.*;
 import mindustry.*;
 import mindustry.ai.formations.*;
 import mindustry.ai.types.*;
-import mindustry.content.*;
 import mindustry.entities.abilities.*;
-import mindustry.entities.bullet.*;
 import mindustry.entities.units.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
@@ -25,6 +23,7 @@ import unity.gen.*;
 import unity.parts.*;
 import unity.parts.PanelDoodadType.*;
 import unity.parts.types.*;
+import unity.type.*;
 import unity.util.*;
 
 import java.util.*;
@@ -85,7 +84,10 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             if(constructdata != null){
                 construct = new ModularConstruct(constructdata);
             }else{
-                construct = ModularConstruct.test;
+                String templatestr = ((UnityUnitType)type).templates.random();
+                ModularConstructBuilder test = new ModularConstructBuilder(3, 3);
+                test.set(Base64.getDecoder().decode(templatestr.trim().replaceAll("[\\t\\n\\r]+", "")));
+                construct = new ModularConstruct(test.exportCompressed());
             }
         }
         constructdata = Arrays.copyOf(construct.data, construct.data.length);
@@ -140,6 +142,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         int weaponslots = Math.round(statmap.getValue("weaponslots"));
         int weaponslotsused = Math.round(statmap.getValue("weaponslotuse"));
+
         for(int i = 0; i < weapons.length(); i++){
             var weapon = getWeaponFromStat(weapons.getMap(i));
             weapon.reload *= 1f / eff;
@@ -153,6 +156,20 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             ModularPart mpart = weapons.getMap(i).get("part");
             weaponrange = Math.max(weaponrange, weapon.bullet.range() + Mathf.dst(mpart.cx, mpart.cy) * ModularPartType.partSize);
         }
+
+        int abilityslots = Math.round(statmap.getValue("abilityslots"));
+        int abilityslotsused = Math.round(statmap.getValue("abilityslotuse"));
+
+        if(abilityslotsused<=abilityslots){
+            var abilitiesStats = statmap.stats.getList("abilities");
+            abilities().clear();
+            for(int i = 0; i < abilitiesStats.length(); i++){
+                var abilityStat = abilitiesStats.getMap(i);
+                Ability ability = abilityStat.get("ability");
+                abilities().add(ability.copy());
+            }
+        }
+
         this.massStat = statmap.getOrCreate("mass").getFloat("value");
 
 
@@ -169,7 +186,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public void setType(UnitType type) {
         this.type = type;
         if (controller == null) controller(type.createController()); //for now
-        if(type!=UnityUnitTypes.modularUnit){
+        if(type!=UnityUnitTypes.modularUnitSmall){
             this.maxHealth = type.health;
             drag(type.drag);
             this.armor = type.armor;
@@ -185,7 +202,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
     @Replace
     public void setupWeapons(UnitType def) {
-        if(def!=UnityUnitTypes.modularUnit){
+        if(def!=UnityUnitTypes.modularUnitSmall){
             mounts = new WeaponMount[def.weapons.size];
             for(int i = 0; i < mounts.length; i++){
                 mounts[i] = def.weapons.get(i).mountType.get(def.weapons.get(i));

@@ -26,6 +26,9 @@ public class UnityUnitType extends UnitType{
     public float rotorDeathSlowdown = 0.01f;
     public float fallRotateSpeed = 2.5f;
 
+    // Modular Units.
+    public Seq<String> templates = new Seq<>();
+
     public UnityUnitType(String name){
         super(name);
         outlines = false; // We already generated the sprites when compiling, so...

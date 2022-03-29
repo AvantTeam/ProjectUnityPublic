@@ -5,20 +5,15 @@ import arc.graphics.g2d.*;
 import arc.math.geom.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
-import arc.util.*;
 import arc.util.io.*;
 import mindustry.*;
-import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
-import mindustry.ui.dialogs.*;
-import mindustry.world.*;
-import mindustry.world.blocks.logic.LogicBlock.*;
 import mindustry.world.blocks.payloads.*;
-import mindustry.world.modules.*;
+import mindustry.world.meta.*;
 import unity.*;
 import unity.content.*;
 import unity.gen.*;
@@ -129,6 +124,12 @@ public class ModularUnitAssembler extends PayloadBlock{
             }
             return null;
         }
+        public boolean isComplete(){
+            return remaining.length==0;
+        }
+        public void complete(){
+            remaining = new ItemStack[0];
+        }
 
     }
 
@@ -151,9 +152,17 @@ public class ModularUnitAssembler extends PayloadBlock{
             var configureButtonCell = table.button(Tex.whiteui, Styles.clearTransi, 50,
             (() -> {
                 Unity.ui.partsEditor.show(blueprint.export(),
-                (data)->{this.configure(data); doodads.clear();construct = new ModularConstruct(blueprint.exportCompressed());},
+                (data)->{
+                    this.configure(data);
+                    doodads.clear();
+                    construct = new ModularConstruct(blueprint.exportCompressed());
+                    for(var c:currentlyConstructing){
+                        c.complete();
+                    }
+                    currentlyConstructing.clear();
+                },
                 PartsEditorDialog.unitInfoViewer,
-                part->part.visible);
+                part->part.visible && part.w<=unitModuleWidth && part.h<=unitModuleHeight);
             }));
             configureButtonCell.size(50);
             configureButtonCell.get().getStyle().imageUp = Icon.pencil;
@@ -172,18 +181,47 @@ public class ModularUnitAssembler extends PayloadBlock{
             }
         }
 
+        void rebuildItemCost(Table req){
+            req.clear();
+            req.top().left();
+            req.add("[lightgray]" + Stat.buildCost.localized() + ":[] ").left().top();
+            int i =0;
+            for(ItemStack stack : blueprint.itemRequirements()){
+                req.add(new ItemDisplay(stack.item, stack.amount, false)).padRight(5);
+                i++;
+                if(i%4==0){
+                    req.row();
+                }
+            }
+        }
+
+        @Override
+        public void displayBars(Table table){
+            super.displayBars(table);
+            ModularConstruct[] curcon = {construct};
+            table.table(t->{
+                t.update(()->{
+                    if(curcon[0]!=construct){
+                        rebuildItemCost(t);
+                        curcon[0] = construct;
+                    }
+                });
+                rebuildItemCost(t);
+            }).minHeight(30).growY();
+        }
+
         //js
         public void spawnUnit(){
             if(Vars.net.client()){
                 return;
             }
-            var t = ((UnityUnitType)UnityUnitTypes.modularUnit).spawn(team, x, y,blueprint.exportCompressed());
+            var t = ((UnityUnitType)UnityUnitTypes.modularUnitSmall).spawn(team, x, y,blueprint.exportCompressed());
             t.rotation = rotdeg();
             Events.fire(new UnitCreateEvent(t, this));
         }
 
         public void createUnit(){
-            var t = UnityUnitTypes.modularUnit.create(team);
+            var t = UnityUnitTypes.modularUnitSmall.create(team);
             ModularConstruct.cache.put(t,blueprint.exportCompressed());
             ((ModularUnitUnit) t).constructdata(ModularConstruct.cache.get(t));
             payload = new UnitPayload(t);
@@ -207,7 +245,7 @@ public class ModularUnitAssembler extends PayloadBlock{
                 }
 
                 ////////////////====================== testing <
-                if(currentMod==null){
+                /*if(currentMod==null){
                     currentMod = getJob(this,null);
                 }
                 if(currentMod!=null){
@@ -217,7 +255,7 @@ public class ModularUnitAssembler extends PayloadBlock{
                     if(currentMod.remaining.length==0){
                         currentMod = null;
                     }
-                }
+                }*/
                 ////////////////====================== testing >
 
                 if(built.size>=construct.partlist.size && payload==null){
@@ -234,6 +272,7 @@ public class ModularUnitAssembler extends PayloadBlock{
                 return null;
             }
             if(e==null){
+                //gets any random job
                 for(var c:currentlyConstructing){
                     if(c.takenby==b.pos()){
                         return c;
@@ -252,6 +291,40 @@ public class ModularUnitAssembler extends PayloadBlock{
                     }
                 }
 
+            }else{
+                //gets any job with a specified item
+                for(var c:currentlyConstructing){
+                    if(c.takenby==b.pos()){
+                        return c;
+                    }
+                    if(c.takenby==-1){
+                        for(var istack: c.remaining){
+                            if(istack.item.equals(e) && istack.amount>0){
+                                c.takenby = b.pos();
+                                return c;
+                            }
+                        }
+                    }
+                }
+                for(var part:construct.partlist){
+                    if(!built.contains(Point2.pack(part.getX(),part.getY()))
+                    && currentlyConstructing.find(bpart->bpart.x==part.getX() && bpart.y==part.getY())==null){
+                        boolean hasItem = false;
+                        for(var istack: part.type.cost){
+                            if(istack.item.equals(e)){
+                                hasItem = true;
+                                break;
+                            }
+                        }
+                        if(hasItem){
+                            var con = new ModuleConstructing(part);
+                            con.takenby = b.pos();
+                            currentlyConstructing.add(con);
+                            return con;
+                        }
+                    }
+                }
+                //uh
             }
             return null; //no job for you
         }
@@ -298,6 +371,15 @@ public class ModularUnitAssembler extends PayloadBlock{
             Draw.z(Layer.blockOver);
             payRotation = rotdeg();
             drawPayload();
+        }
+
+        public Vec2 modulePos(float x,float y){
+            if(construct==null){
+                return new Vec2(x,y);
+            }
+            var v = new Vec2((x-construct.parts.length*0.5f) * partSize,(y-construct.parts[0].length*0.5f) * partSize);
+            v.rotate(90*(rotation-1));
+            return v.add(this.x,this.y);
         }
 
         @Override

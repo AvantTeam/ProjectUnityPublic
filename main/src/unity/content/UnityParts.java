@@ -9,6 +9,8 @@ import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.type.weapons.*;
+import unity.entities.abilities.*;
+import unity.entities.bullet.physical.*;
 import unity.parts.*;
 import unity.parts.types.*;
 import unity.content.effects.*;
@@ -19,11 +21,12 @@ public class UnityParts{
     //misc
     public static ModularPartType panel, mediumPanel, smallRoot, mediumRoot, largeRoot, largePanel,storage;
     //weapons
-    public static ModularPartType gun, cannon, howitzer, pointDefense, tankCannon;
+    public static ModularPartType gun, flamethrower, grenadeLauncher, cannon, howitzer, pointDefense, tankCannon; //harpoon?
     public static ModularPartType gunBridge;
     //movement
     public static ModularPartType smallEngine, engine, smallWheel, smallTracks, mediumWheel, largeWheel, largeTracks, tankTracks, tankTracksLarge;
-
+    //abilities
+    public static ModularPartType pipebomb;
     //unit
     public static Seq<PanelDoodadPalette> unitDoodads = new Seq<>();
 
@@ -43,6 +46,7 @@ public class UnityParts{
             producesPower(15);
             addsWeaponSlots(2);
             itemCapacity(20); //the default
+            addsAbilitySlots(1);
             root = true;
             hasCellDecal = true;
         }};
@@ -129,8 +133,8 @@ public class UnityParts{
                     hitEffect = Fx.blastExplosion;
                     fragLifeMin = 0.1f;
                     fragLifeMax = 0.3f;
-                    fragBullets = 3;
-                    fragBullet = Bullets.standardCopper;
+                    fragBullets = 5;
+                    fragBullet = Bullets.standardThorium;
                }};
             }});
         }};
@@ -167,6 +171,7 @@ public class UnityParts{
             addsWeaponSlots(6);
             itemCapacity(50);
             armor(100);
+            addsAbilitySlots(2);
             root = true;
             hasCellDecal = true;
         }};
@@ -180,6 +185,7 @@ public class UnityParts{
             producesPower(100);
             addsWeaponSlots(10);
             itemCapacity(100);
+            addsAbilitySlots(4);
             root = true;
             hasCellDecal = true;
         }};
@@ -304,6 +310,63 @@ public class UnityParts{
             health(50);
             mass(150);
         }};
+
+        flamethrower = new ModularWeaponMountType("flamethrower"){{
+           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.coal, 10, Items.graphite,30));
+           health(10);
+           mass(60);
+           usesPower(10);
+           w = 1;
+           h = 2;
+           weapon(2,new Weapon("unity-part-flamethrower"){{
+               rotate = true;
+               reload = 8f;
+               inaccuracy = 10;
+               shootSound = Sounds.flame;
+               bullet = Bullets.basicFlame;
+           }});
+        }};
+
+        grenadeLauncher = new ModularWeaponMountType("grenade-launcher"){{
+           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.metaglass, 20, UnityItems.nickel,30,Items.graphite,30));
+           health(20);
+           mass(80);
+           usesPower(20);
+           w = 2;
+           h = 2;
+           weapon(2,new Weapon("unity-part-grenade-launcher"){{
+               rotate = true;
+               reload = 22f;
+               inaccuracy = 3;
+               shootSound = Sounds.shootBig;
+               bullet = new GrenadeBulletType(){{
+                   damage = 5;
+                   splashDamage = 45;
+                   splashDamageRadius = 25;
+                   lifetime = 130;
+                   speed = 3;
+                   fragLifeMin = 0.1f;
+                   fragLifeMax = 0.2f;
+                   fragBullets = 3;
+                   fragBullet = Bullets.standardCopper;
+                   collidesAir = false;
+               }};
+           }});
+        }};
+
+        pipebomb = new ModularUnitAbilityType("pipebomb"){{
+            requirements(PartCategories.specialUnit, ItemStack.with(Items.coal, 20, Items.titanium,10, Items.lead,10));
+            health(20);
+            mass(80);
+            usesPower(5);
+            w = 2;
+            h = 1;
+            ability(1,new SuicideExplosionAbility(){{
+                radius = 45f;
+                damage = 90f;
+            }});
+        }};
+
 
 
         //endregion

@@ -85,6 +85,11 @@ public class SmallWallDrill extends GenericTorqueWallDrill{
                     float t = Mathf.clamp(spd,0,100);
                     float p = h.health();
                     float ratio = Math.min(p,t)/h.maxHealth();
+                    if(h instanceof Unit unit){
+                        if(unit.isFlying()){
+                            return false;
+                        }
+                    }
                     h.damage(t);
                     ratio*=0.1;
                     if(h instanceof Unit unit){
