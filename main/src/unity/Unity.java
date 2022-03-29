@@ -11,12 +11,14 @@ import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
 import mindustry.ui.dialogs.*;
+import mindustry.ui.fragments.*;
 import mindustry.world.blocks.environment.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
 import unity.content.blocks.*;
 import unity.gen.*;
 import unity.graphics.*;
+import unity.graphics.menu.*;
 import unity.mod.*;
 import unity.parts.*;
 import unity.ui.*;
@@ -79,6 +81,13 @@ public class Unity extends Mod{
                     faction.load();
                 }
                 UnityParts.loadDoodads();
+
+                // Might break on mobile
+                try{
+                    Reflect.set(MenuFragment.class, Vars.ui.menufrag, "renderer", new UnityMenuRenderer());
+                }catch(Exception ex){
+                    Log.err("Failed to replace renderer", ex);
+                }
             });
 
             Events.on(FileTreeInitEvent.class, e -> Core.app.post(UnityShaders::load));
