@@ -156,7 +156,7 @@ public class ModularConstructBuilder{
     }
 
     //trims empty tiles.
-    public byte[] exportCompressed(){
+    public byte[] exportCropped(){
         OrderedSet<ModularPart> partsList = new OrderedSet<>();
         int maxx = 0, minx = 256;
         int maxy = 0, miny = 256;

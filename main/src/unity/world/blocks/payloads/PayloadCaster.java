@@ -20,6 +20,7 @@ import unity.graphics.*;
 import unity.util.*;
 import unity.world.blocks.*;
 import unity.world.blocks.production.*;
+import unity.world.meta.*;
 
 import static mindustry.Vars.*;
 
@@ -58,7 +59,13 @@ public class PayloadCaster extends GenericCaster{
     }
 
     public boolean canProduce(Block b){
-       return b.size == 1  && ((b instanceof ModuleBlock mb && mb.castable) || b instanceof Wall) && !state.rules.bannedBlocks.contains(b);
+       var req =  b.requirements;
+       for(var itemstack:req){
+           if(!CrucibleRecipes.items.containsKey(itemstack.item)){
+               return false;
+           }
+       }
+       return b.size == 1  && ((b instanceof ModuleBlock mb && mb.castable) || b instanceof Wall || b.requirements.length==1) && !state.rules.bannedBlocks.contains(b);
     }
 
 
@@ -118,13 +125,13 @@ public class PayloadCaster extends GenericCaster{
                 return;
             }
             for(var i: cast.requirements){
-                if(crucible.getFluid(i.item).melted<i.amount){
+                if(crucible.getFluid(CrucibleRecipes.items.get(i.item)).melted<i.amount){
                     return; // not enough items.
                 }
             }
             //begin cast
             for(var i: cast.requirements){
-                crucible.getFluid(i.item).melted-=i.amount;
+                crucible.getFluid(CrucibleRecipes.items.get(i.item)).melted-=i.amount;
             }
             casting = true;
             currentlycasting = cast;

@@ -35,8 +35,8 @@ public class GrenadeBulletType extends BulletType{
         super.update(b);
 
         if(this.justBounced(b)){
-            b.vel.x *= 0.7;
-            b.vel.y *= 0.7;
+            b.vel.x *= 0.8;
+            b.vel.y *= 0.8;
         }
 
         float zh = this.getZ(b);
@@ -59,10 +59,10 @@ public class GrenadeBulletType extends BulletType{
     @Override
     public float range(){
         //float a = 1.0f/0.3f;
-        float t = this.speed*0.7f;
+        float t = this.speed*0.8f;
         float acc = 0;
         for(int i =0;i<5;i++){
-            t*=0.7;
+            t*=0.8;
             acc+=this.lifetime*0.2f*t;
         }
         //return Math.max(this.speed * (a*this.lifetime/(a+this.lifetime)), this.maxRange);

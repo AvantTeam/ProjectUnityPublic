@@ -14,6 +14,7 @@ import mindustry.world.meta.*;
 import unity.ui.*;
 import unity.world.graph.CrucibleGraph.*;
 import unity.world.meta.*;
+import unity.world.meta.CrucibleRecipes.*;
 
 import static mindustry.Vars.content;
 
@@ -26,7 +27,7 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
     Color color = new Color();
     public GraphConnector<CrucibleGraph> accessConnector = null;
 
-    public OrderedMap<Item, CrucibleFluid> fluids = new OrderedMap<>();
+    public OrderedMap<CrucibleIngredient, CrucibleFluid> fluids = new OrderedMap<>();
     public CrucibleGraphNode(GraphBuild build, float totalCapacity){
         super(build);
         this.capacity =totalCapacity;
@@ -68,7 +69,14 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
 
     //returns how many items went in
     public int addItem(Item i, int amount){
-        var f = getFluid(i);
+        if(!CrucibleRecipes.items.containsKey(i)){
+            return 0;
+        }
+        return addIngredient(CrucibleRecipes.items.get(i),amount);
+    }
+    //returns how many items went in
+    public int addIngredient(CrucibleIngredient i, int amount){
+        var f = getFluid( i);
         if(f.total()+amount<=capacity){
             f.solid+=amount;
             return amount;
@@ -79,7 +87,7 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
         }
     }
 
-    public CrucibleFluid getFluid(Item i){
+    public CrucibleFluid getFluid(CrucibleIngredient i){
         if(!fluids.containsKey(i)){
             fluids.put(i, new CrucibleFluid(i));
         }
@@ -105,8 +113,9 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
         this.color.set(color.x,color.y,color.z,Mathf.clamp(10f*t/capacity));
     }
 
-    private Seq<Item> smeltOrder = new Seq<>();
-    private Seq<Item> coolOrder = new Seq<>();
+    private Seq<CrucibleIngredient> smeltOrder = new Seq<>();
+    private Seq<CrucibleIngredient> boilOrder = new Seq<>();
+    private Seq<CrucibleIngredient> coolOrder = new Seq<>();
 
     @Override
     public void update(){
@@ -117,25 +126,26 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
             }
             smeltOrder.clear();
             coolOrder.clear();
+            boilOrder.clear();
             for(var fluid : fluids){
-                if(!CrucibleRecipes.items.containsKey(fluid.key)){
-                    continue;
+                var i = fluid.key;
+                if(i.meltingpoint != -1 && heat.getTemp()>=i.meltingpoint && fluid.value.solid>0){
+                    smeltOrder.add(i);
                 }
-                var i = CrucibleRecipes.items.get(fluid.key);
-                if(heat.getTemp()>=i.meltingpoint && fluid.value.solid>0){
-                    smeltOrder.add(i.item);
+                if(i.meltingpoint != -1 && heat.getTemp()<i.meltingpoint && fluid.value.melted>0){
+                    coolOrder.add(i);
                 }
-                if(heat.getTemp()<i.meltingpoint && fluid.value.melted>0){
-                    coolOrder.add(i.item);
+                if(i.boilpoint != -1 && heat.getTemp()>=i.boilpoint && fluid.value.melted>0){
+                    boilOrder.add(i);
                 }
             }
-            smeltOrder.sort((a,b)-> Float.compare(CrucibleRecipes.items.get(a).meltingpoint,CrucibleRecipes.items.get(b).meltingpoint));
-            coolOrder.sort((a,b)-> -Float.compare(CrucibleRecipes.items.get(a).meltingpoint,CrucibleRecipes.items.get(b).meltingpoint));
-
+            smeltOrder.sort((a,b)-> Float.compare(a.meltingpoint,b.meltingpoint));
+            coolOrder.sort((a,b)-> -Float.compare(a.meltingpoint,b.meltingpoint));
+            boilOrder.sort((a,b)-> -Float.compare(a.boilpoint,b.boilpoint));
             //solidify
 
             for(var item:coolOrder){
-                var i = CrucibleRecipes.items.get(item);
+                var i = item;
                 float remaining = (i.meltingpoint-heat.getTemp())*heat.heatcapacity;
                 if(remaining<=0){
                     break;
@@ -148,7 +158,7 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
             }
             //melt
             for(var item:smeltOrder){
-                var i = CrucibleRecipes.items.get(item);
+                var i = item;
                 float remaining = (heat.getTemp()-i.meltingpoint)*heat.heatcapacity;
                 if(remaining<=0){
                     break;
@@ -159,6 +169,19 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
                 getFluid(item).melt(smeltRatio*reqSmelt);
                 heat.addHeatEnergy(-smeltRatio*reqSmeltEnergy);
             }
+            //vapourise
+            for(var item:boilOrder){
+                var i = item;
+                float remaining = (heat.getTemp()-i.boilpoint)*heat.heatcapacity;
+                if(remaining<=0){
+                    break;
+                }
+                float reqSmelt = Math.min(fluids.get(item).melted, Math.max(0.1f,fluids.get(item).melted*i.boilspeed* Time.delta));
+                float reqSmeltEnergy = reqSmelt*i.phaseChangeEnergy;
+                float smeltRatio = Mathf.clamp(remaining/reqSmeltEnergy);
+                getFluid(item).vapourise(smeltRatio*reqSmelt);
+                heat.addHeatEnergy(-smeltRatio*reqSmeltEnergy);
+            }
             ///craft
             for(var recipe: CrucibleRecipes.recipes){
                 if(recipe.minTemp>heat.getTemp()){
@@ -166,7 +189,7 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
                 }
                 float maxam = capacity-getFluid(recipe.output).total();
                 for(int i = 0;i<recipe.items.length;i++){
-                    var fluid = getFluid(recipe.items[i].item);
+                    var fluid = getFluid(recipe.items[i].ingredient);
                     if(fluid.total()==0){
                         maxam = 0;
                         break;
@@ -179,7 +202,7 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
                 }
                 maxam *= recipe.speed;
                 for(int i = 0;i<recipe.items.length;i++){
-                    var fluid = getFluid(recipe.items[i].item);
+                    var fluid = getFluid(recipe.items[i].ingredient);
                     if(recipe.items[i].melted){
                         fluid.melted-=maxam*recipe.items[i].amount;
                     }else{
@@ -200,7 +223,7 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
     public void read(Reads read){
         int total = read.i();
         for(int i =0; i<total; i++){
-            Item item = content.item(read.s());
+            CrucibleIngredient item = CrucibleRecipes.ingredients.get(read.s());
             var fluid = new CrucibleFluid(item);
             fluid.solid = read.f();
             fluid.melted = read.f();

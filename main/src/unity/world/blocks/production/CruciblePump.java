@@ -4,9 +4,11 @@ import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.ui.layout.*;
+import arc.struct.*;
 import arc.util.io.*;
 import mindustry.*;
 import mindustry.content.*;
+import mindustry.ctype.*;
 import mindustry.entities.*;
 import mindustry.gen.*;
 import mindustry.type.*;
@@ -14,7 +16,10 @@ import mindustry.world.*;
 import mindustry.world.blocks.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
+import unity.world.blocks.production.CrucibleSource.*;
 import unity.world.graph.*;
+import unity.world.meta.*;
+import unity.world.meta.CrucibleRecipes.*;
 
 import static mindustry.Vars.*;
 
@@ -24,7 +29,9 @@ public class CruciblePump extends GenericGraphBlock{
     public CruciblePump(String name){
         super(name);
         configurable = true;
-        config(Item.class, (CruciblePumpBuild tile, Item item) -> tile.config = item);
+        config(Item.class, (CruciblePumpBuild tile, Item item) -> tile.config = CrucibleRecipes.items.get(item));
+        config(Liquid.class, (CruciblePumpBuild tile, Liquid item) -> tile.config = CrucibleRecipes.liquids.get(item));
+        config(Integer.class, (CruciblePumpBuild tile, Integer item) -> tile.config = CrucibleRecipes.ingredients.get(item));
         configClear((CruciblePumpBuild tile) -> tile.config = null);
     }
 
@@ -37,11 +44,22 @@ public class CruciblePump extends GenericGraphBlock{
     }
 
     public class CruciblePumpBuild extends GenericGraphBuild{
-        Item config;
+        CrucibleIngredient config;
 
         @Override
         public void buildConfiguration(Table table){
-            ItemSelection.buildTable(CruciblePump.this, table, content.items(), () -> config, this::configure);
+            Seq<UnlockableContent> contents = new Seq<>();
+            contents.addAll(content.items().select(CrucibleRecipes.items::containsKey));
+            contents.addAll(content.liquids().select(CrucibleRecipes.liquids::containsKey));
+            ItemSelection.buildTable(CruciblePump.this, table, contents, () -> {
+                if(config instanceof CrucibleItem i){
+                    return i.item;
+                }
+                if(config instanceof CrucibleLiquid i){
+                    return i.liquid;
+                }
+                return null;
+            }, this::configure);
         }
 
         @Override
@@ -70,7 +88,11 @@ public class CruciblePump extends GenericGraphBlock{
                     var f = crucibleNode.getFluid(config);
                     float remove = Mathf.clamp(eff * f.melted + 0.001f,0,f.melted);
                     f.melted-=remove;
-                    Puddles.deposit(frontTile(), this.tile, Liquids.slag, remove*8);
+                    Liquid liquid = Liquids.slag;
+                    if(f.getIngredient() instanceof CrucibleLiquid cl){
+                        liquid = cl.liquid;
+                    }
+                    Puddles.deposit(frontTile(), this.tile, liquid, remove*8);
                 }
             }else if(front() instanceof GraphBuild gb){
                 if(crucibleNode.connector.get(1).isConnected(gb)){
@@ -91,8 +113,8 @@ public class CruciblePump extends GenericGraphBlock{
         }
 
         @Override
-        public Item config(){
-            return config;
+        public Integer config(){
+            return config.id;
         }
 
         @Override
@@ -120,7 +142,7 @@ public class CruciblePump extends GenericGraphBlock{
         @Override
         public void read(Reads read, byte revision){
             super.read(read, revision);
-            config = content.item(read.s());
+            config = CrucibleRecipes.ingredients.get(read.s());
         }
     }
 }

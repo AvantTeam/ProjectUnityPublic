@@ -1,8 +1,8 @@
 package unity.world.graph;
 
-import arc.struct.*;
 import arc.util.*;
 import mindustry.type.*;
+import unity.world.meta.CrucibleRecipes.*;
 
 public class CrucibleGraph extends Graph<CrucibleGraph>{
     //probably have each crucible store their own shit, then the graph distributes it as usual
@@ -55,13 +55,13 @@ public class CrucibleGraph extends Graph<CrucibleGraph>{
 
 
     public static class CrucibleFluid{
-        Item item;
+        CrucibleIngredient ingredient;
         public float melted;
         public float meltedBuffer;//?
         public float solid;
 
-        public CrucibleFluid(Item item){
-            this.item = item;
+        public CrucibleFluid(CrucibleIngredient item){
+            this.ingredient = item;
         }
 
         public float total(){
@@ -71,13 +71,26 @@ public class CrucibleGraph extends Graph<CrucibleGraph>{
             return melted/total();
         }
 
+        public CrucibleIngredient getIngredient(){
+            return ingredient;
+        }
+
         public Item getItem(){
-            return item;
+            if(ingredient instanceof CrucibleItem ci){
+                return ci.item;
+            }
+            return null;
         }
 
         public void melt(float t){
             solid-=t;
             melted+=t;
+        }
+        public void vapourise(float t){
+            melted-=t;
+            if(melted<0){
+                melted = 0;
+            }
         }
     }
 

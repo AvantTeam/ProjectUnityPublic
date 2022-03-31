@@ -1,5 +1,6 @@
 package unity.net;
 
+import arc.math.geom.*;
 import mindustry.*;
 import mindustry.content.*;
 import mindustry.gen.*;
@@ -7,6 +8,9 @@ import mindustry.net.*;
 import mindustry.world.*;
 import mindustry.world.blocks.payloads.*;
 import unity.world.blocks.payloads.PayloadArm.*;
+import unity.world.blocks.units.*;
+import unity.world.blocks.units.ModularUnitAssembler.*;
+import unity.world.blocks.units.UnitAssemblerArm.*;
 
 public class UnityCalls{
     public static void unitGrabbedByArm(UnitPayload unit, PayloadArmBuild pab) {
@@ -48,10 +52,22 @@ public class UnityCalls{
         }
     }
 
+    public static void moduleComplete(ModularUnitAssemblerBuild hangar, UnitAssemblerArmBuild arm, ModuleConstructing module){
+        if (Vars.net.server()) {
+            TankModuleBuiltCallPacket packet = new TankModuleBuiltCallPacket();
+            packet.hangar = hangar;
+            packet.arm = arm;
+            packet.completedModule = new Point2(module.x,module.y);
+            Vars.net.send(packet, true);
+        }
+        //TankModuleBuiltCallPacket
+    }
+
 
     public static void registerPackets(){
         Net.registerPacket(ArmGrabbedUnitCallPacket::new);
         Net.registerPacket(ArmGrabbedBlockCallPacket::new);
         Net.registerPacket(ArmDroppedBlockCallPacket::new);
+        Net.registerPacket(TankModuleBuiltCallPacket::new);
     }
 }

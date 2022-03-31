@@ -162,13 +162,13 @@ public class UnityParts{
             producesPower(400);
         }};
         mediumRoot = new ModularPartType("root-medium"){{
-            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 25, UnityItems.cupronickel, 15));
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 30, Items.graphite, 20, UnityItems.cupronickel, 45));
             w = 2;
             h = 2;
             health(250);
             mass(40);
             producesPower(50);
-            addsWeaponSlots(6);
+            addsWeaponSlots(4);
             itemCapacity(50);
             armor(100);
             addsAbilitySlots(2);

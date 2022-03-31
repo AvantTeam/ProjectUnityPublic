@@ -18,7 +18,6 @@ import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 import mindustry.world.meta.*;
 import unity.parts.*;
-import unity.util.*;
 
 import java.util.*;
 
@@ -141,7 +140,7 @@ public class PartsEditorDialog extends BaseDialog{
             editorElement.onAction();
         }).tooltip("clear").width(64);
         buttons.button(Icon.copy,()->{
-            Core.app.setClipboardText(Base64.getEncoder().encodeToString(builder.exportCompressed()));
+            Core.app.setClipboardText(Base64.getEncoder().encodeToString(builder.exportCropped()));
         }).tooltip("copy").width(64);
         buttons.button(Icon.paste,()->{
             try{

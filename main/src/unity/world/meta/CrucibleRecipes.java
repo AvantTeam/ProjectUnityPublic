@@ -1,5 +1,7 @@
 package unity.world.meta;
 
+import arc.graphics.*;
+import arc.graphics.g2d.*;
 import arc.struct.*;
 import mindustry.content.*;
 import mindustry.type.*;
@@ -7,83 +9,137 @@ import unity.content.*;
 import unity.world.graph.*;
 
 public class CrucibleRecipes{
+    public static IntMap<CrucibleIngredient> ingredients = new IntMap<>();
     public static ObjectMap<Item,CrucibleItem> items = new ObjectMap<>();
+    public static ObjectMap<Liquid,CrucibleLiquid> liquids = new ObjectMap<>();
     public static Seq<CrucibleRecipe> recipes = new Seq<>();
     static {
-        items.put(Items.copper,new CrucibleItem(Items.copper, HeatGraphNode.celsiusZero + 900, 0.1f, 30));
-        items.put(Items.lead,new CrucibleItem(Items.lead, HeatGraphNode.celsiusZero + 400, 0.15f, 10));
-        items.put(UnityItems.nickel,new CrucibleItem(UnityItems.nickel, HeatGraphNode.celsiusZero + 930, 0.15f, 40));
-        items.put(UnityItems.cupronickel,new CrucibleItem(UnityItems.cupronickel, HeatGraphNode.celsiusZero + 800, 0.15f, 60));
-        items.put(Items.sand,new CrucibleItem(Items.sand, HeatGraphNode.celsiusZero + 1300, 0.15f, 20));
-        items.put(Items.metaglass,new CrucibleItem(Items.metaglass, HeatGraphNode.celsiusZero + 900, 0.15f, 25));
-        items.put(Items.silicon,new CrucibleItem(Items.silicon, HeatGraphNode.celsiusZero + 1000, 0.15f, 60));
-        items.put(Items.titanium,new CrucibleItem(Items.titanium, HeatGraphNode.celsiusZero + 1750, 0.15f, 60));
-        items.put(Items.plastanium,new CrucibleItem(Items.plastanium, HeatGraphNode.celsiusZero + 400, 0.15f, 30));
-        items.put(Items.thorium,new CrucibleItem(Items.thorium, HeatGraphNode.celsiusZero + 1750, 0.15f, 30));
-        items.put(Items.surgeAlloy,new CrucibleItem(Items.surgeAlloy, HeatGraphNode.celsiusZero + 1500, 0.15f, 120));
-        items.put(UnityItems.superAlloy,new CrucibleItem(UnityItems.superAlloy, HeatGraphNode.celsiusZero + 1800, 0.15f, 200));
+        int id = 0;
+        addItem(id++,Items.copper,900,0.1f,30);
+        addItem(id++,Items.lead,400,0.15f, 10);
+        addItem(id++,UnityItems.nickel,930,0.15f, 40);
+        addItem(id++,UnityItems.cupronickel,800, 0.15f, 60);
+        addItem(id++,Items.sand,1300, 0.15f, 20);
+        addItem(id++,Items.metaglass,900, 0.15f, 25);
+        addItem(id++,Items.silicon,1000, 0.15f, 60);
+        addItem(id++,Items.titanium,1750, 0.15f, 60);
+        addItem(id++,Items.plastanium,400, 0.15f, 30);
+        addItem(id++,Items.thorium,1750, 0.15f, 30);
+        addItem(id++,Items.surgeAlloy,1500, 0.15f, 120);
+        addItem(id++,UnityItems.superAlloy,1800, 0.15f, 200);
+        addItem(id++,Items.coal,-1, 0.15f, 220);
+        addItem(id++,Items.graphite,-1, 0.15f, 220);
+        addItem(id++,Items.pyratite,500, 0.15f, 220);
+        addLiquid(id++,Liquids.water,0,0.05f,100,0.05f,450);
+        addLiquid(id++,Liquids.cryofluid,-200,0.1f,-190,0.1f,50);
+        addLiquid(id++,Liquids.slag,400,0.1f,2200,0.1f,60);
+        addLiquid(id++,Liquids.oil,-150,0.1f,350,0.1f,120);
 
-        recipes.add(new CrucibleRecipe(UnityItems.cupronickel,0.1f,HeatGraphNode.celsiusZero + 150,
+        recipes.add(new CrucibleRecipe(items.get(UnityItems.cupronickel),0.1f,HeatGraphNode.celsiusZero + 150,
             needs(Items.copper, 2,true),
                    needs(UnityItems.nickel, 1,true)));
-        recipes.add(new CrucibleRecipe(Items.metaglass, 0.1f,HeatGraphNode.celsiusZero + 950,
+        recipes.add(new CrucibleRecipe(items.get(Items.metaglass), 0.1f,HeatGraphNode.celsiusZero + 950,
             needs(Items.lead, 0.5f,true),
                    needs(Items.sand, 0.5f,false)));
-        recipes.add(new CrucibleRecipe(Items.silicon, 0.15f,HeatGraphNode.celsiusZero + 1350,
+        recipes.add(new CrucibleRecipe(items.get(Items.silicon), 0.15f,HeatGraphNode.celsiusZero + 1350,
             needs(Items.coal, 0.5f,false),
                    needs(Items.sand, 0.5f,true)));
-        recipes.add(new CrucibleRecipe(Items.silicon, 0.15f,HeatGraphNode.celsiusZero + 1500,
+        recipes.add(new CrucibleRecipe(items.get(Items.silicon), 0.15f,HeatGraphNode.celsiusZero + 1500,
                     needs(Items.graphite, 0.25f,false),
                            needs(Items.sand, 0.5f,true)));
-        recipes.add(new CrucibleRecipe(Items.graphite, 0.02f,HeatGraphNode.celsiusZero + 2000,
+        recipes.add(new CrucibleRecipe(items.get(Items.graphite), 0.02f,HeatGraphNode.celsiusZero + 2000,
               needs(Items.coal, 0.5f,false))); // super coal-efficient graphite, if you can get these temps.
-        recipes.add(new CrucibleRecipe(Items.surgeAlloy,0.1f,HeatGraphNode.celsiusZero + 1200,
+        recipes.add(new CrucibleRecipe(items.get(Items.surgeAlloy),0.1f,HeatGraphNode.celsiusZero + 1200,
             needs(Items.copper, 2,true),
                    needs(Items.lead, 2,true),
                    needs(Items.titanium, 2,true),
                    needs(Items.silicon, 2,true)));
-        recipes.add(new CrucibleRecipe(UnityItems.superAlloy,0.1f,HeatGraphNode.celsiusZero + 2000,
+        recipes.add(new CrucibleRecipe(items.get(UnityItems.superAlloy),0.1f,HeatGraphNode.celsiusZero + 2000,
            needs(UnityItems.cupronickel, 3,true),
                   needs(Items.surgeAlloy, 2,true),
                   needs(Items.pyratite, 2,false)));
     }
 
-    public static class CrucibleItem{
-        public Item item;
-        public float meltingpoint;
-        public float meltspeed;
-        public float phaseChangeEnergy;
+    public static void addItem(int id, Item item,float meltpointCelsius, float meltspeed, float energy){
+        items.put(item,new CrucibleItem(id,item, HeatGraphNode.celsiusZero + meltpointCelsius, meltspeed, energy));
+        ingredients.put(id,items.get(item));
+    }
+    public static void addLiquid(int id, Liquid liquid,float meltpointCelsius, float meltspeed,float boilingpointCelsius, float boilingspeed, float energy){
+        liquids.put(liquid,new CrucibleLiquid(id,liquid, HeatGraphNode.celsiusZero + meltpointCelsius, meltspeed, HeatGraphNode.celsiusZero + boilingpointCelsius,boilingspeed,energy));
+        ingredients.put(id,liquids.get(liquid));
+    }
 
-        public CrucibleItem(Item item, float meltingpoint, float meltspeed, float phaseChangeEnergy){
+    public static class CrucibleIngredient{
+        public TextureRegion icon;
+        public String name;
+        public Color color = Color.pink;
+        public int id;
+        public float meltingpoint=-1;
+        public float meltspeed;
+        public float phaseChangeEnergy=0;
+        public float boilpoint=-1;
+        public float boilspeed;
+
+        public CrucibleIngredient(TextureRegion icon, String name, int id){
+            this.icon = icon;
+            this.name = name;
+            this.id = id;
+        }
+        public void onVapourise(CrucibleGraphNode cgn, float am){}
+        public void onMelt(CrucibleGraphNode cgn, float am){}
+        public void onSolidify(CrucibleGraphNode cgn, float am){}
+        public void onTemperature(CrucibleGraphNode cgn, float temp){}
+    }
+    public static class CrucibleItem extends CrucibleIngredient{
+        public Item item;
+
+        public CrucibleItem(int id, Item item, float meltingpoint, float meltspeed, float phaseChangeEnergy){
+            super(item.fullIcon,item.name,id);
             this.item = item;
             this.meltingpoint = meltingpoint;
             this.meltspeed = meltspeed;
             this.phaseChangeEnergy = phaseChangeEnergy;
+            color = item.color;
         }
     }
+    public static class CrucibleLiquid extends CrucibleIngredient{
+        public Liquid liquid;
+
+        public CrucibleLiquid(int id, Liquid liquid, float meltingpoint, float meltspeed, float boilingpoint, float boilingspeed, float phaseChangeEnergy){
+            super(liquid.fullIcon,liquid.name,id);
+            this.liquid = liquid;
+            this.meltingpoint = meltingpoint;
+            this.meltspeed = meltspeed;
+            this.boilpoint = boilingpoint;
+            this.boilspeed = boilingspeed;
+            this.phaseChangeEnergy = phaseChangeEnergy;
+            color = liquid.color;
+        }
+    }
+
     public static class RecipeIngredient{
-        public Item item;
+        public CrucibleIngredient ingredient;
         public float amount;
         public boolean melted;
 
-        public RecipeIngredient(Item item, float amount, boolean melted){
-            this.item = item;
+        public RecipeIngredient(CrucibleIngredient item, float amount, boolean melted){
+            this.ingredient = item;
             this.amount = amount;
             this.melted = melted;
         }
     }
     static RecipeIngredient needs(Item item, float amount, boolean melted){
-        return new RecipeIngredient(item,amount,melted);
+        return new RecipeIngredient(items.get(item),amount,melted);
     }
 
     public static class CrucibleRecipe{
         public RecipeIngredient items[];
-        public Item output;
+        public CrucibleIngredient output;
         public float minTemp = 0;
         public float speed = 0.1f;
 
         //most would be melted items i think
-        CrucibleRecipe(Item output, float speed, float minTemp,RecipeIngredient... items){
+        CrucibleRecipe(CrucibleIngredient output, float speed, float minTemp,RecipeIngredient... items){
             this.output=output;
             this.items = items;
             this.speed=speed;

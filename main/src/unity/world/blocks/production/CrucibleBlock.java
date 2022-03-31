@@ -11,6 +11,7 @@ import mindustry.world.blocks.payloads.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
 import unity.world.graph.*;
+import unity.world.meta.*;
 
 import static mindustry.Vars.*;
 
@@ -21,6 +22,7 @@ public class CrucibleBlock extends GenericGraphBlock{
     public CrucibleBlock(String name){
         super(name);
         sync = true;
+        //cant accept liquids just yet...
     }
 
     @Override
@@ -50,7 +52,8 @@ public class CrucibleBlock extends GenericGraphBlock{
         @Override
         public boolean acceptItem(Building source, Item item){
             var crucible = crucibleNode();
-            if( crucible.capacity - crucible.getFluid(item).total() >= 1){
+            var ingre = CrucibleRecipes.items.get(item);
+            if( ingre!=null && crucible.capacity - crucible.getFluid(ingre).total() >= 1){
                 return true;
             }
             return false;
@@ -61,6 +64,7 @@ public class CrucibleBlock extends GenericGraphBlock{
             var crucible = crucibleNode();
             crucible.addItem(item,1);
         }
+
 
         boolean[] connection = new boolean[4];
 

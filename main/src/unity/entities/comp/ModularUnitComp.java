@@ -87,7 +87,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
                 String templatestr = ((UnityUnitType)type).templates.random();
                 ModularConstructBuilder test = new ModularConstructBuilder(3, 3);
                 test.set(Base64.getDecoder().decode(templatestr.trim().replaceAll("[\\t\\n\\r]+", "")));
-                construct = new ModularConstruct(test.exportCompressed());
+                construct = new ModularConstruct(test.exportCropped());
             }
         }
         constructdata = Arrays.copyOf(construct.data, construct.data.length);

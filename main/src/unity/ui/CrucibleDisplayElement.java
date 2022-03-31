@@ -15,13 +15,14 @@ import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import unity.world.graph.CrucibleGraph.*;
+import unity.world.meta.CrucibleRecipes.*;
 
 public class CrucibleDisplayElement extends Element{
     private static Rect scissor = new Rect();
-    public OrderedMap<Item, CrucibleFluid> fluids = new OrderedMap<>();
+    public OrderedMap<CrucibleIngredient, CrucibleFluid> fluids = new OrderedMap<>();
     int columns;
 
-    public CrucibleDisplayElement(OrderedMap<Item, CrucibleFluid> fluids, int columns){
+    public CrucibleDisplayElement(OrderedMap<CrucibleIngredient, CrucibleFluid> fluids, int columns){
         this.fluids = fluids;
         this.columns = columns;
     }
@@ -49,9 +50,9 @@ public class CrucibleDisplayElement extends Element{
                ScissorStack.pop();
             }
             Draw.color(Pal.darkerGray);
-            Draw.rect(fluid.key.fullIcon,xpos+16,ypos + 14,24,24);
+            Draw.rect(fluid.key.icon,xpos+16,ypos + 14,24,24);
             Draw.color();
-            Draw.rect(fluid.key.fullIcon,xpos+16,ypos + 18,24,24);
+            Draw.rect(fluid.key.icon,xpos+16,ypos + 18,24,24);
 
             String text = Strings.fixed(fluid.value.total(),1);
             lay.setText(font, text);

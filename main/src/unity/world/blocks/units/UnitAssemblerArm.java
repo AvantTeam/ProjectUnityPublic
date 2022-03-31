@@ -8,6 +8,7 @@ import mindustry.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
+import unity.net.*;
 import unity.util.GraphicUtils.*;
 import unity.world.blocks.*;
 import unity.world.blocks.units.ModularUnitAssembler.*;
@@ -24,6 +25,7 @@ public class UnitAssemblerArm extends GenericGraphBlock{
         super(name);
         acceptsItems = true;
         hasItems = true;
+        sync = true;
     }
 
     @Override
@@ -113,11 +115,18 @@ public class UnitAssemblerArm extends GenericGraphBlock{
                             }
                         }
                     }
-                    if(!found || currentJob.isComplete()){
+                    if(currentJob!=null && !Vars.net.client() && currentJob.isComplete()){
+                        UnityCalls.moduleComplete(attached,this,currentJob);
+                        currentJob.takenby = -1;
+                        currentJob = null;
+                        buildProgress = 0;
+                    }else if(!found && currentJob!=null){
                         currentJob.takenby = -1;
                         currentJob = null;
                         buildProgress = 0;
                     }
+
+
                 }
             }
             if(!Vars.net.server()){
@@ -161,7 +170,7 @@ public class UnitAssemblerArm extends GenericGraphBlock{
 
         public void tryConnect(){
             var fb = front();
-            if(fb instanceof ModularUnitAssemblerBuild fwb && (fb.x==x || fb.y==y)){
+            if(fb instanceof ModularUnitAssemblerBuild fwb && (fb.x==x || fb.y==y) && !fwb.isSandbox()){
                 if(attached !=fwb){
                     attached = fwb;
                 }

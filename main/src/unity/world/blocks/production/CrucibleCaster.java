@@ -12,6 +12,8 @@ import mindustry.world.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
 import unity.world.graph.*;
+import unity.world.meta.*;
+import unity.world.meta.CrucibleRecipes.*;
 
 import static java.lang.Math.exp;
 import static mindustry.Vars.content;
@@ -68,12 +70,12 @@ public class CrucibleCaster extends GenericCaster{
         public void tryStartCast(){
             var crucible = crucibleNode();
             for(var fluid : crucible.fluids){
-                if(fluid.value.melted >= 4){
-                    currentCast = fluid.key;
+                if(fluid.key instanceof CrucibleItem item  && fluid.value.melted >= 4){
+                    currentCast = item.item;
                 }
             }
             if(currentCast!=null){
-                crucible.getFluid(currentCast).melted-=4;
+                crucible.getFluid(CrucibleRecipes.items.get(currentCast)).melted-=4;
             }
         }
 
