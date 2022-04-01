@@ -26,7 +26,7 @@ public class UnityParts{
     //movement
     public static ModularPartType smallEngine, engine, smallWheel, smallTracks, mediumWheel, largeWheel, largeTracks, tankTracks, tankTracksLarge;
     //abilities
-    public static ModularPartType pipebomb;
+    public static ModularPartType pipebomb,pretender;
     //unit
     public static Seq<PanelDoodadPalette> unitDoodads = new Seq<>();
 
@@ -365,6 +365,16 @@ public class UnityParts{
                 radius = 45f;
                 damage = 90f;
             }});
+        }};
+
+        pretender = new ModularUnitAbilityType("pretender"){{
+            requirements(PartCategories.specialUnit, ItemStack.with(Items.sporePod, 20));
+            health(10);
+            mass(80);
+            usesPower(15);
+            w = 1;
+            h = 1;
+            ability(1,new SuspiciousAbility());
         }};
 
 
