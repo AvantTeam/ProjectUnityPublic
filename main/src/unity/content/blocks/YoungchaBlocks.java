@@ -53,7 +53,7 @@ public class YoungchaBlocks{
         combustionHeater,thermalHeater,seebeckGenerator,smallRadiator,
     //crucible
         //crafting
-        crucible,crucibleChannel,cruciblePump,crucibleCaster,payloadCaster,crucibleSource,crucibleFluidLoader,holdingCrucible,
+        crucible,crucibleChannel,cruciblePump,crucibleCaster,payloadCaster,crucibleSource,crucibleFluidLoader,
     //modules
         basicPanel,
     //other
