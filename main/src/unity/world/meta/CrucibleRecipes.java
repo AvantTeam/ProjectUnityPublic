@@ -2,10 +2,14 @@ package unity.world.meta;
 
 import arc.graphics.*;
 import arc.graphics.g2d.*;
+import arc.math.*;
 import arc.struct.*;
 import mindustry.content.*;
+import mindustry.entities.*;
+import mindustry.game.*;
 import mindustry.type.*;
 import unity.content.*;
+import unity.content.effects.*;
 import unity.world.graph.*;
 
 public class CrucibleRecipes{
@@ -27,8 +31,8 @@ public class CrucibleRecipes{
         addItem(id++,Items.thorium,1750, 0.15f, 30);
         addItem(id++,Items.surgeAlloy,1500, 0.15f, 120);
         addItem(id++,UnityItems.superAlloy,1800, 0.15f, 200);
-        addItem(id++,Items.coal,-1, 0.15f, 220);
-        addItem(id++,Items.graphite,-1, 0.15f, 220);
+        addItem(id++,Items.coal,-(HeatGraphNode.celsiusZero+1), 0.15f, 220);
+        addItem(id++,Items.graphite,-(HeatGraphNode.celsiusZero+1), 0.15f, 220);
         addItem(id++,Items.pyratite,500, 0.15f, 220);
         addLiquid(id++,Liquids.water,0,0.05f,100,0.05f,450);
         addLiquid(id++,Liquids.cryofluid,-200,0.1f,-190,0.1f,50);
@@ -114,6 +118,28 @@ public class CrucibleRecipes{
             this.boilspeed = boilingspeed;
             this.phaseChangeEnergy = phaseChangeEnergy;
             color = liquid.color;
+        }
+
+        @Override
+        public void onVapourise(CrucibleGraphNode cgn, float am){
+            if(liquid.flammability>0.5){
+                if(Mathf.random()<am && Math.random()>0.9){
+                    Fires.create(cgn.build().tile);
+                }
+                if(Mathf.random(3)<am && Math.random()>0.97){
+                    Bullets.fireball.createNet(Team.derelict, cgn.build().x, cgn.build().y, Mathf.random(360f), -1f, 1, 1);
+                }
+            }
+            if(liquid.explosiveness>0.5){
+                cgn.build().damage(am*liquid.explosiveness);
+            }
+            if(liquid.temperature<=0.6){
+                float s = cgn.block().size*2.5f;
+                if(Mathf.random()<am && Math.random()>0.3){
+                    OtherFx.steamSlow.at(cgn.build().x + Mathf.range(s), cgn.build().y + Mathf.range(s));
+                    Fx.bubble.at(cgn.build().x + Mathf.range(s), cgn.build().y + Mathf.range(s),Color.white);
+                }
+            }
         }
     }
 

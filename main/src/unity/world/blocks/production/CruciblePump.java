@@ -114,7 +114,7 @@ public class CruciblePump extends GenericGraphBlock{
 
         @Override
         public Integer config(){
-            return config.id;
+            return config==null?-1:config.id;
         }
 
         @Override

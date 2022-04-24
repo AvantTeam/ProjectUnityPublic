@@ -53,7 +53,7 @@ public class YoungchaBlocks{
         combustionHeater,thermalHeater,seebeckGenerator,smallRadiator,
     //crucible
         //crafting
-        crucible,crucibleChannel,cruciblePump,crucibleCaster,payloadCaster,crucibleSource,
+        crucible,crucibleChannel,cruciblePump,crucibleCaster,payloadCaster,crucibleSource,crucibleFluidLoader,holdingCrucible,
     //modules
         basicPanel,
     //other
@@ -65,7 +65,7 @@ public class YoungchaBlocks{
         oreNickel = new UnityOreBlock(UnityItems.nickel){{
             oreScale = 24.77f;
             oreThreshold = 0.913f;
-            oreDefault = false;
+            oreDefault = true;
         }};
         greySand = new Floor("grey-sand"){{
             variants = 3;
@@ -408,6 +408,16 @@ public class YoungchaBlocks{
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 1);
         }};
 
+        crucibleFluidLoader = new CrucibleFluidLoader("crucible-fluid-loader"){{
+            requirements(Category.crafting, with(UnityItems.nickel, 30, Items.silicon, 30, Items.metaglass, 30));
+            health = 300;
+            rotate = true;
+            solid = true;
+            liquidCapacity = 20;
+            config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,15));
+            config.fixedConnection(CrucibleGraph.class, 1,0,0,0);
+        }};
+
         crucibleCaster = new CrucibleCaster("casting-mold"){{
             requirements(Category.crafting, with(UnityItems.nickel, 60, Items.graphite, 50));
             health = 1700;
@@ -456,6 +466,7 @@ public class YoungchaBlocks{
             requirements(Category.units, with(UnityItems.nickel,30,Items.graphite,30, UnityItems.cupronickel,30));
             size = 3;
             rotate = true;
+            solid = true;
             itemCapacity = 30;
             health = 2600;
             constructSpeed = 0.14f;

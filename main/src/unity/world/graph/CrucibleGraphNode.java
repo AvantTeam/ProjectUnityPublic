@@ -87,6 +87,18 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
         }
     }
 
+    public float addLiquidIngredient(CrucibleIngredient i, float amount){
+        var f = getFluid( i);
+        if(f.total()+amount<=capacity){
+            f.melted+=amount;
+            return amount;
+        }else{
+            float space = capacity-f.total();
+            f.melted+= space;
+            return space;
+        }
+    }
+
     public CrucibleFluid getFluid(CrucibleIngredient i){
         if(!fluids.containsKey(i)){
             fluids.put(i, new CrucibleFluid(i));
@@ -180,6 +192,7 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
                 float reqSmeltEnergy = reqSmelt*i.phaseChangeEnergy;
                 float smeltRatio = Mathf.clamp(remaining/reqSmeltEnergy);
                 getFluid(item).vapourise(smeltRatio*reqSmelt);
+                item.onVapourise(this,smeltRatio*reqSmelt);
                 heat.addHeatEnergy(-smeltRatio*reqSmeltEnergy);
             }
             ///craft

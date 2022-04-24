@@ -42,6 +42,7 @@ public class PartsEditorElement extends Element{
 
     public PartsEditorElement(ModularConstructBuilder builder){
         this.builder = builder;
+
         addListener(new InputListener(){
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){

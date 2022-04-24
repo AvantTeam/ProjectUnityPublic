@@ -25,6 +25,17 @@ public class OtherFx{
         });
     }).layer(Layer.blockOver-1),
 
+    steamSlow = new Effect(200, e -> {
+        Draw.color(Color.white);
+        Draw.alpha(Mathf.sqrt(e.fslope()));
+        float ef = e.finpow()*10f;
+        Angles.randLenVectors((long)e.id, 1, 4.0F + 10.0F * e.finpow(), (x, y) -> {
+            Fill.circle(e.x + x + ef, e.y + y+ ef, e.fout() * 8.0F);
+            Fill.circle(e.x + x / 2.0F + ef, e.y + y / 2.0F + ef, e.fout() * 4.0F);
+        });
+        Draw.alpha(1);
+    }).layer(Layer.blockOver-1),
+
     weldspark = new Effect(12, e->{
         Draw.color(Color.white, Pal.turretHeat, e.fin());
         Lines.stroke(e.fout() * 0.6f + 0.6f);

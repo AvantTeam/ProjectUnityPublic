@@ -28,6 +28,14 @@ public class FlyWheel extends GenericGraphBlock{
     public class FlyWheelBuild extends GenericGraphBuild{
         public OrderedSet<SteamPistonBuild> connected = new OrderedSet<>();
         public float attachX,attachY;
+
+        @Override
+        public void created(){
+            super.created();
+            attachY = y;
+            attachX = x;
+        }
+
         public void update(){
             super.update();
             torqueNode().baseForce=0;

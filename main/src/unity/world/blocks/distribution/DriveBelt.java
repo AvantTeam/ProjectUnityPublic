@@ -237,7 +237,11 @@ public class DriveBelt extends GenericGraphBlock{
             for(var pt:connector.connection){
                 if(pt!=null && !pt.equals(0,0)){
                     Building b = world.build(pt.x+tile.x,pt.y+tile.y);
-                    Drawf.square(b.x, b.y, b.block.size * tilesize / 2f + 1f, Pal.place);
+                    if(b!=null){
+                        Drawf.square(b.x, b.y, b.block.size * tilesize / 2f + 1f, Pal.place);
+                    }else{
+                        Drawf.square((pt.x+tile.x)*8, (pt.y+tile.y)*8, tilesize / 2f + 1f, Pal.place);
+                    }
                 }
             }
 
