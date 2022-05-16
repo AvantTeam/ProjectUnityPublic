@@ -881,7 +881,7 @@ public class KoruhBlocks {
             shoot.shots = 4;
             shoot.shotDelay = 20f;
             inaccuracy = 1f;
-            //TODO xRand = 6f; -Anuke
+            xRand = 6f; //TODO replace -Anuke
 
             maxLevel = 30;
             expFields = new EField[]{

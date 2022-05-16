@@ -542,7 +542,7 @@ public final class UnityUnitTypes{
                 rotateSpeed = 1.2f;
                 inaccuracy = 4f;
                 reload = 3f;
-                //TODO used to have xRand = 4.5f; - use something else instead? -Anuke
+                xRand = 4.5f; //TODO use something else instead? -Anuke
                 shoot.shots = 2;
                 angleCone = 20f;
                 angleOffset = -15f;
@@ -944,7 +944,7 @@ public final class UnityUnitTypes{
                 angleCone = 60f;
                 angleOffset = 45f;
                 inaccuracy = 25f;
-                //TODO formerly xRand = 2.25f; needs fixing -Anuke
+                xRand = 2.25f; //TODO use something else instead? -Anuke
                 shoot.shots = 2;
                 shootSound = Sounds.missile;
 
@@ -1199,7 +1199,7 @@ public final class UnityUnitTypes{
                 rotate = true;
                 rotateSpeed = 2f;
                 reload = 2f;
-                //TODO formerly xRand = 3 -Anuke
+                xRand = 3f; //TODO use something else instead? -Anuke
                 inaccuracy = 4f;
                 shootSound = Sounds.shootBig;
 
@@ -1355,7 +1355,7 @@ public final class UnityUnitTypes{
                 rotate = true;
                 inaccuracy = 15f;
                 reload = 7f;
-                //TODO xRand = 2.25f; -Anuke
+                xRand = 2.25f; //TODO use something else instead? -Anuke
                 shootSound = Sounds.missile;
 
                 bullet = UnityBullets.basicMissile;
@@ -1366,7 +1366,7 @@ public final class UnityUnitTypes{
                 rotate = true;
                 inaccuracy = 15f;
                 reload = 7f;
-                //TODO xRand = 2.25f; -Anuke
+                xRand = 2.25f; //TODO use something else instead? -Anuke
                 shootSound = Sounds.missile;
 
                 bullet = UnityBullets.basicMissile;
@@ -1460,7 +1460,7 @@ public final class UnityUnitTypes{
                     x = 29.75f;
                     y = -13f;
                     shootY = 7f;
-                    //TODO xRand = 9f; -Anuke
+                    xRand = 9f; //TODO use something else instead? -Anuke
                     defaultAngle = angleOffset = 90f;
                     angleCone = 0f;
                     shootCone = 125f;
@@ -1502,7 +1502,7 @@ public final class UnityUnitTypes{
                 mirror = false;
                 inaccuracy = 15f;
                 reload = 7f;
-                //TODO xRand = 2.25f; -Anuke
+                xRand = 2.25f; //TODO use something else instead? -Anuke
                 shootSound = Sounds.missile;
                 angleCone = 135f;
 
