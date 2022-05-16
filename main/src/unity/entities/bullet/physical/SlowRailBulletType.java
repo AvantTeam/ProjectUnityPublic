@@ -47,20 +47,20 @@ public class SlowRailBulletType extends BasicBulletType{
         updateTrail(b);
         hit = false;
         Utils.collideLineRawEnemy(b.team, b.lastX, b.lastY, b.x, b.y, collisionWidth, collisionWidth, (building, direct) -> {
-            if(direct && collidesGround && !b.collided.contains(building.id)){
+            if(direct && collidesGround && !b.collided.contains(building.id) && b.damage > 0f){
                 float h = building.health;
                 float sub = Math.max(building.health * pierceDamageFactor, 0);
                 building.collision(b);
                 hitTile(b, building, h, true);
-                if(pierceCap > 0) b.collided.add(building.id);
+                b.collided.add(building.id);
                 b.damage -= sub;
             }
             return (hit = (building.block.absorbLasers || (pierceCap > 0 && b.collided.size >= pierceCap) || b.damage <= 0f));
         }, unit -> {
-            if(unit.checkTarget(collidesAir, collidesGround) && !b.collided.contains(unit.id)){
+            if(unit.checkTarget(collidesAir, collidesGround) && !b.collided.contains(unit.id) && b.damage > 0f){
                 float sub = Math.max(unit.health * pierceDamageFactor, 0);
                 hitEntity(b, unit, unit.health);
-                if(pierceCap > 0) b.collided.add(unit.id);
+                b.collided.add(unit.id);
                 b.damage -= sub;
             }
             return (hit = ((pierceCap > 0 && b.collided.size >= pierceCap) || b.damage <= 0f));

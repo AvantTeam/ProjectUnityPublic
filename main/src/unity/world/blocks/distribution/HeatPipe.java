@@ -18,6 +18,7 @@ import static arc.Core.*;
 import static mindustry.Vars.*;
 
 public class HeatPipe extends GenericGraphBlock{
+    public float damagemul = 2.5f;
     public final static Color baseColor = Color.valueOf("6e7080");
     final static int[] shift = new int[]{0, 3, 2, 1};
     protected static Color tempCol = new Color();
@@ -76,25 +77,25 @@ public class HeatPipe extends GenericGraphBlock{
             if(timer(timerDump, dumpTime)){
                 if(temp > HeatGraphNode.celsiusZero+150){
                     float intensity = Mathf.clamp(Mathf.map(temp, HeatGraphNode.celsiusZero + 400, HeatGraphNode.celsiusZero + 2000f, 0f, 1f));
-                    unit.apply(StatusEffects.burning, intensity * 40f + 7f);
+                    unit.apply(StatusEffects.burning, (intensity * 40f + 7f) * damagemul);
                     if(unit.isImmune(StatusEffects.burning)){
                         intensity*=0.2;
                     }
                     if(unit.isImmune(StatusEffects.melting)){
                         intensity*=0.2;
                     }
-                    unit.damage(intensity * 50f);
+                    unit.damage(intensity * 50f * damagemul);
                 }else if(temp < HeatGraphNode.celsiusZero-100){
                     float intensity = Mathf.clamp(Mathf.map(temp, HeatGraphNode.celsiusZero - 100, 0, 0f, 1f));
-                    unit.apply(StatusEffects.freezing, intensity * 40f + 7f);
+                    unit.apply(StatusEffects.freezing, (intensity * 40f + 7f) * damagemul);
                     if(unit.isImmune(StatusEffects.freezing)){
                         intensity*=0.2;
                     }
                     if(unit.hasEffect(StatusEffects.wet)){
                         intensity*=2;
-                        unit.apply(StatusEffects.slow, intensity * 20f + 7f);
+                        unit.apply(StatusEffects.slow, (intensity * 20f + 7f) * damagemul);
                     }
-                    unit.damage(intensity * 50f);
+                    unit.damage(intensity * 50f * damagemul);
                 }
             }
         }
@@ -110,18 +111,6 @@ public class HeatPipe extends GenericGraphBlock{
                 Draw.color();
             }
             drawTeamTop();
-        }
-
-        @Override
-        public void read(Reads read, byte revision){
-            super.read(read, revision);
-            heatNode().setTemp(read.f());
-        }
-
-        @Override
-        public void write(Writes write){
-            super.write(write);
-            write.f(heatNode().getTemp());
         }
     }
 }

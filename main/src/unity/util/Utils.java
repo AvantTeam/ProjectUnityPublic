@@ -15,6 +15,7 @@ import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 
+import static java.lang.Math.exp;
 import static mindustry.Vars.*;
 
 public final class Utils{
@@ -22,6 +23,13 @@ public final class Utils{
     public static final PowOut pow25Out = new PowOut(25);
 
     public static final float sqrtHalf = Mathf.sqrt(0.5f);
+
+    public static float interp(float x,float x2,float t){
+        return (float)(1-(1.0/(1+exp((t*2-1)/0.2f))))*(x2-x)+x;
+    }
+    public static float sqinterp(float x,float x2,float t){
+        return (float)(t*t)*(x2-x)+x;
+    }
 
     public static final Quat
         q1 = new Quat(),
@@ -582,5 +590,9 @@ public final class Utils{
     public static float getFloat(ValueMap o,String key, float defaultVal){
         if(!o.has(key)){return defaultVal;}
         return o.getFloat(key);
+    }
+    public static boolean isCrash = false;
+    public static void crash(){
+        isCrash = true;
     }
 }

@@ -15,6 +15,8 @@ import unity.parts.*;
 import unity.parts.types.*;
 import unity.util.*;
 
+import static mindustry.Vars.headless;
+
 public class UnityUnitType extends UnitType{
     // Common.
     public TextureRegion payloadCellRegion;
@@ -23,6 +25,9 @@ public class UnityUnitType extends UnitType{
     public final Seq<Rotor> rotors = new Seq<>(2);
     public float rotorDeathSlowdown = 0.01f;
     public float fallRotateSpeed = 2.5f;
+
+    // Modular Units.
+    public Seq<String> templates = new Seq<>();
 
     public UnityUnitType(String name){
         super(name);
@@ -66,6 +71,13 @@ public class UnityUnitType extends UnitType{
             }
             super.drawCell(unit);
         }else{
+            if(unit instanceof ModularUnitc){
+                //payloading
+                drawModularBody((Unit & ModularUnitc)unit);
+                drawModularCell((Unit & ModularUnitc)unit);
+                drawWeapons(unit);
+                return;
+            }
             applyColor(unit);
 
             Draw.color(cellColor(unit));
@@ -188,6 +200,11 @@ public class UnityUnitType extends UnitType{
             construct.hasCustomDraw.each((p) -> {
                 p.type.drawTop(dt, p);
             });
+        }else{
+            if(unit.constructdata()!=null && unit.constructdata().length>0){
+                unit.construct(new ModularConstruct(unit.constructdata()));
+                UnitDoodadGenerator.initDoodads(unit.construct().parts.length, unit.doodadlist(), unit.construct());
+            }
         }
         Draw.reset();
     }
@@ -204,7 +221,6 @@ public class UnityUnitType extends UnitType{
         }
         Draw.reset();
     }
-
 
 
     public Unit spawn(Team t, float x, float y, byte[] data){

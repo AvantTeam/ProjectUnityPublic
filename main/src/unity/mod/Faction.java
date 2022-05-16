@@ -14,7 +14,7 @@ import static mindustry.Vars.*;
 @FactionBase
 public enum Faction{
     vanilla("vanilla", Team.sharded.color),
-    youngcha("youngcha", Color.valueOf("a69f95")),
+    youngcha("youngcha", Color.valueOf("95c184")),
     koruh("koruh", Color.valueOf("61caff")),
     light("light", Color.valueOf("fffde8")),
     monolith("monolith", UnityPal.monolith),

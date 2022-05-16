@@ -44,6 +44,12 @@ public class SteamPiston extends GenericGraphBlock{
         boolean initConnect = false;
         float pushForce = 0;
         float rwater = 0;
+
+        @Override
+        public boolean shouldConsume(){
+            return super.shouldConsume() &&  heatNode().getTemp()>minTemp;
+        }
+
         @Override
         public void updateTile(){
             super.updateTile();
@@ -61,14 +67,14 @@ public class SteamPiston extends GenericGraphBlock{
                 boolean pulling = flywheeldir.dot(flywheel.attachY-y,-(flywheel.attachX-x))>0;
                 if(pulling ){
                     pushForce = 0;
-                    if(timer(smokeTimer,5)){
+                    if(timer(smokeTimer,5) && liquids.total()>1){
                         float rand = Mathf.random()>0.5f?-1:1;
                         Fx.fuelburn.at(x+flywheeldir.y*tilesize*rand,y-flywheeldir.x*tilesize*rand);
                     }
                 }else{
                     if(rwater<=0 && consValid()){
                         consume();
-                        heatnode.setTemp(heatnode.getTemp()-eff*15);
+                        heatnode.addHeatEnergy(-eff*150);
                         rwater += 10;
                     }
                     if(rwater>0){

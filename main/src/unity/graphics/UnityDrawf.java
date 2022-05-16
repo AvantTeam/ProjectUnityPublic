@@ -8,6 +8,9 @@ import arc.math.geom.*;
 import arc.util.*;
 import mindustry.graphics.*;
 
+import java.util.*;
+
+import static arc.math.geom.Mat3D.*;
 import static mindustry.Vars.tilesize;
 
 public final class UnityDrawf{
@@ -183,7 +186,91 @@ public final class UnityDrawf{
         Lines.line(x, y, x2, y2);
         Draw.reset();
     }
+    public static void arc(float x, float y, float r, float fromRadian,float toRadian){
+        int seg = (int)Math.max(1,Lines.circleVertices(r)*Math.abs(toRadian-fromRadian)/(2*Mathf.pi));
+        Vec2 ptop = new Vec2(), pbottom = new Vec2(); Vec2 ctop = new Vec2(), cbottom = new Vec2();
+        float c = Mathf.cos(fromRadian);
+        float s = Mathf.sin(fromRadian);
+        float thick = Lines.getStroke()*0.5f;
+        ptop.set(c*(r+thick)+x,s*(r+thick)+y);
+        pbottom.set(c*(r-thick)+x,s*(r-thick)+y);
+        for(int i = 0;i<seg;i++){
+            float t = Mathf.lerp(fromRadian,toRadian,(i+1f)/seg);
+            c = Mathf.cos(t);
+            s = Mathf.sin(t);
+            ctop.set(c*(r+thick)+x,s*(r+thick)+y);
+            cbottom.set(c*(r-thick)+x,s*(r-thick)+y);
+            Fill.quad(Core.atlas.white(), ptop.x,ptop.y,ctop.x,ctop.y,cbottom.x,cbottom.y,pbottom.x,pbottom.y);
+            ptop.set(ctop);
+            pbottom.set(cbottom);
+        }
 
+    }
+    
+    public static void mulVec(float[] mat, Vec3 vec){
+        float x = vec.x * mat[M00] + vec.y * mat[M01] + vec.z * mat[M02] + mat[M03];
+        float y = vec.x * mat[M10] + vec.y * mat[M11] + vec.z * mat[M12] + mat[M13];
+        float z = vec.x * mat[M20] + vec.y * mat[M21] + vec.z * mat[M22] + mat[M23];
+        vec.x = x;
+        vec.y = y;
+        vec.z = z;
+    }
+    
+    static Vec3[] tmpV = new Vec3[4];
+    public static void drawRectOrtho(TextureRegion region, float x, float y, float z, float w, float h, float rotY, float rotZ){
+        drawRectOrtho(region,x,y,0,0,z,w,h,rotY,rotZ);
+    }
+    static Mat3D matT = new Mat3D();
+    static Vec3 tAxis = new Vec3();
+    static Vec3 tmpV2 = new Vec3();
+    
+    public static void drawRectOrtho(TextureRegion region, float x, float y, float ox, float oy, float z, float w, float h, float rotY, float rotZ){
+        drawRectOrtho(region, x, y, ox, oy, z, w, h, rotY, rotZ, (w!=h)?rotZ:0);
+    }
+    public static void drawRectOrtho(TextureRegion region, float x, float y, float ox, float oy, float z, float w, float h, float rotY, float rotZ, float sprrotZ){
+        tmpV[3].set(+w*0.5f, +h*0.5f, 0);
+        tmpV[0].set(-w*0.5f, +h*0.5f, 0);
+        tmpV[1].set(-w*0.5f, -h*0.5f, 0);
+        tmpV[2].set(+w*0.5f, -h*0.5f, 0);
+
+        tmpV2.set(ox,oy,z);
+        matT.idt();
+        for(int i = 0;i<4;i++){
+            tmpV[i].rotate(Vec3.Z,sprrotZ);
+        }
+        tAxis.set(Vec3.Y).rotate(Vec3.Z,-rotZ);
+        tmpV2.rotate(Vec3.Z,-rotZ);
+        matT.rotate(tAxis,-rotY);
+        matT.translate(tmpV2);
+
+        for(int i = 0;i<4;i++){
+            mulVec(matT.val,tmpV[i]);
+            tmpV[i].add(x,y,0);
+        }
+
+        Fill.quad(region,tmpV[0].x,tmpV[0].y, tmpV[1].x,tmpV[1].y, tmpV[2].x,tmpV[2].y, tmpV[3].x,tmpV[3].y);
+    }
+    static TextureRegion t1=new TextureRegion(),t2=new TextureRegion();
+    public static void drawRectOffsetHorz(TextureRegion region, float x, float y,float w,float h,float rotation,float o){
+        t1.set(region);
+        t2.set(region);
+        float cx = x+w*0.5f;
+        float dx = x-w*0.5f + w*o;
+        float t1w = w*(1f-o);
+        float t2w = w*o;
+        t1.u2 = Mathf.lerp(region.u,region.u2,1-o);
+        t2.u = Mathf.lerp(region.u2,region.u,o);
+        Draw.rect(t1, dx+t1w*0.5f, y, t1w, h, x-dx, h*0.5f, rotation);
+        Draw.rect(t2, dx-t2w*0.5f, y, t2w, h, x-(dx-t2w), h*0.5f, rotation);
+    }
+
+
+
+    static{
+        for(int i = 0; i < 4; i++){
+            tmpV[i] = new Vec3();
+        }
+    }
     /** @author sunny */
     public static void ring(float bx, float by, int sides, float rad, float hScl, float rot, float thickness, float layerUnder, float layerOver){
         float wScl = 1f;

@@ -7,7 +7,7 @@ public class ModularPart{
     public float ax,ay;
     //middle
     public float cx,cy;
-    int[] panelingIndexes;
+    public int[] panelingIndexes;
     //which lighting variation to draw
     int front = 0;
 

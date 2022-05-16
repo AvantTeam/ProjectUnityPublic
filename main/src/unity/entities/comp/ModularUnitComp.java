@@ -1,5 +1,6 @@
 package unity.entities.comp;
 
+import arc.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
@@ -8,13 +9,13 @@ import arc.util.io.*;
 import mindustry.*;
 import mindustry.ai.formations.*;
 import mindustry.ai.types.*;
-import mindustry.content.*;
 import mindustry.entities.abilities.*;
-import mindustry.entities.bullet.*;
 import mindustry.entities.units.*;
+import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.world.*;
+import mindustry.world.blocks.environment.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
 import unity.content.effects.*;
@@ -22,6 +23,7 @@ import unity.gen.*;
 import unity.parts.*;
 import unity.parts.PanelDoodadType.*;
 import unity.parts.types.*;
+import unity.type.*;
 import unity.util.*;
 
 import java.util.*;
@@ -40,7 +42,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     @Import
     boolean dead;
     @Import
-    float health, maxHealth, rotation, armor;
+    float health, maxHealth, rotation, armor,drownTime;
     @Import
     int id;
     @Import
@@ -55,6 +57,8 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public transient Seq<Unit> controlling;
     @Import
     public transient Formation formation;
+    @Import
+    public transient Floor lastDrownFloor;
 
     transient ModularConstruct construct;
     transient boolean constructLoaded = false;
@@ -70,6 +74,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public transient float rotateSpeed = 0;
     public transient float massStat = 0;
     public transient float weaponrange = 0;
+    public transient int itemcap = 0;
 
     @Override
     public void add(){
@@ -79,7 +84,10 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             if(constructdata != null){
                 construct = new ModularConstruct(constructdata);
             }else{
-                construct = ModularConstruct.test;
+                String templatestr = ((UnityUnitType)type).templates.random();
+                ModularConstructBuilder test = new ModularConstructBuilder(3, 3);
+                test.set(Base64.getDecoder().decode(templatestr.trim().replaceAll("[\\t\\n\\r]+", "")));
+                construct = new ModularConstruct(test.exportCropped());
             }
         }
         constructdata = Arrays.copyOf(construct.data, construct.data.length);
@@ -89,7 +97,9 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         applyStatMap(statmap);
         if(construct != ModularConstruct.test){
             constructLoaded = true;
-            initDoodads();
+            if(!headless){
+                UnitDoodadGenerator.initDoodads(construct.parts.length, doodadlist, construct);
+            }
             int w = construct.parts.length;
             int h = construct.parts[0].length;
             int maxx = 0, minx = 256;
@@ -110,163 +120,6 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         }
     }
 
-    public void initDoodads(){
-        /// :I welp i tried
-        if(construct != null){
-            if(construct.parts.length == 0){
-                return;
-            }
-            boolean[][] filled = new boolean[construct.parts.length][construct.parts[0].length];
-
-
-            int w = construct.parts.length;
-            int h = construct.parts[0].length;
-            int miny = 999, maxy = 0;
-            for(int i = 0; i < w; i++){
-                for(int j = 0; j < h; j++){
-                    filled[i][j] = construct.parts[i][j] != null && !construct.parts[i][j].type.open;
-                    if(filled[i][j]){
-                        miny = Math.min(j, miny);
-                        maxy = Math.max(j, maxy);
-                    }
-                }
-            }
-
-            float[][] lightness = new float[w][h];
-            int tiles = 0;
-            for(int i = 0; i < w; i++){
-                for(int j = 0; j < h; j++){
-                    lightness[i][j] = Mathf.clamp((0.5f - (1f - Mathf.map(j, miny, maxy, 0, 1))) * 2 + 1, 0, 1);
-                    tiles += filled[i][j] ? 1 : 0;
-                }
-            }
-            if(tiles == 0){
-                return;
-            }
-            Seq<Point2> seeds = new Seq();
-            int[][] seedspace = new int[w][h];
-            int[][] seedspacebuf = new int[w][h];
-            for(int i = 0; i < Math.max(Mathf.floor(Mathf.sqrt(tiles) / 2), 1); i++){
-                int cnx = Mathf.random(0, Math.round(w / 2f) - 1);
-                int cny = Mathf.random(0, h - 1);
-                while(!filled[cnx][cny]){
-                    cnx = Mathf.random(0, Math.round(w / 2f) - 1);
-                    cny = Mathf.random(0, h - 1);
-                }
-                seeds.add(new Point2(cnx, cny));
-                seedspace[cnx][cny] = seeds.size;
-                if(filled[w - cnx - 1][cny]){
-                    seedspace[w - cnx - 1][cny] = seeds.size;
-                }
-            }
-            boolean hasEmpty = true;
-            while(hasEmpty){
-                hasEmpty = false;
-                for(int i = 0; i < w; i++){
-                    for(int j = 0; j < h; j++){
-                        if(seedspace[i][j] != 0){
-                            int seed = seedspace[i][j];
-                            seedspacebuf[i][j] = seed;
-                            if(i > 0 && seedspace[i - 1][j] == 0 && seedspacebuf[i - 1][j] < seed){
-                                seedspacebuf[i - 1][j] = seed;
-                            }
-                            if(i < w - 1 && seedspace[i + 1][j] == 0 && seedspacebuf[i + 1][j] < seed){
-                                seedspacebuf[i + 1][j] = seed;
-                            }
-                            if(j > 0 && seedspace[i][j - 1] == 0 && seedspacebuf[i][j - 1] < seed){
-                                seedspacebuf[i][j - 1] = seed;
-                            }
-                            if(j < h - 1 && seedspace[i][j + 1] == 0 && seedspacebuf[i][j + 1] < seed){
-                                seedspacebuf[i][j + 1] = seed;
-                            }
-                        }else{
-                            hasEmpty = true;
-                        }
-                    }
-                }
-                for(int i = 0; i < w; i++){
-                    for(int j = 0; j < h; j++){
-                        seedspace[i][j] = seedspacebuf[i][j];
-                    }
-                }
-            }
-            for(int i = 0; i < Math.round(w / 2f) - 1; i++){
-                for(int j = 0; j < h; j++){
-                    float val = Mathf.map((i * 34.343f + j * 844.638f) % 1f, -0.1f, 0.1f);
-                    lightness[i][j] += val;
-                    lightness[w - i - 1][j] += val;
-                }
-            }
-            for(int i = 0; i < w; i++){
-                for(int j = 0; j < h; j++){
-
-                    if(j > 0 && seedspace[i][j] != seedspace[i][j - 1]){
-                        lightness[i][j] -= 0.5;
-                    }
-                    if(i == Math.round(w / 2f) - 1){
-                        continue;
-                    }
-                    lightness[i][j] = Mathf.clamp(lightness[i][j], 0, 1);
-                }
-            }
-
-            ///finally apply doodads
-            boolean[][] placed = new boolean[construct.parts.length][construct.parts[0].length];
-            float ox = -w * 0.5f;
-            float oy = -h * 0.5f;
-            int middlex = Math.round(w / 2f) - 1;
-            Seq<PanelDoodadType> draw = new Seq<>();
-            PanelDoodadType mirrored = null;
-            for(int i = 0; i < Math.round(w / 2f); i++){
-                for(int j = 0; j < h; j++){
-                    mirrored = null;
-                    if(filled[i][j] && !placed[i][j]){
-                        draw.clear();
-                        draw.add(getType(UnityParts.unitdoodads1x1, lightness[i][j]));
-                        var x2 = getType(UnityParts.unitdoodads2x2, lightness[i][j]);
-                        if(x2.canFit(construct.parts, i, j) && i + 1 < middlex){
-                            draw.add(x2);
-                        }
-
-                        PanelDoodadType doodad = draw.random();
-                        mirrored = doodad;
-
-                        addDoodad(placed, get(doodad, i + ox, j + oy), i, j);
-                    }
-                    if(filled[w - i - 1][j] && !placed[w - i - 1][j]){
-                        if(mirrored != null){
-                            addDoodad(placed, get(mirrored, w - i - mirrored.w + ox, j + oy), w - i - mirrored.w, j);
-                            continue;
-                        }
-                        draw.clear();
-                        draw.add(getType(UnityParts.unitdoodads1x1, lightness[w - i - 1][j]));
-                        PanelDoodadType doodad = draw.random();
-                        addDoodad(placed, get(doodad, w - i - doodad.w + ox, j + oy), w - i - doodad.w, j);
-                    }
-                }
-            }
-        }
-    }
-
-    public void addDoodad(boolean[][] placed, PanelDoodad p, int x, int y){
-        doodadlist.add(p);
-        for(int i = 0; i < p.type.w; i++){
-            for(int j = 0; j < p.type.h; j++){
-                placed[x + i][y + j] = true;
-            }
-        }
-    }
-
-    public PanelDoodad get(PanelDoodadType type, float x, float y){
-        return type.create((type.w * 0.5f + x) * ModularPartType.partSize, (type.h * 0.5f + y) * ModularPartType.partSize, x > 0);
-    }
-
-    public PanelDoodadType getType(Seq<PanelDoodadType> palette, float lightness){
-        lightness = 1 - lightness;
-        var t = palette.get(Mathf.clamp((int)(lightness * palette.size), 0, palette.size - 1));
-        return t;
-    }
-
     public void applyStatMap(ModularUnitStatMap statmap){
         if(construct.parts.length == 0){
             return;
@@ -277,24 +130,46 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         float hratio = Mathf.clamp(this.health / this.maxHealth);
         this.maxHealth = statmap.getOrCreate("health").getFloat("value");
-        this.health = hratio * this.maxHealth;
+        if(savedHp<=0){
+            this.health = hratio * this.maxHealth;
+        }else{
+            this.health = savedHp;
+            savedHp = -1;
+        }
         var weapons = statmap.stats.getList("weapons");
         mounts = new WeaponMount[weapons.length()];
         weaponrange = 0;
 
         int weaponslots = Math.round(statmap.getValue("weaponslots"));
         int weaponslotsused = Math.round(statmap.getValue("weaponslotuse"));
+
         for(int i = 0; i < weapons.length(); i++){
             var weapon = getWeaponFromStat(weapons.getMap(i));
             weapon.reload *= 1f / eff;
             if(weaponslotsused>weaponslots){
                 weapon.reload *= 4f*(weaponslotsused-weaponslots);
             }
-            weapon.load();
+            if(!headless){
+                weapon.load();
+            }
             mounts[i] = weapon.mountType.get(weapon);
             ModularPart mpart = weapons.getMap(i).get("part");
             weaponrange = Math.max(weaponrange, weapon.bullet.range() + Mathf.dst(mpart.cx, mpart.cy) * ModularPartType.partSize);
         }
+
+        int abilityslots = Math.round(statmap.getValue("abilityslots"));
+        int abilityslotsused = Math.round(statmap.getValue("abilityslotuse"));
+
+        if(abilityslotsused<=abilityslots){
+            var abilitiesStats = statmap.stats.getList("abilities");
+            abilities().clear();
+            for(int i = 0; i < abilitiesStats.length(); i++){
+                var abilityStat = abilitiesStats.getMap(i);
+                Ability ability = abilityStat.get("ability");
+                abilities().add(ability.copy());
+            }
+        }
+
         this.massStat = statmap.getOrCreate("mass").getFloat("value");
 
 
@@ -304,7 +179,35 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         rotateSpeed = Mathf.clamp(10f * speed / (float)Math.max(construct.parts.length, construct.parts[0].length), 0, 5);
 
         armor = statmap.getValue("armour", "realValue");
+        itemcap = (int)statmap.getValue("itemcapacity");
+    }
 
+    @Replace
+    public void setType(UnitType type) {
+        this.type = type;
+        if (controller == null) controller(type.createController()); //for now
+        if(type!=UnityUnitTypes.modularUnitSmall){
+            this.maxHealth = type.health;
+            drag(type.drag);
+            this.armor = type.armor;
+            hitSize(type.hitSize);
+            hovering(type.hovering);
+            if(controller == null) controller(type.createController());
+            if(mounts().length != type.weapons.size) setupWeapons(type);
+            if(abilities().size != type.abilities.size){
+                abilities(type.abilities.map(Ability::copy));
+            }
+        }
+    }
+
+    @Replace
+    public void setupWeapons(UnitType def) {
+        if(def!=UnityUnitTypes.modularUnitSmall){
+            mounts = new WeaponMount[def.weapons.size];
+            for(int i = 0; i < mounts.length; i++){
+                mounts[i] = def.weapons.get(i).mountType.get(def.weapons.get(i));
+            }
+        }
     }
 
     public void initWeapon(Weapon w){
@@ -328,8 +231,9 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             constructdata = Arrays.copyOf(construct.data, construct.data.length);
         }
         float vellen = this.vel().len();
-        driveDist += vellen;
-        if(construct != null && vellen > 0.01f){
+
+        if(construct != null && vellen > 0.01f && elevation<0.01){
+            driveDist += vellen;
             DrawTransform dt = new DrawTransform(new Vec2(this.x(), this.y()), rotation);
             float dustvel = 0;
             if(moving){
@@ -339,7 +243,8 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             Vec2 nvt = new Vec2();
             final Vec2 pos = new Vec2();
             construct.partlist.each(part -> {
-                if(!(Mathf.random() > 0.1 || !(part.type instanceof ModularWheelType))){
+                boolean b = part.getY()-1 <0 || (construct.parts[part.getX()][part.getY()-1]!=null  && construct.parts[part.getX()][part.getY()-1].type instanceof ModularWheelType);
+                if(!(Mathf.random() > 0.1 || !(part.type instanceof ModularWheelType)) && b){
                     pos.set(part.cx * ModularPartType.partSize, part.ay * ModularPartType.partSize);
                     dt.transform(pos);
                     nvt.set(nv.x + Mathf.range(3), nv.y + Mathf.range(3));
@@ -353,6 +258,11 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         }
         moving = false;
+    }
+
+    @Replace
+    public int itemCapacity(){
+        return itemcap;
     }
 
     @Replace
@@ -427,6 +337,29 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public void lookAt(float angle){
         rotation = Angles.moveToward(rotation, angle, rotateSpeed * Time.delta * speedMultiplier());
     }
+    transient float savedHp = -1 ;
+    @Override
+    public void read(Reads read){
+        savedHp = health;
+    }
 
+    @Replace
+    public void updateDrowning() {
+       Floor floor = drownFloor();
+       if (floor != null && floor.isLiquid && floor.drownTime > 0) {
+           lastDrownFloor = floor;
+           drownTime += Time.delta / floor.drownTime / type.drownTimeMultiplier / (hitSize() / 8f);
+           if (Mathf.chanceDelta(0.05F)) {
+               floor.drownUpdateEffect.at(x(), y(), hitSize(), floor.mapColor);
+           }
+           if (drownTime >= 0.999F && !net.client()) {
+               kill();
+               Events.fire(new UnitDrownEvent(self()));
+           }
+       } else {
+           drownTime -= Time.delta / 50.0F;
+       }
+       drownTime = Mathf.clamp(drownTime);
+    }
 
 }

@@ -14,3 +14,6 @@ main/assets/sprites/
 .vscode/
 .kateproject
 build.bat
+ftp.txt
+ftpcmd.log
+sshcommands.bat

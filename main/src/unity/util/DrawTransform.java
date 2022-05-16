@@ -14,9 +14,15 @@ public class DrawTransform{
         this.rot = rot;
         recalc();
     }
+    public DrawTransform(){
+        recalc();
+    }
 
     public void setTranslate(Vec2 transl){
         this.transl.set(transl);
+    }
+    public void setTranslate(float x,float y){
+       this.transl.set(x,y);
     }
 
     public float getRotation(){

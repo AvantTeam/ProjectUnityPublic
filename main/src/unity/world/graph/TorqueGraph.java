@@ -1,5 +1,7 @@
 package unity.world.graph;
 
+import arc.func.*;
+import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 
@@ -54,7 +56,39 @@ public class TorqueGraph extends Graph<TorqueGraph>{
         lastInertia = iner;
     }
 
-    ///this is on vertex added...
+    public OrderedSet<GraphConnector<TorqueGraph>> multiconnectors = new OrderedSet<>();
+
+    @Override
+    public void onVertexRemoved(GraphConnector<TorqueGraph> vertex){
+        multiconnectors.remove(vertex);
+    }
+
+    @Override
+    public void onVertexAdded(GraphConnector<TorqueGraph> vertex){
+        if(vertex.getNode().connectors>1){
+            multiconnectors.add(vertex);
+        }
+    }
+
+    public void propagate(Cons<TorqueGraph> cons){
+        ObjectSet<TorqueGraph> visited = new ObjectSet<>();
+        Seq<TorqueGraph> toVisit = new Seq<>();
+        visited.add(this);
+        toVisit.add(this);
+        while(!toVisit.isEmpty()){
+            TorqueGraph graph = toVisit.pop();
+            cons.get(graph);
+            for(var mc: graph.multiconnectors){
+                for(var other: mc.getNode().connector){
+                    if(other!=mc && !visited.contains(other.getGraph())){
+                        visited.add(other.getGraph());
+                        toVisit.add(other.getGraph());
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void onUpdate(){
         refreshGraphStats();

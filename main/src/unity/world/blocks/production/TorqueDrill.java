@@ -5,7 +5,10 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.util.*;
 import arc.util.io.*;
+import mindustry.entities.units.*;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
@@ -16,8 +19,7 @@ import static arc.Core.atlas;
 
 public class TorqueDrill extends Drill implements GraphBlock{
     public GraphBlockConfig config = new GraphBlockConfig(this);
-    public float maxSpeed = 50;
-    public float maxEfficiency = 2.5f;
+    public float maxEfficiency = 2.0f;
 
     public final TextureRegion[] bottomRegions = new TextureRegion[2], topRegions = new TextureRegion[2], oreRegions = new TextureRegion[2];
     public TextureRegion rotorRegion, rotorRotateRegion, mbaseRegion, wormDrive, gearRegion, rotateRegion, overlayRegion;
@@ -25,6 +27,7 @@ public class TorqueDrill extends Drill implements GraphBlock{
     public TorqueDrill(String name){
         super(name);
         rotate = true;
+        drawArrow = false;
     }
     @Override
     public TextureRegion[] icons(){
@@ -51,16 +54,15 @@ public class TorqueDrill extends Drill implements GraphBlock{
         }
     }
 
-    @Override
-    public void setStats(){
-        super.setStats();
-    }
 
+    @Override public void setStats(){ super.setStats(); config.setStats(stats); }
     @Override
     public void drawPlace(int x, int y, int rotation, boolean valid){
         super.drawPlace(x, y, rotation, valid);
     }
-
+    @Override public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
+         super.drawRequestRegion(req,list);
+         config.drawConnectionPoints(req,list); }
     @Override public Block getBuild(){
             return this;
         }
@@ -68,13 +70,11 @@ public class TorqueDrill extends Drill implements GraphBlock{
         return config;
     }
 
-    @Override
-    public boolean outputsItems(){
+    @Override public boolean outputsItems(){
         return true;
     }
 
-    @Override
-    public boolean rotatedOutput(int x, int y){
+    @Override public boolean rotatedOutput(int x, int y){
         return false;
     }
 
@@ -83,12 +83,12 @@ public class TorqueDrill extends Drill implements GraphBlock{
         OrderedMap<Class<? extends Graph>,GraphNode> graphNodes = new OrderedMap<>();
         int prevTileRotation = -1;
         boolean placed = false;
-
-        @Override public void created(){ if(!placed){ init(); } }
+        @Override public Building create(Block block, Team team){ var b = super.create(block, team); if(b instanceof GraphBuild gb){gb.initGraph();} return b;}
+        @Override public void created(){ if(!placed){ initGraph(); } }
         @Override public void displayBars(Table table){ super.displayBars(table); displayGraphBars(table); }
         @Override public void write(Writes write){ super.write(write);writeGraphs(write); }
         @Override public void read(Reads read, byte revision){ super.read(read, revision); readGraphs(read); }
-
+        @Override public void pickedUp(){ disconnectFromGraph(); placed = false; super.pickedUp(); }
         @Override
         public void placed(){
             super.placed();
@@ -114,7 +114,7 @@ public class TorqueDrill extends Drill implements GraphBlock{
 
         @Override
         public float efficiency(){
-            return super.efficiency() * Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,maxSpeed,0,maxEfficiency),0,maxEfficiency);
+            return super.efficiency() * Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,torqueNode().maxSpeed,0,maxEfficiency),0,maxEfficiency);
         }
 
         @Override

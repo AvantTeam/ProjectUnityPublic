@@ -9,7 +9,9 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.event.*;
+import arc.struct.*;
 import arc.util.*;
+import mindustry.input.*;
 import unity.parts.*;
 
 import static arc.Core.scene;
@@ -19,7 +21,9 @@ public class PartsEditorElement extends Element{
     //clipping
     private final Rect scissorBounds = new Rect();
     private final Rect widgetAreaBounds = new Rect();
-    //
+    //history for undos
+    Seq<byte[]> prev = new Seq<>();
+    int index = -1;
 
     public ModularConstructBuilder builder;
     public ModularPartType selected = null;
@@ -38,6 +42,7 @@ public class PartsEditorElement extends Element{
 
     public PartsEditorElement(ModularConstructBuilder builder){
         this.builder = builder;
+
         addListener(new InputListener(){
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
@@ -99,19 +104,19 @@ public class PartsEditorElement extends Element{
                 scene.setScrollFocus(PartsEditorElement.this);
             }
 
-            @Override
-            public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY){
-                Log.info("scrolled: "+amountX+","+amountY);
-                float scroll = amountY;
-                if(Math.abs(amountX) > Math.abs(amountY)){
-                    scroll = amountX;
-                }
-                targetscl *= (scroll*0.1)+1;
-                targetscl = Mathf.clamp(targetscl,0.2f,5);
-
-                return true;
-            }
         });
+    }
+
+    @Override
+    public void act(float delta){
+        super.act(delta);
+        targetscl += Core.input.axis(Binding.zoom) / 10f * targetscl;
+        targetscl = Mathf.clamp(targetscl,0.2f,5);
+    }
+
+    public void zoom(float am){
+        targetscl *= am;
+        targetscl = Mathf.clamp(targetscl,0.2f,5);
     }
 
     public void onClicked(InputEvent event, float x, float y, int pointer, KeyCode button){
@@ -132,6 +137,7 @@ public class PartsEditorElement extends Element{
                     builder.deletePartAt(mirrorX(g.x), g.y);
                 }
             }
+            onAction();
         }
     }
 
@@ -231,13 +237,13 @@ public class PartsEditorElement extends Element{
                 if(part==null){
                     continue;
                 }
-                if(!part.isHere(i,j)){
+                if(!(Math.max(part.getX(),minx)==i && Math.max(part.getY(),miny)==j)){
                     continue;
                 }
                 Draw.color(bgCol);
-                rectCorner(i*32,j*32, part.type.w*32, part.type.h*32);
+                rectCorner(part.getX()*32,part.getY()*32, part.type.w*32, part.type.h*32);
                 Draw.color(builder.valid[i][j]?Color.white:Color.red);
-                rectCorner(part.type.icon,i*32,j*32, part.type.w*32, part.type.h*32);
+                rectCorner(part.type.icon,part.getX()*32,part.getY()*32, part.type.w*32, part.type.h*32);
             }
         }
 
@@ -279,7 +285,7 @@ public class PartsEditorElement extends Element{
         Lines.rect(gx+x*scl,gy+y*scl, w*scl, h*scl);
     }
     public void line(float x,float y,float x2,float y2){
-        Lines.rect(gx+x*scl,gy+y*scl, gx+x2*scl,gy+y2*scl);
+        Lines.line(gx+x*scl,gy+y*scl, gx+x2*scl,gy+y2*scl);
     }
 
     public float gx(){
@@ -319,4 +325,29 @@ public class PartsEditorElement extends Element{
     public void deselect(){
         selected = null;
     }
+
+    public void onAction(){
+        prev.add(builder.export());
+        if(index!=prev.size-2){
+            prev.removeRange(index+2,prev.size-1);
+        }
+        index++;
+    }
+    public void redo(){
+        index++;
+        if(index>=prev.size){
+            index = prev.size-1;
+            return;
+        }
+        builder.set(prev.get(index));
+    }
+    public void undo(){
+        index--;
+        if(index<0){
+            index = -1;
+            return;
+        }
+        builder.set(prev.get(index));
+    }
+
 }

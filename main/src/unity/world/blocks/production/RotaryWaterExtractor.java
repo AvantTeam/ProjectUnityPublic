@@ -8,6 +8,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.entities.units.*;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
@@ -18,7 +19,6 @@ import unity.world.graph.*;
 import static arc.Core.*;
 
 public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
-    public float maxSpeed;
     ////interface
     public GraphBlockConfig config = new GraphBlockConfig(this);
     @Override public Block getBuild(){
@@ -36,6 +36,9 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         super(name);
         solid = true;
         noUpdateDisabled = false;
+        rotate = true;
+        drawArrow = false;
+        hasPower = false;
     }
 
     @Override
@@ -51,19 +54,16 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         }
     }
 
-    @Override
-    public void setStats(){ super.setStats();}
+    @Override public void setStats(){ super.setStats(); config.setStats(stats); }
 
     @Override
     public void drawPlace(int x, int y, int rotation, boolean valid){
         super.drawPlace(x, y, rotation, valid);
     }
+    @Override public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
+        super.drawRequestRegion(req,list);
+        config.drawConnectionPoints(req,list); }
 
-    @Override
-    public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
-        Draw.alpha(0.5f);
-        Draw.rect(region, req.drawx(), req.drawy(), req.rotation * 90f);
-    }
 
     @Override
     public TextureRegion[] icons(){
@@ -77,8 +77,8 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         OrderedMap<Class<? extends Graph>,GraphNode> graphNodes = new OrderedMap<>();
         int prevTileRotation = -1;
         boolean placed = false;
-
-        @Override public void created(){ if(!placed){ init(); } }
+        @Override public Building create(Block block, Team team){ var b = super.create(block, team); if(b instanceof GraphBuild gb){gb.initGraph();} return b;}
+        @Override public void created(){ if(!placed){ initGraph(); } }
 
         @Override
         public void placed(){
@@ -89,7 +89,7 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
 
         @Override public void onRemoved(){ disconnectFromGraph();super.onRemoved(); }
         @Override public void onDestroyed(){ disconnectFromGraph(); super.onDestroyed(); }
-
+        @Override public void pickedUp(){ disconnectFromGraph(); placed = false; super.pickedUp(); }
 
         @Override public OrderedMap<Class<? extends Graph>, GraphNode> getNodes(){ return graphNodes; }
         @Override public Building getBuild(){ return this; }
@@ -107,7 +107,7 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
 
         @Override
         public float efficiency(){
-            return super.efficiency()*Mathf.clamp(getGraph(TorqueGraph.class).lastVelocity/maxSpeed);
+            return super.efficiency()*Mathf.clamp(getGraph(TorqueGraph.class).lastVelocity/torqueNode().maxSpeed);
         }
 
         @Override

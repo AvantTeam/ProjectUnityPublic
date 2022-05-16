@@ -4,6 +4,7 @@ import mindustry.type.*;
 import unity.parts.*;
 import unity.parts.stat.*;
 import unity.parts.stat.AdditiveStat.*;
+import unity.util.*;
 
 public class ModularWeaponMountType extends ModularPartType{
     public ModularWeaponMountType(String name){
@@ -20,5 +21,8 @@ public class ModularWeaponMountType extends ModularPartType{
         super.appendStats(statmap, part, grid);
     }
 
-
+    @Override
+    public void drawTop(DrawTransform transform, ModularPart part){
+        super.drawTop(transform, part);
+    }
 }

@@ -1,12 +1,9 @@
 package unity.parts.stat;
 
-import arc.audio.*;
 import arc.graphics.g2d.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import mindustry.content.*;
-import mindustry.entities.bullet.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.world.meta.*;
@@ -73,6 +70,6 @@ public class WeaponMountStat extends ModularPartStat{
         t.row();
         t.add("[lightgray]" + Stat.reload.localized() + ": " + (u.mirror ? "2x " : "") + "[white]" + Strings.autoFixed(60f / u.reload * u.shots, 2) + " " + StatUnit.perSecond.localized());
 
-        StatValues.ammo(ObjectMap.of(UnityUnitTypes.modularUnit, u.bullet)).display(t);
+        StatValues.ammo(ObjectMap.of(UnityUnitTypes.modularUnitSmall, u.bullet)).display(t);
     }
 }

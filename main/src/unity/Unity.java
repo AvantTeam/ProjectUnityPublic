@@ -7,18 +7,27 @@ import mindustry.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
+
+import mindustry.ui.dialogs.*;
+import mindustry.ui.dialogs.JoinDialog.*;
+
 import mindustry.ui.fragments.*;
+
 import mindustry.world.blocks.environment.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
 import unity.content.blocks.*;
 import unity.gen.*;
 import unity.graphics.*;
+
 import unity.graphics.menu.*;
+
 import unity.mod.*;
+import unity.net.*;
 import unity.parts.*;
 import unity.ui.*;
 import unity.util.*;
+import unity.world.graph.*;
 
 import static mindustry.Vars.*;
 
@@ -76,20 +85,45 @@ public class Unity extends Mod{
                 for(Faction faction : Faction.all){
                     faction.load();
                 }
+                Graphs.load();
                 UnityParts.loadDoodads();
 
+                if(dev.isDev()){
+                    Seq<Server> servers = ReflectUtils.getFieldValue(Vars.ui.join, JoinDialog.class,"servers");
+                    boolean found = false;
+                    for(Server s:servers){
+                        if(s.ip.equals("mindustry.xeloboyo.art") || s.ip.equals("172.105.174.77")){
+                            found = true;
+                        }
+                    }
+                    if(!found){
+                        Server xeloserver = new Server();
+                        xeloserver.ip = "mindustry.xeloboyo.art";
+                        servers.add(xeloserver);
+                        ReflectUtils.invokeMethod(Vars.ui.join,"setupRemote");
+                        ReflectUtils.invokeMethod(Vars.ui.join,"refreshRemote");
+
+                    }
+
+                }
+            });
                 // Might break on mobile
                 try{
                     Reflect.set(MenuFragment.class, Vars.ui.menufrag, "renderer", new UnityMenuRenderer());
                 }catch(Exception ex){
                     Log.err("Failed to replace renderer", ex);
                 }
-            });
 
             Events.on(FileTreeInitEvent.class, e -> Core.app.post(UnityShaders::load));
 
             Events.on(DisposeEvent.class, e -> {
                 UnityShaders.dispose();
+            });
+        }else{
+            Events.run(Trigger.update , ()->{
+                if(Utils.isCrash){
+                    throw new RuntimeException("DEATH");
+                }
             });
         }
 
@@ -124,6 +158,7 @@ public class Unity extends Mod{
         dev.init();
         music.init();
         ui.init();
+        UnityCalls.registerPackets();;
     }
 
     @Override
@@ -145,7 +180,7 @@ public class Unity extends Mod{
         UnityEntityMapping.init();
 
 
-        logContent();
+        //logContent();
     }
 
     public void logContent(){

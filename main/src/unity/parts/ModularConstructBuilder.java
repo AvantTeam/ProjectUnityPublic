@@ -27,6 +27,7 @@ public class ModularConstructBuilder{
         }
         root=null;
         onChange.run();
+        updatedItemReq = false;
     }
 
     public void set(byte[] data){
@@ -43,6 +44,7 @@ public class ModularConstructBuilder{
         findRoot();
         onChange.run();
         rebuildValid();
+        updatedItemReq = false;
     }
     public void paste(ModularConstructBuilder e){
         int ox = (w-e.w)/2;
@@ -57,10 +59,11 @@ public class ModularConstructBuilder{
                 }
                 var epart = e.parts[i-ox][j-oy];
                 if(canFit(epart,ox,oy) && epart.isHere(i-ox,j-oy)){
-                    placePart(epart.type,i,j);
+                    placePartDirect(epart.type,i,j);
                 }
             }
         }
+        findRoot();
         rebuildValid();
     }
 
@@ -122,13 +125,19 @@ public class ModularConstructBuilder{
         }
     }
 
+    boolean updatedItemReq = false;
+    public ItemSeq itemRequirements;
+
     public ItemSeq itemRequirements(){
-        ItemSeq requirements = new ItemSeq();
-        var list = getList();
-        for(ModularPart mp:list){
-            requirements.add(mp.type.cost);
+        if(!updatedItemReq){
+            itemRequirements = new ItemSeq();
+            var list = getList();
+            for(ModularPart mp : list){
+                itemRequirements.add(mp.type.cost);
+            }
+            updatedItemReq = true;
         }
-        return requirements;
+        return itemRequirements;
     }
 
     public byte[] export(){
@@ -147,7 +156,7 @@ public class ModularConstructBuilder{
     }
 
     //trims empty tiles.
-    public byte[] exportCompressed(){
+    public byte[] exportCropped(){
         OrderedSet<ModularPart> partsList = new OrderedSet<>();
         int maxx = 0, minx = 256;
         int maxy = 0, miny = 256;
@@ -237,16 +246,20 @@ public class ModularConstructBuilder{
         }
         return true;
     }
-
-    public boolean placePart(ModularPartType selected, int x, int y){
-        for(int i =x ;i<x+selected.w;i++){
-            for(int j =y ;j<y+selected.h;j++){
-                if(parts[i][j]!=null){
-                    return false;
-                }
-            }
+    public void placePartDirect(ModularPartType selected, int x, int y){
+        if(!canPlace(selected,x,y)){
+            return;
         }
-        if(selected.root && root!=null){
+        var part = selected.create(x,y);
+        for(int i =x ;i<x+selected.w;i++){
+           for(int j =y ;j<y+selected.h;j++){
+               parts[i][j] = part;
+           }
+        }
+        updatedItemReq = false;
+    }
+    public boolean placePart(ModularPartType selected, int x, int y){
+        if(!canPlace(selected,x,y)){
             return false;
         }
         var part = selected.create(x,y);
@@ -260,6 +273,7 @@ public class ModularConstructBuilder{
         }
         onChange.run();
         rebuildValid();
+        updatedItemReq = false;
         return true;
     }
 
@@ -277,5 +291,6 @@ public class ModularConstructBuilder{
         }
         onChange.run();
         rebuildValid();
+        updatedItemReq = false;
     }
 }

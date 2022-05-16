@@ -1,5 +1,7 @@
 package unity.world.graph;
 
+import arc.util.*;
+
 public class HeatGraph extends Graph<HeatGraph>{
 
     @Override
@@ -16,35 +18,44 @@ public class HeatGraph extends Graph<HeatGraph>{
     public void onUpdate(){
         //for each vertex distribute heat to neighbours via the gauss siedel method.
         float k = 0;
+        float e = 0;
         float t = 0;
         float cond = 0;
         float b = 0;
         HeatGraphNode hgn;
         HeatGraphNode hgno;
+
+        for(GraphConnector<HeatGraph> v : vertexes){
+            ((HeatGraphNode)v.getNode()).flux=0;
+        }
+
         int iter = 3; // convergence iterations
         for(int i = 0;i<iter;i++){
             for(GraphConnector<HeatGraph> v : vertexes){
                 hgno = ((HeatGraphNode)v.node);
-                k = 1;
-                t = hgno.temp;
+                k = 0;
+                e = hgno.heatenergy;
+                t = hgno.getTemp();
                 cond = hgno.conductivity;
-                //
+                // my brain hurt
+                //but essentially the energy only GS equality is eₙ = (e꜀ + kTₛ)/(1+k/c) as T꜀ is e꜀/c
                 for(GraphEdge ge : v.connections){
                     hgn = ((HeatGraphNode)ge.other(v).node);
-                    b = 0.5f * (hgn.conductivity + cond);
+                    b =  (hgn.conductivity + cond) * Time.delta;
                     k += b;
-                    t += b * hgn.temp;
+                    e += b * hgn.getTemp();
                 }
-                hgno.tempBuffer = t / k;
+                hgno.energyBuffer = e / (1+k/hgno.heatcapacity);
             }
-            if(i!=iter-1){
-                for(GraphConnector<HeatGraph> v : vertexes){
-                    hgno = ((HeatGraphNode)v.node);
-                    hgno.temp = hgno.tempBuffer;
-                }
+            for(GraphConnector<HeatGraph> v : vertexes){
+                hgno = ((HeatGraphNode)v.node);
+                hgno.flux += hgno.energyBuffer-hgno.heatenergy;
+                hgno.heatenergy = hgno.energyBuffer;
             }
         }
     }
+
+
 
     @Override //more like disconnect vertex
     public void removeVertex(GraphConnector<HeatGraph> vertex){
@@ -62,5 +73,10 @@ public class HeatGraph extends Graph<HeatGraph>{
     public void removeEdge(GraphEdge edge){
         removeEdgeNonSplit(edge);
         //no graph splitting.
+    }
+
+    @Override
+    public boolean isRoot(GraphConnector<HeatGraph> t){
+        return true;
     }
 }
