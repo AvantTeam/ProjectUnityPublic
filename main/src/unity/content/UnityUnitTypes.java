@@ -839,7 +839,22 @@ public final class UnityUnitTypes{
                 shoot = new ShootSpread(3, 15f);
                 shootSound = Sounds.laser;
 
-                bullet = UnityBullets.sapLaser;
+                bullet = new LaserBulletType(80f){{
+                    colors = new Color[]{Pal.sapBulletBack.cpy().a(0.4f), Pal.sapBullet, Color.white};
+                    length = 150f;
+                    width = 25f;
+                    sideLength = sideWidth = 0f;
+                    shootEffect = ShootFx.sapPlasmaShoot;
+                    hitColor = lightColor = lightningColor = Pal.sapBullet;
+                    status = StatusEffects.sapped;
+                    statusDuration = 80f;
+                    lightningSpacing = 17f;
+                    lightningDelay = 0.12f;
+                    lightningDamage = 15f;
+                    lightningLength = 4;
+                    lightningLengthRand = 2;
+                    lightningAngleRand = 15f;
+                }};
             }}, new MultiBarrelWeapon("unity-araneidae-cannon"){{
                 mirror = false;
                 x = 0f;
