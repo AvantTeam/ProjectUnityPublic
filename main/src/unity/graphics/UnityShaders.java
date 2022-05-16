@@ -6,7 +6,6 @@ import arc.graphics.g2d.*;
 import arc.graphics.gl.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
-import mindustry.*;
 import mindustry.graphics.*;
 
 import static mindustry.Vars.*;
@@ -16,6 +15,7 @@ public class UnityShaders {
     public static @Nullable ModSurfaceShader lava,pit,waterpit;
 
     public static CacheLayer.ShaderLayer lavaLayer,pitLayer,waterpitLayer;
+
     protected static boolean loaded;
 
     public static void load(){
@@ -182,5 +182,4 @@ public class UnityShaders {
             setUniformi("u_texture2", 2);
         }
     }
-
 }

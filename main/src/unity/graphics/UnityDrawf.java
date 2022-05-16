@@ -17,6 +17,7 @@ public final class UnityDrawf{
     private final static float[] v = new float[6];
     private final static TextureRegion nRegion = new TextureRegion();
     private final static Vec2 vector = new Vec2();
+    private static final Vec2 vec1 = new Vec2(), vec2 = new Vec2(), vec3 = new Vec2(), vec4 = new Vec2();
 
     private UnityDrawf(){
         throw new AssertionError();
@@ -59,6 +60,18 @@ public final class UnityDrawf{
 
                 Fill.tri(v[0], v[1], v[2], v[3], v[4], v[5]);
             }
+        }
+    }
+
+    public static void snowFlake(float x, float y, float r, float s){
+        for(int i = 0; i < 3; i++){
+            Lines.lineAngleCenter(x, y, r + 60 * i, s);
+        }
+    }
+
+    public static void spark(float x, float y, float w, float h, float r){
+        for(int i = 0; i < 4; i++){
+            Drawf.tri(x, y, w, h, r + 90 * i);
         }
     }
 
@@ -253,9 +266,81 @@ public final class UnityDrawf{
 
 
 
-    static {
-        for(int i = 0;i<4;i++){
+    static{
+        for(int i = 0; i < 4; i++){
             tmpV[i] = new Vec3();
         }
+    }
+    /** @author sunny */
+    public static void ring(float bx, float by, int sides, float rad, float hScl, float rot, float thickness, float layerUnder, float layerOver){
+        float wScl = 1f;
+
+        float l = Lines.getStroke();
+
+        float sign = Mathf.sign(hScl);
+        hScl = Math.abs(hScl);
+        Tmp.v1.trns(rot + 90, sign * thickness * (1 - hScl));
+        hScl = Math.abs(hScl);
+
+        float space = 360 / (float)sides;
+        float r1 = rad - l / 2, r2 = rad + l / 2;
+
+        for(int i = 0; i < sides; i++){
+            float a = space * i;
+            boolean over = i >= sides / 2 == sign > 0;
+
+            Draw.z(!over ? layerUnder : layerOver);
+            vec1.trns(rot,
+                    r1 * wScl * Mathf.cosDeg(a),
+                    r1 * hScl * Mathf.sinDeg(a)
+            );
+            vec2.trns(rot,
+                    r1 * wScl * Mathf.cosDeg(a + space),
+                    r1 * hScl * Mathf.sinDeg(a + space)
+            );
+            vec3.trns(rot,
+                    r2 * wScl * Mathf.cosDeg(a + space),
+                    r2 * hScl * Mathf.sinDeg(a + space)
+            );
+            vec4.trns(rot,
+                    r2 * wScl * Mathf.cosDeg(a),
+                    r2 * hScl * Mathf.sinDeg(a)
+            );
+
+            float x = bx + Tmp.v1.x;
+            float y = by + Tmp.v1.y;
+
+            if(over){
+            //over, use 12
+                Draw.color(Color.red);
+                Fill.quad(
+                        bx - Tmp.v1.x + vec4.x, by - Tmp.v1.y + vec4.y,
+                        bx - Tmp.v1.x + vec3.x, by - Tmp.v1.y + vec3.y,
+                        x + vec3.x, y + vec3.y,
+                        x + vec4.x, y + vec4.y
+                );
+            }
+            else{
+                //under, use 34
+                Draw.color(Color.orange);
+                Fill.quad(
+                        bx - Tmp.v1.x + vec2.x, by - Tmp.v1.y + vec2.y,
+                        bx - Tmp.v1.x + vec1.x, by - Tmp.v1.y + vec1.y,
+                        x + vec1.x, y + vec1.y,
+                        x + vec2.x, y + vec2.y
+                );
+
+            }
+
+            Draw.z(!over ? layerUnder : layerOver);
+            Draw.color(Color.white);
+            Fill.quad(
+                    x + vec1.x, y + vec1.y,
+                    x + vec2.x, y + vec2.y,
+                    x + vec3.x, y + vec3.y,
+                    x + vec4.x, y + vec4.y
+            );
+        }
+        Draw.reset();
     }
 }
