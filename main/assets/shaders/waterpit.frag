@@ -60,11 +60,11 @@ float sqaureRay(vec2 rorg, vec2 invrdir){
 //rdir should be normalised
 float tileMarch(vec2 tpos, vec2 rdir, float maxlen, vec2 tile, vec2 tilestep){
     vec2 irdir = vec2(1.0)/rdir;
-    if(rdir.x==0){
-        irdir.x = 9999.0f;
+    if(rdir.x==0.0){
+        irdir.x = 9999.0;
     }
-    if(rdir.y==0){
-        irdir.y = 9999.0f;
+    if(rdir.y==0.0){
+        irdir.y = 9999.0;
     }
     ivec2 rt = ivec2(0, 0);
     //first step shouldnt have anything

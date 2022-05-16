@@ -38,6 +38,12 @@ public class CrucibleRecipes{
         addLiquid(id++,Liquids.cryofluid,-200,0.1f,-190,0.1f,50);
         addLiquid(id++,Liquids.slag,400,0.1f,2200,0.1f,60);
         addLiquid(id++,Liquids.oil,-150,0.1f,350,0.1f,120);
+        addItem(id++,UnityItems.stone,-(HeatGraphNode.celsiusZero+1), 0.1f, 220);
+        addItem(id++,UnityItems.denseAlloy,900, 0.15f, 120);
+        addItem(id++,UnityItems.steel,1500, 0.15f, 50);
+        addItem(id++,UnityItems.dirium,2500, 0.1f, 520);
+        addItem(id++,UnityItems.uranium,1500, 0.1f, 80);
+        addLiquid(id++,UnityLiquids.lava,1300,0.1f,3250,0.1f,300);
 
         recipes.add(new CrucibleRecipe(items.get(UnityItems.cupronickel),0.1f,HeatGraphNode.celsiusZero + 150,
             needs(Items.copper, 2,true),
@@ -49,19 +55,36 @@ public class CrucibleRecipes{
             needs(Items.coal, 0.5f,false),
                    needs(Items.sand, 0.5f,true)));
         recipes.add(new CrucibleRecipe(items.get(Items.silicon), 0.15f,HeatGraphNode.celsiusZero + 1500,
-                    needs(Items.graphite, 0.25f,false),
-                           needs(Items.sand, 0.5f,true)));
+            needs(Items.graphite, 0.25f,false),
+                   needs(Items.sand, 0.5f,true)));
         recipes.add(new CrucibleRecipe(items.get(Items.graphite), 0.02f,HeatGraphNode.celsiusZero + 2000,
-              needs(Items.coal, 0.5f,false))); // super coal-efficient graphite, if you can get these temps.
+            needs(Items.coal, 0.5f,false))); // super coal-efficient graphite, if you can get these temps.
         recipes.add(new CrucibleRecipe(items.get(Items.surgeAlloy),0.1f,HeatGraphNode.celsiusZero + 1200,
             needs(Items.copper, 2,true),
                    needs(Items.lead, 2,true),
                    needs(Items.titanium, 2,true),
                    needs(Items.silicon, 2,true)));
         recipes.add(new CrucibleRecipe(items.get(UnityItems.superAlloy),0.1f,HeatGraphNode.celsiusZero + 2000,
-           needs(UnityItems.cupronickel, 3,true),
-                  needs(Items.surgeAlloy, 2,true),
-                  needs(Items.pyratite, 2,false)));
+            needs(UnityItems.cupronickel, 3,true),
+                   needs(Items.surgeAlloy, 2,true),
+                   needs(Items.pyratite, 2,false)));
+        ///delibratly very slow,, perhaps some casual time manipulation can speed it up?
+        recipes.add(new CrucibleRecipe(items.get(UnityItems.dirium),0.0002f,HeatGraphNode.celsiusZero + 2000,
+            needs(UnityItems.uranium, 1,true),
+                   needs(UnityItems.steel, 1,true),
+                   needs(Items.titanium, 1,true),
+                   needs(Items.pyratite, 2,false)));
+        recipes.add(new CrucibleRecipe(items.get(UnityItems.denseAlloy),0.02f,HeatGraphNode.celsiusZero + 1500,
+            needs(UnityLiquids.lava, 0.5f,true),
+                   needs(Items.copper, 1,true),
+                   needs(Items.lead, 2,true)));
+        recipes.add(new CrucibleRecipe(items.get(UnityItems.steel),0.003f,HeatGraphNode.celsiusZero + 1500,
+            needs(Items.graphite, 1,false),
+                   needs(UnityItems.denseAlloy, 2,true)));
+        recipes.add(new CrucibleRecipe(liquids.get(UnityLiquids.lava),0.05f,HeatGraphNode.celsiusZero + 1500,
+            needs(UnityItems.stone, 1,false)));
+        recipes.add(new CrucibleRecipe(items.get(UnityItems.stone),1f,0,
+            needs(UnityLiquids.lava, 1,false,true)));
     }
 
     public static void addItem(int id, Item item,float meltpointCelsius, float meltspeed, float energy){
@@ -147,15 +170,31 @@ public class CrucibleRecipes{
         public CrucibleIngredient ingredient;
         public float amount;
         public boolean melted;
+        public boolean requiresSolid;
 
         public RecipeIngredient(CrucibleIngredient item, float amount, boolean melted){
             this.ingredient = item;
             this.amount = amount;
             this.melted = melted;
         }
+        public RecipeIngredient(CrucibleIngredient item, float amount, boolean melted,boolean requiresSolid){
+            this.ingredient = item;
+            this.amount = amount;
+            this.melted = melted;
+            this.requiresSolid=requiresSolid;
+        }
     }
     static RecipeIngredient needs(Item item, float amount, boolean melted){
         return new RecipeIngredient(items.get(item),amount,melted);
+    }
+    static RecipeIngredient needs(Item item, float amount, boolean melted,boolean solid){
+         return new RecipeIngredient(items.get(item),amount,melted,solid);
+     }
+    static RecipeIngredient needs(Liquid liquid, float amount, boolean melted){
+         return new RecipeIngredient(liquids.get(liquid),amount,melted);
+     }
+    static RecipeIngredient needs(Liquid liquid, float amount, boolean melted,boolean solid){
+        return new RecipeIngredient(liquids.get(liquid),amount,melted,solid);
     }
 
     public static class CrucibleRecipe{

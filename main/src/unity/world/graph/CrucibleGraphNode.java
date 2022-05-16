@@ -207,7 +207,7 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
                         maxam = 0;
                         break;
                     }
-                    maxam = Math.min(maxam, (recipe.items[i].melted? fluid.melted : fluid.total())/recipe.items[i].amount);
+                    maxam = Math.min(maxam, (recipe.items[i].melted? fluid.melted : (recipe.items[i].requiresSolid?fluid.solid:fluid.total()))/recipe.items[i].amount);
                 }
 
                 if(maxam<=0){
@@ -219,10 +219,14 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
                     if(recipe.items[i].melted){
                         fluid.melted-=maxam*recipe.items[i].amount;
                     }else{
-                        fluid.melted-=maxam*recipe.items[i].amount;
-                        if(fluid.melted<0){
-                            fluid.solid+=fluid.melted;
-                            fluid.melted = 0;
+                        if(recipe.items[i].requiresSolid){
+                            fluid.solid-=maxam*recipe.items[i].amount;
+                        }else{
+                            fluid.melted -= maxam * recipe.items[i].amount;
+                            if(fluid.melted < 0){
+                                fluid.solid += fluid.melted;
+                                fluid.melted = 0;
+                            }
                         }
                     }
                 }
