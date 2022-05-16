@@ -34,9 +34,9 @@ public class DiagonalTower extends ExpTower{
     }
 
     @Override
-    public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
+    public void drawPlanRegion(BuildPlan req, Eachable<BuildPlan> list){
         Draw.rect(topRegion, req.drawx(), req.drawy());
-        drawRequestConfig(req, list);
+        drawPlanConfig(req, list);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class DiagonalTower extends ExpTower{
     }
 
     @Override
-    public void drawRequestConfig(BuildPlan req, Eachable<BuildPlan> list){
+    public void drawPlanConfig(BuildPlan req, Eachable<BuildPlan> list){
         if(!req.worldContext) return;
         Draw.rect(region, req.drawx(), req.drawy(), req.rotation * 90 - 90 + (req.config instanceof Boolean b && b ? 45 : 0));
         Draw.mixcol();
@@ -112,11 +112,11 @@ public class DiagonalTower extends ExpTower{
 
         @Override
         public void buildConfiguration(Table table){
-            table.button(Icon.undo, Styles.clearTransi, () -> {
+            table.button(Icon.undo, Styles.cleari, () -> {
                 configure(rotint() + 1);
             }).size(40);
             table.image().color(Pal.gray).size(4, 40).pad(0);
-            table.button(Icon.redo, Styles.clearTransi, () -> {
+            table.button(Icon.redo, Styles.cleari, () -> {
                 configure(rotint() + 7);
             }).size(40);
         }

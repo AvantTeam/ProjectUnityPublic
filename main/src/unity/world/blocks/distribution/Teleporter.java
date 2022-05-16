@@ -66,7 +66,7 @@ public class Teleporter extends Block{
 
     @Override
     public void init(){
-        consumes.powerCond(powerUse, TeleporterBuild::isConsuming);
+        consumePowerCond(powerUse, TeleporterBuild::isConsuming);
         super.init();
     }
 
@@ -78,12 +78,12 @@ public class Teleporter extends Block{
     }
 
     @Override
-    public void drawRequestConfig(BuildPlan req, Eachable<BuildPlan> list){
-        drawRequestConfigCenter(req, req.config, "nothing");
+    public void drawPlanConfig(BuildPlan req, Eachable<BuildPlan> list){
+        drawPlanConfigCenter(req, req.config, "nothing");
     }
 
     @Override
-    public void drawRequestConfigCenter(BuildPlan req, Object content, String region){
+    public void drawPlanConfigCenter(BuildPlan req, Object content, String region){
         if(!(content instanceof Integer temp) || temp < 0 || temp >= selection.length) return;
         Draw.color(selection[temp]);
         Draw.rect(blankRegion, req.drawx(), req.drawy());
@@ -138,7 +138,7 @@ public class Teleporter extends Block{
             group.setMinCheckCount(0);
             for(int i = 0; i < selection.length; i++){
                 int j = i;
-                ImageButton button = table.button(Tex.whiteui, Styles.clearToggleTransi, 24f, () -> {}).size(34f).group(group).get();
+                ImageButton button = table.button(Tex.whiteui, Styles.clearTogglei, 24f, () -> {}).size(34f).group(group).get();
                 button.changed(() -> configure(button.isChecked() ? j : -1));
                 button.getStyle().imageUpColor = selection[j];
                 button.update(() -> button.setChecked(toggle == j));
@@ -148,7 +148,7 @@ public class Teleporter extends Block{
 
         protected TeleporterBuild findLink(int value){
             ObjectSet<TeleporterBuild> teles = teleporters[team.id][value];
-            Seq<TeleporterBuild> entries = teles.asArray();
+            Seq<TeleporterBuild> entries = teles.toSeq();
             if(entry >= entries.size) entry = 0;
             if(entry == entries.size - 1){
                 TeleporterBuild other = teles.get(entries.get(entry));
@@ -169,7 +169,7 @@ public class Teleporter extends Block{
             if(toggle == -1) return false;
             target = findLink(toggle);
             if(target == null) return false;
-            return source != this && consValid() && Mathf.zero(1 - efficiency()) && target.items.total() < target.getMaximumAccepted(item);
+            return source != this && canConsume() && Mathf.zero(1 - efficiency()) && target.items.total() < target.getMaximumAccepted(item);
         }
 
         @Override

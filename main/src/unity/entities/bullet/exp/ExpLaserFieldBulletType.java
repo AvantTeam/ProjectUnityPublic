@@ -20,7 +20,7 @@ public class ExpLaserFieldBulletType extends ExpLaserBulletType{
     public ExpLaserFieldBulletType(float length, float damage){
         super(length, damage);
         speed = 0.01f;
-        scaleVelocity = true;
+        scaleLife = true;
     }
 
     int getFields(Bullet b){

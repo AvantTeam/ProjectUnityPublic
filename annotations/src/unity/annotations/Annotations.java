@@ -365,7 +365,7 @@ public class Annotations{
                 for(int i = 0; i < vars.size; i++) format.append(format.length() == 0 ? "$L" : " + $L");
 
                 format.insert(0, "(").append(") / $L");
-                cons.get(format.toString(), Seq.with(vars).and(String.valueOf(vars.size)));
+                cons.get(format.toString(), Seq.with(vars).add(String.valueOf(vars.size)));
             }),
             multiply(false, (vars, cons) -> {
                 if(vars.size == 1){

@@ -74,7 +74,7 @@ public class ExpTower extends ExpTank {
     }
 
     @Override
-    public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
+    public void drawPlanRegion(BuildPlan req, Eachable<BuildPlan> list){
         Draw.rect(topRegion, req.drawx(), req.drawy());
         Draw.rect(region, req.drawx(), req.drawy(), req.rotation * 90 - 90);
     }

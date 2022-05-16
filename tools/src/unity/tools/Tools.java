@@ -8,7 +8,6 @@ import arc.mock.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.Log.*;
-import arc.util.async.*;
 import mindustry.async.*;
 import mindustry.core.*;
 import mindustry.ctype.*;

@@ -84,14 +84,14 @@ public class PartsEditorDialog extends BaseDialog{
         Table content = new Table();
         //top side, tabs
         Table tabs = new Table();
-        ImageButton partsSelectMenuButton = new ImageButton(Icon.box, Styles.clearPartiali);
+        ImageButton partsSelectMenuButton = new ImageButton(Icon.box, Styles.clearNonei);
         partsSelectMenuButton.clicked(()->{
             partSelectBuilder.get(content);
             builder.onChange = ()->{};
         });
         tabs.add(partsSelectMenuButton).size(64).pad(8);
 
-        ImageButton infoMenuButton = new ImageButton(Icon.info, Styles.clearPartiali);
+        ImageButton infoMenuButton = new ImageButton(Icon.info, Styles.clearNonei);
         infoMenuButton.clicked(()->{
             infoViewer.get(builder,content);
             builder.onChange = ()->{

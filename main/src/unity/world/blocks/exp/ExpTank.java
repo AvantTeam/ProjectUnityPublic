@@ -34,7 +34,7 @@ public class ExpTank extends Block {
     @Override
     public void setBars(){
         super.setBars();
-        bars.add("exp", (ExpTankBuild entity) -> new Bar(() -> Core.bundle.get("bar.exp"), () -> UnityPal.exp, entity::expf));
+        addBar("exp", (ExpTankBuild entity) -> new Bar(() -> Core.bundle.get("bar.exp"), () -> UnityPal.exp, entity::expf));
     }
 
     @Override
@@ -110,7 +110,7 @@ public class ExpTank extends Block {
 
         @Override
         public void drawLight(){
-            Drawf.light(team, x, y, 25f + 25f * expf(), UnityPal.exp, 0.5f * expf());
+            Drawf.light(x, y, 25f + 25f * expf(), UnityPal.exp, 0.5f * expf());
         }
 
         @Override

@@ -31,10 +31,10 @@ public class MultiBulletType extends BulletType{
     }
 
     @Override
-    public float range(){
+    public float calculateRange(){
         float max = 0f;
         for(MultiBulletData b : bullets){
-            max = Math.max(max, b.type.range());
+            max = Math.max(max, b.type.range);
         }
         return max;
     }
@@ -83,7 +83,7 @@ public class MultiBulletType extends BulletType{
     public void despawned(Bullet b){
         if(bullets.length > 0 && b.owner instanceof Unit e && e.isAdded()){
             for(MultiBulletData data : bullets){
-                float scl = data.type.scaleVelocity ? Mathf.clamp(b.fdata / data.type.range()) : 1f;
+                float scl = data.type.scaleLife ? Mathf.clamp(b.fdata / data.type.range) : 1f;
                 Tmp.v1.trns(b.rotation(), data.x, data.y).add(b);
                 data.type.create(b.owner, b.team, Tmp.v1.x, Tmp.v1.y, b.rotation() + data.rotation, 1f, scl);
                 data.type.shootEffect.at(Tmp.v1.x, Tmp.v1.y, b.rotation() + data.rotation);

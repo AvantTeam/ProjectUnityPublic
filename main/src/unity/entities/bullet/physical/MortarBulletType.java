@@ -15,7 +15,7 @@ public class MortarBulletType extends BasicBulletType{
         super(speed, damage, "shell");
         collides = false;
         collidesTiles = false;
-        scaleVelocity = true;
+        scaleLife = true;
         shrinkX = shrinkY = 0f;
         trailLength = 15;
         trailInterp = a -> Mathf.sin(a * Mathf.PI);

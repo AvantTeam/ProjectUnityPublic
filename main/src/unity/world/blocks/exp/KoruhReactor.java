@@ -40,7 +40,7 @@ public class KoruhReactor extends ImpactReactor{
     public void setBars(){
         super.setBars();
 
-        bars.add("exp", (KoruhReactor.KoruhReactorBuild entity) -> new Bar(() -> Core.bundle.get("bar.exp"), () -> UnityPal.exp, entity::expf));
+        addBar("exp", (KoruhReactor.KoruhReactorBuild entity) -> new Bar(() -> Core.bundle.get("bar.exp"), () -> UnityPal.exp, entity::expf));
     }
 
     public class KoruhReactorBuild extends ImpactReactorBuild implements ExpHolder{
@@ -74,8 +74,8 @@ public class KoruhReactor extends ImpactReactor{
         }
 
         @Override
-        public boolean consValid(){
-            return super.consValid() && (ignoreExp || exp >= expUse);
+        public boolean canConsume(){
+            return super.canConsume() && (ignoreExp || exp >= expUse);
         }
 
         @Override

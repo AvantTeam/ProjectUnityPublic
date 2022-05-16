@@ -111,7 +111,7 @@ public abstract class BaseProcessor extends AbstractProcessor{
                 Seq<String> statics = imports.select(i -> i.contains("import static ")).sort();
                 imports = imports.select(i -> !statics.contains(s -> s.equals(i))).sort();
                 if(!statics.isEmpty()){
-                    imports = statics.addAll("\n").and(imports);
+                    imports = statics.addAll("\n").add(imports);
                 }
 
                 String rawSource = file.toString();

@@ -34,7 +34,7 @@ public class SagittariusLaserBulletType extends BulletType{
     }
 
     @Override
-    public float range(){
+    public float calculateRange(){
         return length;
     }
 
@@ -139,7 +139,7 @@ public class SagittariusLaserBulletType extends BulletType{
                     Drawf.tri(end.x, end.y, Lines.getStroke() * 1.22f, cw * 3 + width / 1.5f, rot);
                     Draw.color(Tmp.c1.set(color).a(Mathf.pow(color.a, lasers / 3f)));
                     Fill.circle(p.x, p.y, w);
-                    if(color == colors[0]) Drawf.light(b.team, p.x, p.y, end.x, end.y, w * 1.7f * b.fout(), colors[0], 0.6f);
+                    if(color == colors[0]) Drawf.light(p.x, p.y, end.x, end.y, w * 1.7f * b.fout(), colors[0], 0.6f);
                 }
 
                 cw *= 0.5f;

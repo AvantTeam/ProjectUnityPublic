@@ -12,7 +12,7 @@ public class SuicideExplosionAbility extends Ability{
     public float radius=8;
     public float damage=1;
     public int fragments=0;
-    public BulletType frag = Bullets.standardCopper;
+    public BulletType frag = Bullets.placeholder;
     public float fragVelocityMin=0;
     public float fragVelocityMax=1;
     public float fragLifeMin = 1;

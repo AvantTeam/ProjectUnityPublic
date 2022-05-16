@@ -7,7 +7,6 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.*;
-import mindustry.ai.formations.*;
 import mindustry.ai.types.*;
 import mindustry.entities.abilities.*;
 import mindustry.entities.units.*;
@@ -55,8 +54,6 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     float elevation;
     @Import
     public transient Seq<Unit> controlling;
-    @Import
-    public transient Formation formation;
     @Import
     public transient Floor lastDrownFloor;
 
@@ -154,7 +151,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             }
             mounts[i] = weapon.mountType.get(weapon);
             ModularPart mpart = weapons.getMap(i).get("part");
-            weaponrange = Math.max(weaponrange, weapon.bullet.range() + Mathf.dst(mpart.cx, mpart.cy) * ModularPartType.partSize);
+            weaponrange = Math.max(weaponrange, weapon.bullet.range + Mathf.dst(mpart.cx, mpart.cy) * ModularPartType.partSize);
         }
 
         int abilityslots = Math.round(statmap.getValue("abilityslots"));
@@ -162,12 +159,14 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         if(abilityslotsused<=abilityslots){
             var abilitiesStats = statmap.stats.getList("abilities");
-            abilities().clear();
+            Ability[] resultAbilities = new Ability[abilitiesStats.length()];
             for(int i = 0; i < abilitiesStats.length(); i++){
                 var abilityStat = abilitiesStats.getMap(i);
                 Ability ability = abilityStat.get("ability");
-                abilities().add(ability.copy());
+
+                resultAbilities[i] = ability.copy();
             }
+            abilities(resultAbilities);
         }
 
         this.massStat = statmap.getOrCreate("mass").getFloat("value");
@@ -185,17 +184,17 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     @Replace
     public void setType(UnitType type) {
         this.type = type;
-        if (controller == null) controller(type.createController()); //for now
+        if (controller == null) controller(type.createController(self())); //for now
         if(type!=UnityUnitTypes.modularUnitSmall){
             this.maxHealth = type.health;
             drag(type.drag);
             this.armor = type.armor;
             hitSize(type.hitSize);
             hovering(type.hovering);
-            if(controller == null) controller(type.createController());
+            if(controller == null) controller(type.createController(self()));
             if(mounts().length != type.weapons.size) setupWeapons(type);
-            if(abilities().size != type.abilities.size){
-                abilities(type.abilities.map(Ability::copy));
+            if(abilities().length != type.abilities.size){
+                abilities(type.abilities.map(Ability::copy).toArray(Ability.class));
             }
         }
     }
@@ -281,40 +280,16 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             return state.rules.infiniteResources ? Float.MAX_VALUE : Math.max(clipsize, type.region.width) + buildingRange + tilesize * 4.0F;
         }
         if(mining()){
-            return clipsize + type.miningRange;
+            return clipsize + type.mineRange;
         }
         return clipsize;
-    }
-
-    private static transient final Seq<FormationMember> members2 = new Seq<>();
-
-    @Replace
-    public void command(Formation formation, Seq<Unit> units){
-        clearCommand();
-        units.shuffle();
-        float spacing = hitSize() * 0.9F;
-        minFormationSpeed = speed;
-        controlling.addAll(units);
-        for(Unit unit : units){
-            FormationAI ai;
-            unit.controller(ai = new FormationAI(self(), formation));
-            spacing = Math.max(spacing, ai.formationSize());
-            minFormationSpeed = Math.min(minFormationSpeed, unit instanceof ModularUnitUnit ? ((ModularUnitUnit)unit).speed : unit.type.speed);
-        }
-        this.formation = formation;
-        formation.pattern.spacing = spacing;
-        members2.clear();
-        for(Unitc u : units){
-            members2.add((FormationAI)u.controller());
-        }
-        formation.addMembers(members2);
     }
 
     @Replace
     public float speed(){
         float strafePenalty = isGrounded() || !isPlayer() ? 1.0F : Mathf.lerp(1.0F, type.strafePenalty, Angles.angleDist(vel().angle(), rotation) / 180.0F);
         float boost = Mathf.lerp(1.0F, type.canBoost ? type.boostMultiplier : 1.0F, elevation);
-        return (isCommanding() ? minFormationSpeed * 0.98F : speed) * strafePenalty * boost * floorSpeedMultiplier();
+        return speed * strafePenalty * boost * floorSpeedMultiplier();
     }
 
     @Replace

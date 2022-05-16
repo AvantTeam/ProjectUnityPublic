@@ -234,7 +234,7 @@ public class UnityFx{
             Effect effect = this;
             if((data instanceof Float[])) effect.lifetime = ((Float[])data)[1];
 
-            create(effect, x, y, rotation, Color.white, data);
+            create(x, y, rotation, Color.white, data);
         }
     },
 
@@ -283,11 +283,11 @@ public class UnityFx{
         e.scaled(60, ee -> r[3] *= ee.fin());
 
         Draw.color(UnityPal.lancerSap3.cpy().a(0.1f+0.55f * e.fslope()));
-        Lines.swirl(e.x, e.y, r[0], 0.6f, Time.time*8-60);
-        Lines.swirl(e.x, e.y, r[1], 0.6f, Time.time*5);
+        Lines.arc(e.x, e.y, r[0], 0.6f, Time.time*8-60);
+        Lines.arc(e.x, e.y, r[1], 0.6f, Time.time*5);
         Draw.color(Pal.lancerLaser.cpy().lerp(Pal.sapBullet, 0.5f+0.5f*Mathf.sin(16*e.fin())).a(0.25f+0.8f * e.fslope()));
-        Lines.swirl(e.x, e.y, r[2], 0.4f, Time.time*-6+121);
-        Lines.swirl(e.x, e.y, r[3], 0.4f, Time.time*-4+91);
+        Lines.arc(e.x, e.y, r[2], 0.4f, Time.time*-6+121);
+        Lines.arc(e.x, e.y, r[3], 0.4f, Time.time*-4+91);
     }),
 
     smallChainLightning = new Effect(40f, 300f, e -> {

@@ -132,7 +132,7 @@ public class UnitTeleporter extends Block {
                 preLoad = false;
             }
 
-            heat = Mathf.lerpDelta(heat, consValid() ? 1f : 0f, heatLerp);
+            heat = Mathf.lerpDelta(heat, canConsume() ? 1f : 0f, heatLerp);
             if(animateNear && !headless){
                 nearBool = false;
                 Units.nearby(team, x, y, 80f, u -> {
@@ -145,7 +145,7 @@ public class UnitTeleporter extends Block {
 
         @Override
         public void unitOn(Unit unit){
-            if(!consValid()) return;
+            if(!canConsume()) return;
             if(unit.hasEffect(UnityStatusEffects.tpCoolDown) || unit.isPlayer()) return;
             unit.apply(UnityStatusEffects.tpCoolDown, 120f);
             teleport(unit, null);
@@ -189,7 +189,7 @@ public class UnitTeleporter extends Block {
 
         @Override
         public void drawSelect(){
-            Draw.color(consValid() ? (inRange(player) ? Color.orange : Pal.accent) : Pal.darkMetal);
+            Draw.color(canConsume() ? (inRange(player) ? Color.orange : Pal.accent) : Pal.darkMetal);
             float length = tilesize * size / 2f + 3f + Mathf.absin(5f, 2f);
             Draw.rect(arrowRegion, x + length, y, 180f);
             Draw.rect(arrowRegion, x, y + length, 270f);
@@ -200,11 +200,11 @@ public class UnitTeleporter extends Block {
 
         @Override
         public void drawLight(){
-            Drawf.light(team, x, y, lightRadius * (animateNear ? 0.5f + 0.5f * warmup : 1f), lightColor, 0.8f * heat);
+            Drawf.light(x, y, lightRadius * (animateNear ? 0.5f + 0.5f * warmup : 1f), lightColor, 0.8f * heat);
         }
 
         @Override
-        public boolean consValid(){
+        public boolean canConsume(){
             return power == null ? enabled : power.status > 0.98f;
         }
 
@@ -215,12 +215,12 @@ public class UnitTeleporter extends Block {
 
         @Override
         public boolean shouldShowConfigure(Player player){
-            return consValid() && inRange(player);
+            return canConsume() && inRange(player);
         }
 
         @Override
         public boolean configTapped(){
-            if(!consValid() || !inRange(player)) return false;
+            if(!canConsume() || !inRange(player)) return false;
             configure(null);
             Sounds.click.at(this);
             return false;

@@ -57,7 +57,7 @@ public class GrenadeBulletType extends BulletType{
     }
 
     @Override
-    public float range(){
+    public float calculateRange(){
         //float a = 1.0f/0.3f;
         float t = this.speed*0.8f;
         float acc = 0;

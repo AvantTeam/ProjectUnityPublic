@@ -31,6 +31,8 @@ public class ClassicProjector extends ExpForceProjector {
     public int expGain = 1;
     public TextureRegion altRegion;
 
+    public @Nullable Consume itemConsumer, coolantConsumer;
+
     public ClassicProjector(String name){
         super(name);
     }
@@ -42,6 +44,8 @@ public class ClassicProjector extends ExpForceProjector {
 
     @Override
     public void init(){
+        coolantConsumer = findConsumer(c -> c instanceof ConsumeLiquidBase);
+
         super.init();
         if(effectColors == null) effectColors = new Color[]{fromColor};
     }
@@ -109,7 +113,7 @@ public class ClassicProjector extends ExpForceProjector {
 
         @Override
         public void updateTile(){
-            boolean phaseValid = hasItems && consumes.get(ConsumeType.item).valid(this);
+            boolean phaseValid = hasItems && itemConsumer != null && itemConsumer.efficiency(this) > 0;
 
             phaseHeat = Mathf.lerpDelta(phaseHeat, Mathf.num(phaseValid), 0.1f);
 
@@ -128,10 +132,9 @@ public class ClassicProjector extends ExpForceProjector {
             if(buildup > 0){
                 float scale = !broken ? cooldownNormal : cooldownBrokenBase;
 
-                if(hasLiquids){
-                    ConsumeLiquidFilter cons = consumes.get(ConsumeType.liquid);
-                    if(cons.valid(this)){
-                        cons.update(this);
+                if(hasLiquids && coolantConsumer != null){
+                    if(coolantConsumer.efficiency(this) > 0){
+                        coolantConsumer.update(this);
                         scale *= (cooldownLiquid * (1f + (liquids.current().heatCapacity - 0.4f) * 0.9f));
                     }
                 }

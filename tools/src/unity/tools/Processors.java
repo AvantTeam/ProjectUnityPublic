@@ -1,7 +1,6 @@
 package unity.tools;
 
 import arc.util.*;
-import arc.util.async.*;
 import unity.tools.proc.*;
 
 import java.util.concurrent.*;

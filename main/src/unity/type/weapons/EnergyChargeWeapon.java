@@ -62,18 +62,18 @@ public class EnergyChargeWeapon extends Weapon{
 
             if(!controllable && autoTarget){
                 if((mount.retarget -= Time.delta) <= 0f){
-                    mount.target = findTarget(unit, mountX, mountY, bullet.range(), bullet.collidesAir, bullet.collidesGround);
+                    mount.target = findTarget(unit, mountX, mountY, bullet.range, bullet.collidesAir, bullet.collidesGround);
                     mount.retarget = mount.target == null ? targetInterval : targetSwitchInterval;
                 }
 
-                if(mount.target != null && checkTarget(unit, mount.target, mountX, mountY, bullet.range())){
+                if(mount.target != null && checkTarget(unit, mount.target, mountX, mountY, bullet.range)){
                     mount.target = null;
                 }
 
                 boolean shoot = false;
 
                 if(mount.target != null){
-                    shoot = mount.target.within(mountX, mountY, bullet.range() + Math.abs(shootY) + (mount.target instanceof Sized s ? s.hitSize()/2f : 0f)) && can;
+                    shoot = mount.target.within(mountX, mountY, bullet.range + Math.abs(shootY) + (mount.target instanceof Sized s ? s.hitSize()/2f : 0f)) && can;
 
                     if(predictTarget){
                         Vec2 to = Predict.intercept(unit, mount.target, bullet.speed);
@@ -132,7 +132,7 @@ public class EnergyChargeWeapon extends Weapon{
             unit.vel.len() >= mount.weapon.minShootVelocity &&
             mount.reload <= 0.0001f &&
             Angles.within(rotate ? mount.rotation : unit.rotation, mount.targetRotation, mount.weapon.shootCone)){
-                shoot(unit, mount, bulletX, bulletY, mount.aimX, mount.aimY, mountX, mountY, shootAngle, Mathf.sign(x));
+                shoot(unit, mount, bulletX, bulletY, shootAngle);
 
                 mount.reload = reload;
 
@@ -145,17 +145,19 @@ public class EnergyChargeWeapon extends Weapon{
     }
 
     @Override
-    protected void shoot(Unit unit, WeaponMount mount, float shootX, float shootY, float aimX, float aimY, float mountX, float mountY, float rotation, int side){
+    protected void shoot(Unit unit, WeaponMount mount, float shootX, float shootY, float rotation){
         if(chargeCondition == null){
-            super.shoot(unit, mount, shootX, shootY, aimX, aimY, mountX, mountY, rotation, side);
-        }else{
+            super.shoot(unit, mount, shootX, shootY, rotation);
+        }
+        //TODO essentially unported; what's the point of the chargeCondition anyway? it's never written to -Anuke
+        /*else{
             float baseX = unit.x, baseY = unit.y;
             boolean delay = firstShotDelay + shotDelay > 0f;
 
             (delay ? chargeSound : continuous ? Sounds.none : shootSound).at(shootX, shootY, Mathf.random(soundPitchMin, soundPitchMax));
 
             BulletType ammo = bullet;
-            float lifeScl = ammo.scaleVelocity ? Mathf.clamp(Mathf.dst(shootX, shootY, aimX, aimY) / ammo.range()) : 1f;
+            float lifeScl = ammo.scaleLife ? Mathf.clamp(Mathf.dst(shootX, shootY, aimX, aimY) / ammo.range()) : 1f;
             float charge = Math.max(0f, -mount.reload);
 
             sequenceNum = 0;
@@ -197,15 +199,13 @@ public class EnergyChargeWeapon extends Weapon{
             ammo.shootEffect.at(shootX, shootY, rotation, parentize ? unit : null);
             ammo.smokeEffect.at(shootX, shootY, rotation, parentize ? unit : null);
             unit.apply(shootStatus, shootStatusDuration);
-        }
+        }*/
     }
 
     Bullet bulletC(Unit unit, float shootX, float shootY, float angle, float lifescl, float charge){
-        float xr = Mathf.range(xRand);
-
         return bullet.create(unit, unit.team,
-        shootX + Angles.trnsx(angle, 0, xr),
-        shootY + Angles.trnsy(angle, 0, xr),
+        shootX,
+        shootY,
         angle, bullet.damage + charge, (1f - velocityRnd) + Mathf.random(velocityRnd), lifescl, null);
     }
 

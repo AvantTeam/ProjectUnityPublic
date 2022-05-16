@@ -36,7 +36,7 @@ public class KoruhCrafter extends GenericCrafter {
     @Override
     public void setBars(){
         super.setBars();
-        bars.add("exp", (KoruhCrafterBuild entity) -> new Bar(() -> Core.bundle.get("bar.exp"), () -> UnityPal.exp, entity::expf));
+        addBar("exp", (KoruhCrafterBuild entity) -> new Bar(() -> Core.bundle.get("bar.exp"), () -> UnityPal.exp, entity::expf));
     }
 
     public class KoruhCrafterBuild extends GenericCrafterBuild implements ExpHolder{
@@ -50,8 +50,8 @@ public class KoruhCrafter extends GenericCrafter {
         }
 
         @Override
-        public boolean consValid(){
-            return super.consValid() && (ignoreExp || expc >= expUse);
+        public boolean canConsume(){
+            return super.canConsume() && (ignoreExp || expc >= expUse);
         }
 
         @Override

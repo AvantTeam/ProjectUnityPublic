@@ -47,8 +47,8 @@ public class DupeProcessor extends BaseProcessor{
 
     @Override
     public void process(RoundEnvironment roundEnv) throws Exception{
-        comps = comps.addAll((Set<TypeElement>)roundEnv.getElementsAnnotatedWith(DupeComponent.class)).flatMap(t -> Seq.with(t).and(types(t)));
-        inters = inters.addAll((Set<TypeElement>)roundEnv.getElementsAnnotatedWith(DupeInterface.class)).flatMap(t -> Seq.with(t).and(types(t)));
+        comps = comps.addAll((Set<TypeElement>)roundEnv.getElementsAnnotatedWith(DupeComponent.class)).flatMap(t -> Seq.with(t).add(types(t)));
+        inters = inters.addAll((Set<TypeElement>)roundEnv.getElementsAnnotatedWith(DupeInterface.class)).flatMap(t -> Seq.with(t).add(types(t)));
         defs.addAll(roundEnv.getElementsAnnotatedWith(Dupe.class));
 
         if(round == 1){
@@ -384,7 +384,7 @@ public class DupeProcessor extends BaseProcessor{
             }
 
             out.remove(component);
-            componentDependencies.put(component, result.asArray());
+            componentDependencies.put(component, result.toSeq());
         }
 
         return componentDependencies.get(component);
@@ -424,7 +424,7 @@ public class DupeProcessor extends BaseProcessor{
 
                 Seq<ParameterSpec> params = Seq.with(mbuilder.parameters);
                 String argLiteral = params.toString(", ", e -> "$L");
-                Object[] args = Seq.with(simpleName(elem)).and(params.map(p -> p.name)).toArray(Object.class);
+                Object[] args = Seq.with(simpleName(elem)).add(params.map(p -> p.name)).toArray(Object.class);
 
                 mbuilder.addStatement("super.$L(" + argLiteral + ")", args);
             }*/
@@ -509,7 +509,7 @@ public class DupeProcessor extends BaseProcessor{
         ){
             Seq<ParameterSpec> params = Seq.with(mbuilder.parameters);
             String argLiteral = params.toString(", ", e -> "$L");
-            Object[] args = Seq.with(simpleName(values.first())).and(params.map(p -> p.name)).toArray(Object.class);
+            Object[] args = Seq.with(simpleName(values.first())).add(params.map(p -> p.name)).toArray(Object.class);
 
             mbuilder.addStatement("super.$L(" + argLiteral + ")", args);
         }*/

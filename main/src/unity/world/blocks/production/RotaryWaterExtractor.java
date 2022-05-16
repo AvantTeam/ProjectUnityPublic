@@ -60,8 +60,8 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
     public void drawPlace(int x, int y, int rotation, boolean valid){
         super.drawPlace(x, y, rotation, valid);
     }
-    @Override public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
-        super.drawRequestRegion(req,list);
+    @Override public void drawPlanRegion(BuildPlan req, Eachable<BuildPlan> list){
+        super.drawPlanRegion(req,list);
         config.drawConnectionPoints(req,list); }
 
 
@@ -121,7 +121,7 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         public void draw(){
             float rot = getGraph(TorqueGraph.class).rotation;
             Draw.rect(bottomRegions[rotation % 2], x, y);
-            if(liquids.total() > 0.001f) Drawf.liquid(liquidRegions[rotation % 2], x, y, liquids.total() / liquidCapacity, liquids.current().color);
+            if(liquids.currentAmount() > 0.001f) Drawf.liquid(liquidRegions[rotation % 2], x, y, liquids.currentAmount() / liquidCapacity, liquids.current().color);
             Drawf.shadow(rotorRegion, x - size / 2f, y - size / 2f, rot*0.2f);
             Draw.rect(rotorRegion, x, y, rot*0.2f);
             Draw.rect(topRegions[rotation], x, y);

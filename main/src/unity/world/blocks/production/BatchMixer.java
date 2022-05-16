@@ -17,6 +17,8 @@ import static arc.math.Mathf.pi;
 
 public class BatchMixer extends GenericGraphCrafter{
     TextureRegion floor, base, spinner,top;
+    @Nullable ConsumeItems consItems;
+
     public BatchMixer(String name){
         super(name);
     }
@@ -28,6 +30,13 @@ public class BatchMixer extends GenericGraphCrafter{
         base = loadTex("base");
         top = loadTex("top");
         spinner = loadTex("spinner");
+    }
+
+    @Override
+    public void init(){
+        consItems = findConsumer(b -> b instanceof ConsumeItems);
+
+        super.init();
     }
 
     public class BatchMixerBuild extends  GenericGraphCrafterBuild{
@@ -61,7 +70,7 @@ public class BatchMixer extends GenericGraphCrafter{
 
         public float saturation(){
             //ItemConsumer
-            var itemsNeeded = ((ConsumeItems)block.consumes.get(ConsumeType.item)).items;
+            var itemsNeeded = consItems.items;
             float min = 1;
             float max = itemCapacity;
             for(var itemStack:itemsNeeded){

@@ -19,13 +19,10 @@ import static mindustry.Vars.*;
 
 public class ExpLiquidTurret extends ExpTurret {
     public ObjectMap<Liquid, BulletType> ammoTypes = new ObjectMap<>();
-    public TextureRegion liquidRegion;
-    public TextureRegion topRegion;
     public boolean extinguish = true;
 
     public ExpLiquidTurret(String name){
         super(name);
-        acceptCoolant = false;
         hasLiquids = true;
         loopSound = Sounds.spray;
         shootSound = Sounds.none;
@@ -48,11 +45,7 @@ public class ExpLiquidTurret extends ExpTurret {
 
     @Override
     public void init(){
-        consumes.add(new ConsumeLiquidFilter(i -> ammoTypes.containsKey(i), 1f){
-            @Override
-            public boolean valid(Building entity){
-                return entity.liquids.total() > 0.001f;
-            }
+        consume(new ConsumeLiquidFilter(i -> ammoTypes.containsKey(i), 1f){
 
             @Override
             public void update(Building entity){
@@ -68,29 +61,7 @@ public class ExpLiquidTurret extends ExpTurret {
         super.init();
     }
 
-    @Override
-    public void load(){
-        super.load();
-        liquidRegion = atlas.find(name + "-liquid");
-        topRegion = atlas.find(name + "-top");
-    }
-
-    @Override
-    public TextureRegion[] icons(){
-        if(topRegion.found()) return new TextureRegion[]{baseRegion, region, topRegion};
-        return super.icons();
-    }
-
     public class ExpLiquidTurretBuild extends ExpTurretBuild{
-        @Override
-        public void draw(){
-            super.draw();
-
-            if(liquidRegion.found()){
-                Drawf.liquid(liquidRegion, x + tr2.x, y + tr2.y, liquids.total() / liquidCapacity, liquids.current().color, rotation - 90);
-            }
-            if(topRegion.found()) Draw.rect(topRegion, x + tr2.x, y + tr2.y, rotation - 90);
-        }
 
         @Override
         public boolean shouldActiveSound(){
@@ -135,24 +106,6 @@ public class ExpLiquidTurret extends ExpTurret {
         }
 
         @Override
-        protected void effects(){
-            BulletType type = peekAmmo();
-
-            Effect fshootEffect = shootEffect == Fx.none ? type.shootEffect : shootEffect;
-            Effect fsmokeEffect = smokeEffect == Fx.none ? type.smokeEffect : smokeEffect;
-
-            fshootEffect.at(x + tr.x, y + tr.y, rotation, liquids.current().color);
-            fsmokeEffect.at(x + tr.x, y + tr.y, rotation, liquids.current().color);
-            shootSound.at(tile);
-
-            if(shootShake > 0){
-                Effect.shake(shootShake, shootShake, tile.build);
-            }
-
-            recoil = recoilAmount;
-        }
-
-        @Override
         public BulletType useAmmo(){
             if(cheating()) return ammoTypes.get(liquids.current());
             BulletType type = ammoTypes.get(liquids.current());
@@ -167,7 +120,7 @@ public class ExpLiquidTurret extends ExpTurret {
 
         @Override
         public boolean hasAmmo(){
-            return ammoTypes.get(liquids.current()) != null && liquids.total() >= 1f / ammoTypes.get(liquids.current()).ammoMultiplier;
+            return ammoTypes.get(liquids.current()) != null && liquids.currentAmount() >= 1f / ammoTypes.get(liquids.current()).ammoMultiplier;
         }
 
         @Override

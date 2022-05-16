@@ -5,6 +5,7 @@ import arc.graphics.g2d.*;
 import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.entities.bullet.*;
+import mindustry.entities.effect.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import unity.content.effects.*;
@@ -127,8 +128,8 @@ public class UnityBullets{
             }
 
             @Override
-            public void hitTile(Bullet b, Building build, float initialHealth, boolean direct){
-                super.hitTile(b, build, initialHealth, direct);
+            public void hitTile(Bullet b, Building build, float x, float y, float initialHealth, boolean direct){
+                super.hitTile(b, build, x, y, initialHealth, direct);
                 if(b.owner instanceof Healthc owner){
                     owner.heal(Math.max(initialHealth - build.health(), 0f) * 0.2f);
                 }
@@ -193,6 +194,8 @@ public class UnityBullets{
             damageInc = 5f;
             fromColor = Pal.lancerLaser;
             toColor = Pal.sapBullet;
+
+            chargeEffect = new MultiEffect(UnityFx.laserCharge, UnityFx.laserChargeBegin);
         }};
 
         frostLaser = new ExpLaserBulletType(170f, 130f){
@@ -279,6 +282,8 @@ public class UnityBullets{
             fromColor = Pal.lancerLaser.cpy().lerp(Pal.sapBullet, 0.5f);
             toColor = Pal.sapBullet;
             hitMissed = true;
+
+            chargeEffect = new MultiEffect(UnityFx.laserChargeShort, UnityFx.laserChargeBegin);
         }};
 
         distField = new DistFieldBulletType(0, -1){{
@@ -340,6 +345,8 @@ public class UnityBullets{
 
             distField = UnityBullets.distField;
             smallDistField = UnityBullets.smallDistField;
+
+            chargeEffect = new MultiEffect(UnityFx.laserFractalCharge, UnityFx.laserFractalChargeBegin);
         }};
 
         laserGeyser = new GeyserBulletType(){{
@@ -359,6 +366,7 @@ public class UnityBullets{
             hitBuildingExpGain = 1;
             sideLength = 0f;
             sideWidth = 0f;
+            chargeEffect = UnityFx.laserBreakthroughChargeBegin;
         }};
 
         coalBlaze = new ExpBulletType(3.35f, 32f){{

@@ -141,14 +141,14 @@ public class MultiBarrelWeapon extends Weapon{
     }
 
     @Override
-    protected void shoot(Unit unit, WeaponMount mount, float shootX, float shootY, float aimX, float aimY, float mountX, float mountY, float rotation, int side){
+    protected void shoot(Unit unit, WeaponMount mount, float shootX, float shootY, float rotation){
         MultiBarrelMount mMount = ((MultiBarrelMount)mount);
         float offset = Mathf.mod(mMount.inUse, mMount.recoils.length) * barrelSpacing - (mMount.recoils.length - 1) * barrelSpacing / 2f;
         tv.trns(rotation, 0f, offset);
         shootX += tv.x;
         shootY += tv.y;
 
-        super.shoot(unit, mount, shootX, shootY, aimX, aimY, mountX, mountY, rotation, side);
+        super.shoot(unit, mount, shootX, shootY, rotation);
 
         mMount.recoils[Mathf.mod(mMount.inUse, mMount.recoils.length)] = barrelRecoil;
         mMount.inUse += Mathf.sign(flipSprite);

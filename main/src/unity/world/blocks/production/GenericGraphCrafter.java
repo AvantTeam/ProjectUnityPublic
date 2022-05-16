@@ -27,8 +27,8 @@ public class GenericGraphCrafter extends GenericCrafter implements GraphBlock{
         return config;
     }
     @Override public void setStats(){ super.setStats(); config.setStats(stats); }
-    @Override public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
-       super.drawRequestRegion(req,list);
+    @Override public void drawPlanRegion(BuildPlan req, Eachable<BuildPlan> list){
+       super.drawPlanRegion(req,list);
        config.drawConnectionPoints(req,list); }
     @Override public boolean rotatedOutput(int x, int y){
             return false;

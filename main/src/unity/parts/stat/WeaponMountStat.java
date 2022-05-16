@@ -68,7 +68,7 @@ public class WeaponMountStat extends ModularPartStat{
             t.add("[lightgray]" + Stat.inaccuracy.localized() + ": [white]" + (int)u.inaccuracy + " " + StatUnit.degrees.localized());
         }
         t.row();
-        t.add("[lightgray]" + Stat.reload.localized() + ": " + (u.mirror ? "2x " : "") + "[white]" + Strings.autoFixed(60f / u.reload * u.shots, 2) + " " + StatUnit.perSecond.localized());
+        t.add("[lightgray]" + Stat.reload.localized() + ": " + (u.mirror ? "2x " : "") + "[white]" + Strings.autoFixed(60f / u.reload * u.shoot.shots, 2) + " " + StatUnit.perSecond.localized());
 
         StatValues.ammo(ObjectMap.of(UnityUnitTypes.modularUnitSmall, u.bullet)).display(t);
     }

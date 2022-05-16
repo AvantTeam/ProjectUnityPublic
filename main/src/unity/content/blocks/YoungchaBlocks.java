@@ -252,7 +252,7 @@ public class YoungchaBlocks{
             tier = 3;
             drillTime = 400;
             requirements(Category.production, with(Items.lead, 60, Items.copper, 150));
-            consumes.liquid(Liquids.water, 0.08f).boost();
+            consumeLiquid(Liquids.water, 0.08f).boost();
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.13f, 50f, 40,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
@@ -277,7 +277,7 @@ public class YoungchaBlocks{
             size = 3;
             health = 2600;
             craftTime = 100.0F;
-            consumes.item(Items.coal, 9);
+            consumeItem(Items.coal, 9);
             outputItem = new ItemStack(Items.graphite, 8);
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.15f, 60f, 50,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
@@ -289,7 +289,7 @@ public class YoungchaBlocks{
             health = 2600;
             itemCapacity = 100;
             craftTime = 30.0F;
-            consumes.items(new ItemStack(Items.coal, 1),new ItemStack(Items.lead, 1),new ItemStack(Items.sand, 1));
+            consumeItems(new ItemStack(Items.coal, 1),new ItemStack(Items.lead, 1),new ItemStack(Items.sand, 1));
             outputItem = new ItemStack(Items.pyratite, 2);
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.3f, 100f, 70,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 1, 0,  0, 1, 0,  0, 1, 0);
@@ -320,7 +320,7 @@ public class YoungchaBlocks{
             rotate = true;
             health = 2000;
             solid = true;
-            consumes.liquid(Liquids.water, 0.1f);
+            consumeLiquid(Liquids.water, 0.1f);
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 9, 1100 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 0,0,0, 0,0,0 ,0,1,0 ,0,0,0);
         }};

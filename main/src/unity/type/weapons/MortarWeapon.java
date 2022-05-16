@@ -50,13 +50,13 @@ public class MortarWeapon extends Weapon{
     @Override
     public void update(Unit unit, WeaponMount mount){
         MortarMount mMount = (MortarMount)mount;
-        float r = bullet.range();
+        float r = bullet.range;
         mMount.incline = Mathf.approachDelta(mMount.incline, Mathf.clamp(unit.dst(mount.aimX, mount.aimY) / r), barrelSpeed / r);
         super.update(unit, mount);
     }
 
     @Override
-    protected void shoot(Unit unit, WeaponMount mount, float shootX, float shootY, float aimX, float aimY, float mountX, float mountY, float rotation, int side){
+    protected void shoot(Unit unit, WeaponMount mount, float shootX, float shootY, float rotation){
         MortarMount mMount = (MortarMount)mount;
         float incline = Mathf.sinDeg(Mathf.lerp(inclineOffset, maxIncline, mMount.incline)) * this.shootY;
         float weaponRotation = unit.rotation - 90 + (rotate ? mount.rotation : 0),
@@ -65,10 +65,10 @@ public class MortarWeapon extends Weapon{
         Tmp.v1.trns(weaponRotation - 90f, -incline + barrelOffset);
         shootX = mX + Tmp.v1.x;
         shootY = mY + Tmp.v1.y;
-        super.shoot(unit, mount, shootX, shootY, aimX, aimY, mountX, mountY, rotation, side);
+        super.shoot(unit, mount, shootX, shootY, rotation);
     }
 
-    @Override
+    /*@Override
     protected Bullet bullet(Unit unit, float shootX, float shootY, float angle, float lifescl){
         float xr = Mathf.range(xRand);
 
@@ -79,7 +79,7 @@ public class MortarWeapon extends Weapon{
         b.fdata = 1f - lifescl;
 
         return b;
-    }
+    }*/
 
     static class MortarMount extends WeaponMount{
         float incline = 0f;

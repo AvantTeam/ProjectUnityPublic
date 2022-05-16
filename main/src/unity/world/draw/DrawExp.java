@@ -3,6 +3,7 @@ package unity.world.draw;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
@@ -18,7 +19,7 @@ public class DrawExp extends DrawBlock {
     public Color flame = Color.yellow;
 
     @Override
-    public void draw(GenericCrafter.GenericCrafterBuild build){
+    public void draw(Building build){
         Draw.rect(build.block.region, build.x, build.y);
         if(exp.found() && build instanceof KoruhCrafter.KoruhCrafterBuild kr){
             Draw.color(UnityPal.exp, Color.white, Mathf.absin(20, 0.6f));
@@ -29,7 +30,7 @@ public class DrawExp extends DrawBlock {
         if(top.found()){
             Draw.z(Layer.blockOver);
             Draw.color(flame);
-            Draw.alpha(Mathf.absin(build.totalProgress, glowScale, glowAmount) * build.warmup);
+            Draw.alpha(Mathf.absin(build.totalProgress(), glowScale, glowAmount) * build.warmup());
             Draw.rect(top, build.x, build.y);
         }
         Draw.reset();

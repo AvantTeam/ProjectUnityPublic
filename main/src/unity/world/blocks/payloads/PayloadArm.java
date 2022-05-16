@@ -173,7 +173,7 @@ public class PayloadArm extends GenericGraphBlock{
                     return;
                 }
                 if(!selected){
-                    if(Vars.control.input.frag.config.getSelectedTile()==thisbuild){
+                    if(Vars.control.input.config.getSelected()==thisbuild){
                         deselect();
                     }
                     return;
@@ -354,8 +354,8 @@ public class PayloadArm extends GenericGraphBlock{
         public void updateTile(){
             super.updateTile();
             if(selected){
-                if(Vars.control.input.frag.config.getSelectedTile() != this || !Vars.control.input.frag.config.isShown()){
-                    Vars.control.input.frag.config.showConfig(this); // force config to be open....
+                if(Vars.control.input.config.getSelected() != this || !Vars.control.input.config.isShown()){
+                    Vars.control.input.config.showConfig(this); // force config to be open....
                 }
             }
             TorqueGraphNode tnode = torqueNode();
@@ -533,7 +533,7 @@ public class PayloadArm extends GenericGraphBlock{
         }
 
         @Override
-        public boolean onConfigureTileTapped(Building other){
+        public boolean onConfigureBuildTapped(Building other){
             return false;
         }
 

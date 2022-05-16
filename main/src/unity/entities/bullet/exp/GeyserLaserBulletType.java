@@ -61,6 +61,6 @@ public class GeyserLaserBulletType extends ExpLaserBulletType{
         Fill.circle(b.x, b.y, b.fout() * width * 0.9f * strokes[2]);
         Draw.reset();
 
-        Drawf.light(b.team, b.x, b.y, Tmp.v1.x, Tmp.v1.y, width * 10 * b.fout(), l.lightColor, l.lightColor.a);
+        Drawf.light(b.x, b.y, Tmp.v1.x, Tmp.v1.y, width * 10 * b.fout(), l.lightColor, l.lightColor.a);
     }
 }

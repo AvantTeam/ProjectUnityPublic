@@ -158,7 +158,7 @@ public class ModularUnitAssembler extends PayloadBlock{
         @Override
         public void buildConfiguration(Table table){
             //ui lamdba soup time
-            var configureButtonCell = table.button(Tex.whiteui, Styles.clearTransi, 50,
+            var configureButtonCell = table.button(Tex.whiteui, Styles.cleari, 50,
             (() -> {
                 Unity.ui.partsEditor.show(blueprint.export(),
                 (data)->{
@@ -173,7 +173,7 @@ public class ModularUnitAssembler extends PayloadBlock{
 
             if(sandbox){
                 //creative spawn unit.
-                var spawnUnitButtonCell = table.button(Tex.whiteui, Styles.clearTransi, 50,
+                var spawnUnitButtonCell = table.button(Tex.whiteui, Styles.cleari, 50,
                 (() -> {
                     configure(true);
                 })).size(50);
@@ -181,7 +181,7 @@ public class ModularUnitAssembler extends PayloadBlock{
             }
 
             if(this.block.hasItems){
-                Vars.control.input.frag.inv.showFor(this);
+                Vars.control.input.inv.showFor(this);
             }
         }
 

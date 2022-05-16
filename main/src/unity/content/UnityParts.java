@@ -58,7 +58,7 @@ public class UnityParts{
            weapon(1,new Weapon("unity-part-gun"){{
                rotate = true;
                reload = 18f;
-               bullet = Bullets.standardCopper;
+               bullet = Bullets.placeholder;
            }});
         }};
         cannon = new ModularWeaponMountType("cannon"){{
@@ -119,9 +119,9 @@ public class UnityParts{
                 rotateSpeed = 4f;
                 reload = 80f;
                 ejectEffect = Fx.casing3;
-                shots = 2;
+                shoot.shots = 2;
+                shoot.shotDelay = 2f;
                 inaccuracy = 6;
-                shotDelay = 2f;
                 shootSound = Sounds.artillery;
                 bullet = new ArtilleryBulletType(5f, 50){{
                     width = 15f;
@@ -134,7 +134,14 @@ public class UnityParts{
                     fragLifeMin = 0.1f;
                     fragLifeMax = 0.3f;
                     fragBullets = 5;
-                    fragBullet = Bullets.standardThorium;
+                    fragBullet = new BasicBulletType(4f, 29, "bullet"){{
+                        width = 10f;
+                        height = 13f;
+                        shootEffect = Fx.shootBig;
+                        smokeEffect = Fx.shootBigSmoke;
+                        ammoMultiplier = 4;
+                        lifetime = 60f;
+                    }};
                }};
             }});
         }};
@@ -323,7 +330,20 @@ public class UnityParts{
                reload = 8f;
                inaccuracy = 10;
                shootSound = Sounds.flame;
-               bullet = Bullets.basicFlame;
+               bullet = new BulletType(3.35f, 17f){{
+                   ammoMultiplier = 3f;
+                   hitSize = 7f;
+                   lifetime = 18f;
+                   pierce = true;
+                   collidesAir = false;
+                   statusDuration = 60f * 4;
+                   shootEffect = Fx.shootSmallFlame;
+                   hitEffect = Fx.hitFlameSmall;
+                   despawnEffect = Fx.none;
+                   status = StatusEffects.burning;
+                   keepVelocity = false;
+                   hittable = false;
+               }};
            }});
         }};
 
@@ -348,7 +368,12 @@ public class UnityParts{
                    fragLifeMin = 0.1f;
                    fragLifeMax = 0.2f;
                    fragBullets = 3;
-                   fragBullet = Bullets.standardCopper;
+                   fragBullet = new BasicBulletType(2.5f, 9){{
+                       width = 7f;
+                       height = 9f;
+                       lifetime = 60f;
+                       ammoMultiplier = 2;
+                   }};
                    collidesAir = false;
                }};
            }});
