@@ -9,6 +9,7 @@ import mindustry.gen.*;
 import mindustry.graphics.*;
 import unity.content.effects.*;
 import unity.entities.bullet.energy.*;
+import unity.entities.bullet.misc.*;
 import unity.entities.bullet.exp.*;
 import unity.gen.*;
 
@@ -16,7 +17,7 @@ import static unity.content.UnityStatusEffects.distort;
 
 public class UnityBullets{
     public static BulletType
-    basicMissile,
+    basicMissile, boidMissle,
 
     citadelFlame,
 
@@ -92,6 +93,22 @@ public class UnityBullets{
 
             status = StatusEffects.sapped;
             statusDuration = 60f * 10;
+        }};
+
+        boidMissle = new BoidBulletType(2.7f, 30){{
+            damage = 50;
+            homingPower = 0.02f;
+            lifetime = 500f;
+            keepVelocity = false;
+            shootEffect = Fx.shootHeal;
+            smokeEffect = Fx.hitLaser;
+            hitEffect = despawnEffect = Fx.hitLaser;
+            hitSound = Sounds.none;
+
+            healPercent = 5.5f;
+            collidesTeam = true;
+            trailColor = Pal.heal;
+            backColor = Pal.heal;
         }};
 
         continuousSapLaser = new ContinuousLaserBulletType(60f){

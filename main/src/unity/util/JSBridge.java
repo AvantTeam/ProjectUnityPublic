@@ -50,7 +50,7 @@ public final class JSBridge{
     }
 
     public static void importPackage(ImporterTopLevel scope, String packageName){
-        if(tools) return;
+        if(tools || scope==null) return;
         NativeJavaPackage p = new NativeJavaPackage(packageName, mods.mainLoader());
         p.setParentScope(scope);
 

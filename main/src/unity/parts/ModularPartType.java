@@ -14,6 +14,7 @@ import mindustry.world.meta.*;
 import unity.parts.stat.*;
 import unity.parts.stat.AdditiveStat.*;
 import unity.util.*;
+import unity.world.blocks.payloads.*;
 
 //like Block, this is a singleton
 public class ModularPartType implements Displayable{
@@ -46,6 +47,8 @@ public class ModularPartType implements Displayable{
     //cost
     public float constructTimeMultiplier = 1; // base time based on item cost
     public ItemStack[] cost = {};
+    public int costTotal = 0;
+    public ModuleBlock moduleCost = null;
     //module cost..
 
 
@@ -54,6 +57,7 @@ public class ModularPartType implements Displayable{
 
     //places it can connect to
     public boolean root = false;
+    public boolean visible = true;
 
 
     public ModularPart create(int x, int y){
@@ -100,6 +104,10 @@ public class ModularPartType implements Displayable{
     public void requirements(String category,ItemStack[] itemcost){
         this.category = category;
         this.cost = itemcost;
+        costTotal = 0;
+        for(var i:itemcost){
+            costTotal+=i.amount;
+        }
     }
 
     public boolean canBeUsedIn(int type){
@@ -117,19 +125,19 @@ public class ModularPartType implements Displayable{
     public void drawCell(DrawTransform transform, ModularPart part){
         if(hasCellDecal){
             TextureRegion cellsprite = cell[Math.abs(part.cx)<0.01?1:0];
-            transform.drawRectScl(cellsprite, part.ax * partSize, part.ay * partSize, part.cx<0?1:-1, 1);
+            transform.drawRectScl(cellsprite, part.cx * partSize, part.cy * partSize, part.cx<0?1:-1, 1);
         }
     }
     public void drawTop(DrawTransform transform, ModularPart part){
         if(hasExtraDecal)
-            transform.drawRect(top[part.front],part.ax*partSize,part.ay*partSize);
+            transform.drawRect(top[part.front],part.cx*partSize,part.cy*partSize);
     }
     public void draw(DrawTransform transform, ModularPart part){
         transform.drawRect(panelling[part.panelingIndexes[0]],part.ax*partSize,part.ay*partSize);
     }
     public void drawOutline(DrawTransform transform, ModularPart part){
         if(hasExtraDecal)
-            transform.drawRect(outline[part.front], part.ax*partSize,part.ay*partSize);
+            transform.drawRect(outline[part.front], part.cx*partSize,part.cy*partSize);
     }
 
     public static ModularPartType getPartFromId(int id){
@@ -153,6 +161,8 @@ public class ModularPartType implements Displayable{
             stat.mergePost(statmap,part);
         }
     }
+
+    //units
     public void armor(float amount){
            stats.add(new ArmourStat(amount));
        }
@@ -171,10 +181,17 @@ public class ModularPartType implements Displayable{
     public void addsWeaponSlots(float amount){
         stats.add(new WeaponSlotStat(amount));
     }
+    public void addsAbilitySlots(float amount){
+            stats.add(new AbilitySlotStat(amount));
+        }
     public void healthMul(float amount){
         stats.add(new HealthStat(amount));
     }
-
+    public void itemCapacity(float amount){
+            stats.add(new ItemCapacityStat(amount));
+        }
+    //turrets
+    //???
 
     @Override
     public void display(Table table){

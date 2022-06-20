@@ -41,6 +41,7 @@ public class UnityUI{
     boolean includeVanilla = true;
     String searchstr="",prevstr="";
     boolean collapsed = true;
+    boolean wasRefreshed = false;
 
     Cons<Table> advancedOptions = table -> {
         table.clearChildren();
@@ -66,8 +67,16 @@ public class UnityUI{
 
 
     public void init(){
+        if(Vars.headless){
+            return;
+        }
         partsEditor = new PartsEditorDialog();
-
+        Events.on(EventType.SaveLoadEvent.class, e->{
+            included.clear();
+            for(Faction f:Faction.all){
+                included.add(f);
+            }
+        });
         Events.run(Trigger.update,()->{
             if(Vars.ui.hudfrag.blockfrag==null){
                 return;
@@ -80,9 +89,11 @@ public class UnityUI{
                 if(top.find("faction table")!=null){
                     return;
                 }
-                included.clear();
-                for(Faction f:Faction.all){
-                    included.add(f);
+                if(!wasRefreshed){
+                    included.clear();
+                    for(Faction f : Faction.all){
+                        included.add(f);
+                    }
                 }
                 Table advtable = new Table();
                 top.row();
@@ -142,9 +153,9 @@ public class UnityUI{
     }
 
     public void reloadBlocks(){
-        Table table = ReflectUtils.getFieldValue(Vars.ui.hudfrag.blockfrag,ReflectUtils.getField(Vars.ui.hudfrag.blockfrag,"toggler"));
-        for(Block b:Vars.content.blocks()){
-            if(FactionMeta.map(b)==null){
+        Table table = ReflectUtils.getFieldValue(Vars.ui.hudfrag.blockfrag, ReflectUtils.getField(Vars.ui.hudfrag.blockfrag, "toggler"));
+        for(Block b : Vars.content.blocks()){
+            if(FactionMeta.map(b) == null){
                 b.placeablePlayer = included.contains(Faction.vanilla);
             }else{
                 b.placeablePlayer = included.contains(FactionMeta.map(b));
@@ -154,8 +165,16 @@ public class UnityUI{
             }
         }
         //fuckery (updates the blocks)
-        var b = (ImageButton)table.find("category-"+ Vars.ui.hudfrag.blockfrag.currentCategory.name());
-        b.fireClick();
+        var b = (ImageButton)table.find("category-" + Vars.ui.hudfrag.blockfrag.currentCategory.name());
+        if(b==null){
+            b = (ImageButton)table.find("category-" + Category.distribution.name());
+        }
+        if(b!=null){
+            b.fireClick();
+        }else{
+            ReflectUtils.invokeMethod(Vars.ui.hudfrag.blockfrag,ReflectUtils.findMethod(Vars.ui.hudfrag.blockfrag.getClass(),"rebuild",true));
+        }
+
 
     }
 

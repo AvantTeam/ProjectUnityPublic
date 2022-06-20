@@ -1,10 +1,19 @@
 package unity.world.graph;
 
+import arc.*;
 import arc.func.*;
+import arc.graphics.g2d.*;
+import arc.math.geom.*;
 import arc.struct.*;
+import arc.util.*;
+import mindustry.entities.units.*;
+import mindustry.graphics.*;
 import mindustry.world.*;
+import mindustry.world.meta.*;
+import unity.world.graph.GraphConnector.*;
 
-import java.lang.reflect.*;
+import static arc.math.geom.Geometry.*;
+import static mindustry.Vars.*;
 
 //the uh block settings part of graphs ig
 public class GraphBlockConfig{
@@ -35,7 +44,18 @@ public class GraphBlockConfig{
         }catch(Exception e){
             throw new IllegalStateException("Graph doesn't have a empty constructor or constructor is invalid/inaccessible");
         }
+    }
 
+    public <T extends Graph> void distanceConnection(Class<T> tClass, int connections){
+        try{
+            var constructor = tClass.getConstructor();
+            addConnectionConfig(new DistanceConnectionConfig(tClass,()-> {
+                try{ return constructor.newInstance(); } catch(Exception e) { e.printStackTrace(); }
+                return null;
+            },connections));
+        }catch(Exception e){
+            throw new IllegalStateException("Graph doesn't have a empty constructor or constructor is invalid/inaccessible");
+        }
     }
 
     public static abstract class ConnectionConfig<T extends Graph>{
@@ -59,6 +79,19 @@ public class GraphBlockConfig{
         }
     }
 
+    public static class DistanceConnectionConfig<T extends Graph>  extends ConnectionConfig<T>{
+        int connections;
+        public DistanceConnectionConfig(Class<T> tClass, Prov<T> newGraph, int connections){
+            super(tClass, newGraph);
+            this.connections=connections;
+        }
+
+        @Override
+        public GraphConnector getConnector(GraphNode gn){
+            return new DistanceGraphConnector(connections,gn, newGraph.get());
+        }
+    }
+
     //for connections on the sides, most probably the most common type.
     public static class FixedConnectionConfig<T extends Graph>  extends ConnectionConfig<T>{
         int[] connectionIndexes;
@@ -79,7 +112,78 @@ public class GraphBlockConfig{
         }
     }
 
+    public void setStats(Stats stats){
+        stats.add(Stat.abilities,table -> {
+            for(var gcnfig:nodeConfig){
+                table.row();
+                table.add(Core.bundle.get("ui.graph."+Graphs.graphInfo.get(gcnfig.key).name)).growX().left().color(Pal.accent);
+                table.row();
+                table.image().growX().pad(5).padLeft(0).padRight(0).height(3).color(Pal.accent);
+                GraphNode gn = gcnfig.value.get(null);
+                table.row();
+                table.table(gn::displayStats).growX();
+            }
+        });
+    }
+
     public Block getBlock(){
         return block;
     }
+
+    public void drawConnectionPoints(BuildPlan req, Eachable<BuildPlan> list){
+        //soon
+        for(ConnectionConfig c:connections){
+            TextureRegion tr = Graphs.graphInfo.get(c.graphType).icon;
+            if(tr == null){
+                return;
+            }
+            if(c instanceof FixedConnectionConfig fcc){
+                for(int i = 0;i<fcc.connectionIndexes.length;i++){
+                    if(fcc.connectionIndexes[i]!=0){
+                        Point2 p2 = getConnectSidePos(i,this.block.size,req.rotation);
+                        int cx = req.x+p2.x;
+                        int cy = req.y+p2.y;
+                        boolean[] d = {false};
+                        list.each(b->{
+                            if(d[0]){return;}
+                            if(cx>=b.x && cy>=b.y && b.x+b.block.size>cx && b.y+b.block.size>cy){
+                                d[0] = true;
+                            }
+                        });
+                        if(d[0]){
+                            continue;
+                        }
+                        Draw.rect(tr,cx*tilesize,cy*tilesize);
+                    }
+                }
+            }
+        }
+    }
+
+    //this came from js, but im not sure if it relative to the center or the bl corner of the building.
+    //gets positions along the sides.
+    public Point2 getConnectSidePos(int index, int size, int rotation){
+        int side = index / size;
+        side = (side + rotation) % 4;
+        Point2 tangent = d4((side + 1) % 4);
+        int originX = 0, originY = 0;
+        if(size > 1){
+            originX += size / 2;
+            originY += size / 2;
+            originY -= size - 1;
+            if(side > 0){
+                for(int i = 1; i <= side; i++){
+                    originX += d4x(i) * (size - 1);
+                    originY += d4y(i) * (size - 1);
+                }
+            }
+            originX += tangent.x * (index % size);
+            originY += tangent.y * (index % size);
+        }
+        return new Point2(originX+d4x(side),originY+d4y(side));
+    }
+
+
+
+
 }

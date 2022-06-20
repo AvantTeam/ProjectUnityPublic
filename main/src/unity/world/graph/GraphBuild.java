@@ -3,8 +3,11 @@ package unity.world.graph;
 import arc.func.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.struct.ObjectMap.*;
 import arc.util.io.*;
 import mindustry.gen.*;
+
+import static unity.util.UnityTmp.graphIterator;
 
 public interface GraphBuild{
     OrderedMap<Class<? extends Graph>, GraphNode> getNodes();
@@ -27,7 +30,12 @@ public interface GraphBuild{
         return this.getGraphNode(c).connector.get(index).getGraph();
     }
 
-    default void init(){
+    default void onInit(){}
+
+    default void initGraph(){
+        if(getNodes().size!=0){
+            return;
+        }
         setPrevRotation(getBuild().rotation);
         if(getBuild().block instanceof GraphBlock graphBlock){
             var cfg = graphBlock.getConfig();
@@ -39,9 +47,14 @@ public interface GraphBuild{
                     getNodes().put(connectionConfig.getGraphType(), (GraphNode)gnode);
                 }
                 var node = getGraphNode(connectionConfig.getGraphType());
+                node.connectors++;
+            }
+            for(var connectionConfig : cfg.connections){
+                var node = getGraphNode(connectionConfig.getGraphType());
                 node.connector.add(connectionConfig.getConnector(node));
             }
         }
+        onInit();
     }
 
 
@@ -59,25 +72,37 @@ public interface GraphBuild{
         for(var entry : getNodes()){
             entry.value.onPlace();
         }
+        onPlaced();
     }
+    default void onPlaced(){
+
+    }
+
     default void onRotate(){
         for(var entry : getNodes()){
             entry.value.onRotate();
         }
     }
 
+    default void eachNode(Cons2<Class<? extends Graph>, GraphNode> cons){
+        graphIterator = new Entries<>(getNodes());
+        for(var e: graphIterator){
+            cons.get(e.key,e.value);
+        }
+    }
+
     default void updateGraphs(){
         if(getPrevRotation()==-1){
-            setPrevRotation(getBuild().rotation);
             connectToGraph();
+            setPrevRotation(getBuild().rotation);
         }
 
         if(getPrevRotation() != getBuild().rotation && getBuild().block.rotate){
-            setPrevRotation(getBuild().rotation);
             onRotate();
+            setPrevRotation(getBuild().rotation);
         }
 
-        getNodes().each((cls, graphNode) -> {
+        eachNode((cls, graphNode) -> {
             //change later.
             graphNode.update();
             for(var graphConn : graphNode.connector){
@@ -108,16 +133,22 @@ public interface GraphBuild{
         });
     }
 
-    //conv for js
+    //conv for getting
     default TorqueGraphNode torqueNode(){
         return (TorqueGraphNode)getGraphNode(TorqueGraph.class);
     }
     default HeatGraphNode heatNode(){
         return (HeatGraphNode)getGraphNode(HeatGraph.class);
     }
+    default CrucibleGraphNode crucibleNode(){
+            return (CrucibleGraphNode)getGraphNode(CrucibleGraph.class);
+        }
 
     //conv for drawing
-    default float getCorrectRotation(){
+    default float get2SpriteRotation(){
         return (getBuild().rotdeg() + 90f) % 180f - 90f;
+    }
+    default float get2SpriteRotationVert(){
+        return (getBuild().rotdeg()) % 180f;
     }
 }

@@ -32,8 +32,9 @@ public class SimpleTransmission extends GenericGraphBlock{
 
     public static class TransmissionTorqueGraphNode extends TorqueGraphNode{
         float ratio = 2;
-        public TransmissionTorqueGraphNode(float friction, float inertia, GraphBuild build){
+        public TransmissionTorqueGraphNode(float friction, float inertia, float ratio,GraphBuild build){
             super(friction, inertia, build);
+            this.ratio=ratio;
         }
 
         public TransmissionTorqueGraphNode(GraphBuild build){

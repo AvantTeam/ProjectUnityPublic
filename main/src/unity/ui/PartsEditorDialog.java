@@ -3,12 +3,14 @@ package unity.ui;
 import arc.*;
 import arc.func.*;
 import arc.graphics.*;
+import arc.input.*;
 import arc.math.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mindustry.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
@@ -16,7 +18,6 @@ import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 import mindustry.world.meta.*;
 import unity.parts.*;
-import unity.util.*;
 
 import java.util.*;
 
@@ -136,17 +137,36 @@ public class PartsEditorDialog extends BaseDialog{
         }).update(i->{i.setChecked(editorElement.mirror);}).tooltip("mirror").width(64);
         buttons.button(Icon.file,()->{
             builder.clear();
+            editorElement.onAction();
         }).tooltip("clear").width(64);
         buttons.button(Icon.copy,()->{
-            Core.app.setClipboardText(Base64.getEncoder().encodeToString(builder.exportCompressed()));
+            Core.app.setClipboardText(Base64.getEncoder().encodeToString(builder.exportCropped()));
         }).tooltip("copy").width(64);
         buttons.button(Icon.paste,()->{
-            ModularConstructBuilder test = new ModularConstructBuilder(3,3);
-            test.set(Base64.getDecoder().decode(Core.app.getClipboardText().trim().replaceAll("[\\t\\n\\r]+","")));
-            builder.clear();
-            builder.paste(test);
+            try{
+                ModularConstructBuilder test = new ModularConstructBuilder(3, 3);
+                test.set(Base64.getDecoder().decode(Core.app.getClipboardText().trim().replaceAll("[\\t\\n\\r]+", "")));
+                builder.clear();
+                builder.paste(test);
+                editorElement.onAction();
+            }catch(Exception e){
+                Vars.ui.showOkText("Uh", "Your code is poopoo", () -> {}); ///?????
+            }
         }).tooltip("paste").width(64);
-        buttons.button("@back", Icon.left, this::hide).name("back");
+        if(Core.graphics.getWidth()<750){
+            buttons.row();
+            buttons.table(row2->{
+                buttons.button("@undo", Icon.undo, ()->{
+                    editorElement.undo();
+                }).name("undo").width(64);
+                buttons.button("@redo", Icon.redo, ()->{
+                    editorElement.redo();
+                }).name("redo").width(64);
+                buttons.button("@back", Icon.left, this::hide).name("back");
+            }).left();
+        }else{
+            buttons.button("@back", Icon.left, this::hide).name("back");
+        }
 
         ///
         selectSide = new Table();
@@ -163,9 +183,22 @@ public class PartsEditorDialog extends BaseDialog{
         add(editorSide);
 
         hidden(() -> consumer.get(builder.export()));
+
+        //input
+        update(()->{
+            if(Core.scene != null && Core.scene.getKeyboardFocus() == this){
+                if(Core.input.ctrl()){
+                    if(Core.input.keyTap(KeyCode.z)){
+                        editorElement.undo();
+                    }else if(Core.input.keyTap(KeyCode.y)){
+                        editorElement.redo();
+                    }
+                }
+            }
+        });
     }
 
-    public void show(byte[] data, Cons<byte[]> modified,Cons2<ModularConstructBuilder, Table> viewer){
+    public void show(byte[] data, Cons<byte[]> modified,Cons2<ModularConstructBuilder, Table> viewer, Boolf<ModularPartType> allowed){
         this.builder.set(data);
         leftSideBuilder.get(selectSide);
         editorElement.setBuilder(this.builder);
@@ -176,6 +209,9 @@ public class PartsEditorDialog extends BaseDialog{
         //todo: temp
         avalibleParts.clear();
         for(var part: ModularPartType.partMap){
+            if(!allowed.get(part.value)){
+                continue;
+            }
             if(!avalibleParts.containsKey(part.value.category)){
                 avalibleParts.put(part.value.category, new Seq<>());
             }
@@ -233,6 +269,11 @@ public class PartsEditorDialog extends BaseDialog{
         int weaponslots = Math.round(statmap.getValue("weaponslots"));
         int weaponslotsused = Math.round(statmap.getValue("weaponslotuse"));
         table.add("[lightgray]" +  Core.bundle.get("ui.parts.stat.weapon-slots") + ": "+(weaponslotsused>weaponslots?"[red]":"[green]")+ weaponslotsused+"/"+weaponslots).left().top().tooltip(Core.bundle.get("ui.parts.stat.weapon-slots-tooltip"));
+
+        table.row();
+        int abilityslots = Math.round(statmap.getValue("abilityslots"));
+        int abilityslotsused = Math.round(statmap.getValue("abilityslotuse"));
+        table.add("[lightgray]" +  Core.bundle.get("ui.parts.stat.ability-slots") + ": "+(abilityslotsused>abilityslots?"[red]":"[green]")+ abilityslotsused+"/"+abilityslots).left().top().tooltip(Core.bundle.get("ui.parts.stat.ability-slots-tooltip"));
     };
 
     public void updateScrollFocus(){

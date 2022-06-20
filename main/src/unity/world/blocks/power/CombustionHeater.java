@@ -2,18 +2,26 @@ package unity.world.blocks.power;
 
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.util.*;
 import arc.util.io.*;
 import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.world.consumers.*;
+import mindustry.world.meta.*;
 import unity.graphics.*;
 import unity.world.blocks.*;
+import unity.world.graph.*;
 
 import static arc.Core.atlas;
 
 public class CombustionHeater extends GenericGraphBlock{
     public final TextureRegion[] baseRegions = new TextureRegion[4];
     TextureRegion heatRegion;
+    public float baseTemp = 1000 + HeatGraphNode.celsiusZero;
+    public float tempPerFlammability = 1750;
+
+    public float minConsumeAmount = 0.005f;
+    public float maxConsumeAmount = 0.015f;
 
     public CombustionHeater(String name){
         super(name);
@@ -33,8 +41,20 @@ public class CombustionHeater extends GenericGraphBlock{
         super.init();
     }
 
+    @Override
+    public void setStats(){
+        super.setStats();
+        stats.add(Stat.productionTime, "@ - @ "+StatUnit.seconds.localized(), Strings.fixed((1 / minConsumeAmount)/60f,1),Strings.fixed((1/maxConsumeAmount)/60f,1) );
+    }
+
     public class CombustionHeaterBuild extends GenericGraphBuild{
         float generateTime, productionEfficiency;
+
+        @Override
+        public void initGraph(){
+            super.initGraph();
+            heatNode().minGenerate = 0;
+        }
 
         @Override
         public boolean productionValid(){
@@ -57,11 +77,13 @@ public class CombustionHeater extends GenericGraphBlock{
             }
 
             if(generateTime > 0f){
-                generateTime -= Math.min(0.01f * delta(), generateTime);
+                float mul = Mathf.lerp(minConsumeAmount,maxConsumeAmount,Mathf.clamp(heatNode().lastEnergyInput*0.3f,0.1f,1.0f));
+                float am = Math.min(delta() * mul, generateTime);;
+                generateTime -= am;
             }else{
                 productionEfficiency = 0f;
             }
-
+            heatNode().targetTemp = baseTemp + Math.max(tempPerFlammability*(productionEfficiency-1),-baseTemp*0.5f);
             heatNode().efficency = productionEfficiency;
         }
 

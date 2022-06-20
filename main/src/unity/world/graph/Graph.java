@@ -53,6 +53,7 @@ public abstract class Graph<T extends Graph>{
         if(vertex.getGraph()!=this){ Log.info("tried to remove invalid vertex"); return;}
 
         vertexes.remove(vertex);
+        onVertexRemoved(vertex);
         vertex.graph = null;
         onGraphChanged();
     }
@@ -66,6 +67,7 @@ public abstract class Graph<T extends Graph>{
                 Graph<T> ngraph = createFromThis();
                 ngraph.addVertex(vertex);
                 vertexes.remove(vertex);
+                onVertexRemoved(vertex);
                onGraphChanged();
             }
             return;
@@ -76,13 +78,13 @@ public abstract class Graph<T extends Graph>{
             Graph<T> ngraph = createFromThis();
             ngraph.addVertex(vertex);
             vertexes.remove(vertex);
+            onVertexRemoved(vertex);
             onGraphChanged();
         }else{
             //non trivial case, need to detach edges and check for splits.
             //probably change to do all the edges at once hmm
             int size = vertex.connections.size;
             for(int  i = 0;i<size;i++){
-                GraphEdge vconn = vertex.connections.removeIndex(0);
                 if(vertex.getGraph()!=this){
                     vertex.getGraph().removeVertex(vertex);
                     if(vertexes.contains(vertex)){
@@ -90,11 +92,13 @@ public abstract class Graph<T extends Graph>{
                     }
                     return;
                 }else{
+                    GraphEdge vconn = vertex.connections.removeIndex(0);
                     removeEdge(vconn);
                 }
             }
             if(vertexes.size>1){
                 vertexes.remove(vertex);
+                onVertexRemoved(vertex);
             }
             onGraphChanged();
         }
@@ -140,6 +144,7 @@ public abstract class Graph<T extends Graph>{
                 }
                 for(GraphConnector<T> other : ngraph.vertexes){
                     this.vertexes.remove(other);
+                    onVertexRemoved(other);
                 }
             }
         }
@@ -176,6 +181,7 @@ public abstract class Graph<T extends Graph>{
         return true;
     }
 
+    public void onVertexRemoved(GraphConnector<T> vertex){}
     public void onVertexAdded(GraphConnector<T> vertex){}
     public void addVertex(GraphConnector<T> vertex){
         vertexes.add(vertex);
@@ -226,6 +232,10 @@ public abstract class Graph<T extends Graph>{
     }
 
     //used for saving.
+    public boolean hasVertex(GraphConnector<T> connector){
+       return vertexes.contains(connector);
+    }
+
     public GraphConnector<T> firstVertex(){
         return vertexes.first();
     }
@@ -247,6 +257,10 @@ public abstract class Graph<T extends Graph>{
     public void read(Reads read){
         authoritative = true;
         authoritativeUntil = (int)(Core.graphics.getFrameId()+1);
+    }
+
+    public boolean isRoot(GraphConnector<T> t){
+        return vertexes.first()==t;
     }
 
 }

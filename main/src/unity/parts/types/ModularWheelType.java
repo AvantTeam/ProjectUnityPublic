@@ -33,7 +33,7 @@ public class ModularWheelType extends ModularPartType{
         super.draw(transform, part);
         Vec2 pos = new Vec2(part.cx*partSize,part.cy*partSize);
         transform.transform(pos);
-        float ang = rollDistance*8;
+        float ang = rollDistance*16;
 
         transform.drawRect(base,part.cx*partSize,part.cy*partSize);
         if(h==1){
