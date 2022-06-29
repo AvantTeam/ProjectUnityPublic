@@ -21,7 +21,6 @@ public class DevBuildImpl implements DevBuild{
 
     @Override
     public void init(){
-        enableConsole = true;
         JSBridge.importDefaults(JSBridge.defaultScope);
 
         if(!headless && !android){
