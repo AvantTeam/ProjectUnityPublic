@@ -81,7 +81,9 @@ public class KoruhBlocks {
 
     public static void load(){
         Blocks.stone.itemDrop = UnityItems.stone;
+        Blocks.stone.playerUnmineable = true;
         Blocks.craters.itemDrop = UnityItems.stone;
+        Blocks.craters.playerUnmineable = true;
 
         lava = new Floor("lava-deposit"){
             {
