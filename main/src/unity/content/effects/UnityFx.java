@@ -100,7 +100,7 @@ public class UnityFx{
             Tmp.v1.set(Tmp.v2).sub(e.x, e.y).nor().scl(tilesize / 2f);
             Tmp.v2.sub(Tmp.v1);
             Tmp.v1.add(e.x, e.y);
-            Drawf.laser(null, Core.atlas.find("unity-exp-laser"), Core.atlas.find("unity-exp-laser-end"), Tmp.v1.x, Tmp.v1.y, Tmp.v2.x, Tmp.v2.y, 0.4f * e.fout());
+            Drawf.laser(Core.atlas.find("unity-exp-laser"), Core.atlas.find("unity-exp-laser-end"), Tmp.v1.x, Tmp.v1.y, Tmp.v2.x, Tmp.v2.y, 0.4f * e.fout());
         }
     }),
 

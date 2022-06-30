@@ -174,7 +174,7 @@ public class ExpTower extends ExpTank {
             Tmp.v2.sub(Tmp.v1);
             Tmp.v1.add(this);
             Lines.stroke(f * fout);
-            Drawf.laser(null, laser, laserEnd, Tmp.v1.x, Tmp.v1.y, Tmp.v2.x, Tmp.v2.y, f * fout);
+            Drawf.laser(laser, laserEnd, Tmp.v1.x, Tmp.v1.y, Tmp.v2.x, Tmp.v2.y, f * fout);
             Draw.reset();
         }
 
