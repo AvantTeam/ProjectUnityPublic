@@ -39,7 +39,7 @@ public class YoungchaBlocks{
         //transmission
         driveShaft, shaftRouter, smallTransmission, torqueMeter,driveBeltSmall,driveBeltLarge,
         //power
-        crankShaft, windTurbine, rotaryWaterExtractor, flywheel, torqueSource,
+        crankShaft, windTurbine, rotaryWaterExtractor, flywheel, torqueSource, converter,
         //production
         augerDrill, wallDrill,
         //payload
@@ -231,6 +231,16 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new WindTurbineTorqueGraphNode(0.03f, 20f, 1.2f, 20f, b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        }};
+
+        converter = new TorquePowerGenerator("converter"){{
+            buildVisibility = BuildVisibility.shown;
+            health = 300;
+            size = 3;
+            category = Category.power;
+            powerProduction = 5f;
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.13f, 50f, 80,b));
+            config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
         }};
         rotaryWaterExtractor = new RotaryWaterExtractor("rotary-water-extractor"){{
             health = 2600;
