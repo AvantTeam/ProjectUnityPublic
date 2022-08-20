@@ -144,6 +144,16 @@ public class UnitAssemblerArm extends GenericGraphBlock{
         }
 
         @Override
+        public void onRemoved(){
+            super.onRemoved();
+            if( currentJob!=null){
+                currentJob.takenby = -1;
+                currentJob = null;
+                buildProgress = 0;
+            }
+        }
+
+        @Override
         public void draw(){
             Draw.rect(base[rotation],x,y);
             Drawf.spinSprite(spinner,x,y,Mathf.radiansToDegrees * Mathf.atan2(arm.jointPositions[0].x-arm.start.x,arm.jointPositions[0].y-arm.start.y));

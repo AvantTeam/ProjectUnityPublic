@@ -11,7 +11,7 @@ public class UnityItems{
     //koruh
     stone, denseAlloy, steel, dirium, uranium,
     //youngcha
-    nickel, cupronickel, superAlloy;
+    nickel, cupronickel, superAlloy,sulfur;
 
     public static void load(){
         //region faction-alloys
@@ -56,6 +56,11 @@ public class UnityItems{
         nickel = new Item("nickel", Color.valueOf("6e9675")){{
             hardness = 3;
             cost = 1.5f;
+        }};
+
+        sulfur = new Item("sulfur", Color.valueOf("ffbb2b")){{
+            hardness = 1;
+            cost = 1.0f;
         }};
 
 

@@ -106,8 +106,9 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         }
 
         @Override
-        public float efficiency(){
-            return super.efficiency()*Mathf.clamp(getGraph(TorqueGraph.class).lastVelocity/torqueNode().maxSpeed);
+        public void updateConsumption(){
+            super.updateConsumption();
+            efficiency *= Mathf.clamp(getGraph(TorqueGraph.class).lastVelocity/torqueNode().maxSpeed);
         }
 
         @Override

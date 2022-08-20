@@ -56,6 +56,13 @@ public class CrankShaft extends GenericGraphBlock{
             }
         }
 
+        public <T extends Integer> void f(T t){
+
+        }
+        public <T> void f(T t){
+
+        }
+
         @Override
         public void draw(){
             Draw.rect(base[rotation],x,y);

@@ -251,6 +251,14 @@ public class ModularUnitAssembler extends PayloadBlock{
                     built.clear();
                     currentlyConstructing.clear();
                 }
+                for(int i = 0;i<currentlyConstructing.size;i++){
+                    var task = currentlyConstructing.get(i);
+                    if(task.takenby!=-1 && Vars.world.tile(task.takenby).build==null){
+                        task.takenby = -1;
+                        currentlyConstructing.remove(i);
+                        i--;
+                    }
+                }
             }
             moveOutPayload();
         }

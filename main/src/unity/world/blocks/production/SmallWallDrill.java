@@ -51,7 +51,7 @@ public class SmallWallDrill extends GenericTorqueWallDrill{
         @Override
         public void updateTile(){
             super.updateTile();
-            float eff = efficiency();
+            float eff = torqueEfficiency();
             if(Mathf.chanceDelta(0.02*eff)){
                 updateEffect.at(x + Mathf.range(size * 2f), y + Mathf.range(size * 2f));
             }
@@ -75,10 +75,10 @@ public class SmallWallDrill extends GenericTorqueWallDrill{
             tnode.baseForce = 0;
             float spd = torqueNode().getGraph().lastVelocity;
             if(tilesDrilling == 0 && timer(hitTimer,10) && spd>5){
-                float ang = targetDrillAngle + rotdeg();
+                float ang = targetDrillAngle + rotdeg()+ 90;
                 float s2 = size*0.5f;
-                float vx = -Mathf.cos(ang)+Mathf.range(0.5f);
-                float vy = -Mathf.sin(ang)+Mathf.range(0.5f);
+                float vx = -Mathf.cosDeg(ang)+Mathf.range(0.5f);
+                float vy = -Mathf.sinDeg(ang)+Mathf.range(0.5f);
                 float rx = x + Geometry.d4x(rotation) * (s2+targetDrillExtend+0.5f) * tilesize, ry = y + Geometry.d4y(rotation) * (s2+targetDrillExtend+0.5f) * tilesize;
                 s2 = size*4;
                 Utils.collideLineRawEnemy(team, rx-vx*s2, ry-vy*s2, rx+vx*s2, ry+vy*s2, 4, true, true, true, (x, y, h, direct) -> {
@@ -138,6 +138,7 @@ public class SmallWallDrill extends GenericTorqueWallDrill{
             Draw.rect(bore,rx + Mathf.sinDeg(-ang)*s2*4f,ry + Mathf.cosDeg(ang)*s2*4f,-r*0.2f);
             Draw.rect(bore,rx - Mathf.sinDeg(-ang)*s2*4f,ry - Mathf.cosDeg(ang)*s2*4f,r*0.2f);
             Draw.rect(arm,rx,ry,ang);
+
             drawTeamTop();
         }
     }

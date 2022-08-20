@@ -43,6 +43,10 @@ public class DriveBelt extends GenericGraphBlock{
         config(Integer.class, (DriveBeltBuild build, Integer point) -> {
             Building other = world.build(point);
             if(other instanceof DriveBeltBuild odb){
+                if(state.isEditor()){
+                    build.connector.recalcNeighbours();
+                    odb.connector.recalcNeighbours(); //normally the first update will 'do it', but since there is none in the editor we have to uh improvise.
+                }
                 boolean contains = build.connector.isConnected(odb);
                 if(contains){
                     build.connector.disconnectTo(odb.connector);
@@ -61,6 +65,7 @@ public class DriveBelt extends GenericGraphBlock{
             }
         });
     }
+
 
     @Override
     public void init(){

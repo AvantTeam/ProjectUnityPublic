@@ -90,8 +90,8 @@ public class BatchMixer extends GenericGraphCrafter{
         }
 
         @Override
-        public float efficiency(){
-            return super.efficiency() * Mathf.clamp((torqueNode().getGraph().lastVelocity / torqueNode().maxSpeed)) * saturation();
+        public float getProgressIncrease(float baseTime){
+            return super.getProgressIncrease(baseTime) * Mathf.clamp((torqueNode().getGraph().lastVelocity / torqueNode().maxSpeed)) * saturation();
         }
 
         @Override

@@ -47,8 +47,8 @@ public class PayloadArm extends GenericGraphBlock{
         rotate = true;
         solid = true;
         config(Point2[].class, (PayloadArmBuild build, Point2[] value) -> {
-            build.from = value[0];
-            build.to = value[1];
+            build.from = value[0].cpy();
+            build.to = value[1].cpy();
             build.rotateTargetBy = Math.abs(value[2].x) + Math.abs(value[2].y);
             build.recalcPositions();
             build.switchState(build.state);
@@ -535,6 +535,11 @@ public class PayloadArm extends GenericGraphBlock{
         @Override
         public boolean onConfigureBuildTapped(Building other){
             return false;
+        }
+
+        @Override
+        public boolean onConfigureTapped(float x, float y){
+            return super.onConfigureTapped(x, y);
         }
 
         @Override

@@ -7,6 +7,7 @@ import arc.math.geom.*;
 import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
+import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
 import mindustry.world.blocks.power.*;
 import mindustry.world.meta.*;
@@ -50,14 +51,14 @@ public class YoungchaBlocks{
         //transmission
         heatPipe, steamPiston,
         //power
-        combustionHeater,thermalHeater,seebeckGenerator,smallRadiator,
+        combustionHeater,thermalHeater,seebeckGenerator,smallRadiator,heatSource,
     //crucible
         //crafting
         crucible,crucibleChannel,cruciblePump,crucibleCaster,payloadCaster,crucibleSource,crucibleFluidLoader,
     //modules
         basicPanel,
     //other
-        reinforcedPowerNode,//shitty power node just so vanilla can stop existing in this area for lore reasons.
+        reinforcedPowerNode,sulfurBlock,//shitty power node just so vanilla can stop existing in this area for lore reasons.
     unitAssemblyArm,
     sandboxAssembler, monomialHangar; // monomial, binomial then polynomial (maybe meromorphic for the t6-t7 equiv massive unit)
 
@@ -354,6 +355,13 @@ public class YoungchaBlocks{
             requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
         }};
 
+        heatSource = new HeatSource("heat-source"){{
+            solid = true;
+            requirements(Category.power,BuildVisibility.sandboxOnly,with());
+            config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b,0,1,900,5000));
+            config.fixedConnection(HeatGraph.class, 1,1,1,1);
+        }};
+
         seebeckGenerator = new SeebeckGenerator("seebeck-generator"){{
             size = 3;
             rotate = true;
@@ -482,6 +490,8 @@ public class YoungchaBlocks{
             rotate = true;
         }};
 
+        //to remove sometime
+
         reinforcedPowerNode = new PowerNode("reinforced-power-node"){{
             requirements(Category.power, with(UnityItems.nickel, 70, Items.titanium, 20, UnityItems.cupronickel, 20));
             size = 2;
@@ -490,7 +500,11 @@ public class YoungchaBlocks{
             health = 900;
         }};
 
-
+        sulfurBlock = new Wall("sulfur-block"){{
+            requirements(Category.defense,BuildVisibility.sandboxOnly,  with(UnityItems.sulfur, 4));
+            size = 1;
+            health = 40;
+        }};
         //modules
         basicPanel = new ModuleBlock("module-basic-panel"){{
             requirements(Category.crafting, BuildVisibility.hidden,with(UnityItems.nickel, 8));

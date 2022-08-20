@@ -1,6 +1,8 @@
 package unity.world.graph;
 
 import arc.util.*;
+import mindustry.*;
+import mindustry.world.meta.*;
 
 public class HeatGraph extends Graph<HeatGraph>{
 
@@ -16,14 +18,22 @@ public class HeatGraph extends Graph<HeatGraph>{
 
     @Override
     public void onUpdate(){
+        HeatGraphNode.ambientTemp = HeatGraphNode.celsiusZero+20;
+        if((Vars.state.rules.env & Env.scorching) != 0){
+            HeatGraphNode.ambientTemp = HeatGraphNode.celsiusZero+500;
+        }else if((Vars.state.rules.env & Env.space) != 0){
+            HeatGraphNode.ambientTemp = HeatGraphNode.celsiusZero;
+        }
+
+
         //for each vertex distribute heat to neighbours via the gauss siedel method.
         float k = 0;
         float e = 0;
-        float t = 0;
         float cond = 0;
         float b = 0;
         HeatGraphNode hgn;
         HeatGraphNode hgno;
+
 
         for(GraphConnector<HeatGraph> v : vertexes){
             ((HeatGraphNode)v.getNode()).flux=0;
@@ -35,7 +45,6 @@ public class HeatGraph extends Graph<HeatGraph>{
                 hgno = ((HeatGraphNode)v.node);
                 k = 0;
                 e = hgno.heatenergy;
-                t = hgno.getTemp();
                 cond = hgno.conductivity;
                 // my brain hurt
                 //but essentially the energy only GS equality is eₙ = (e꜀ + kTₛ)/(1+k/c) as T꜀ is e꜀/c

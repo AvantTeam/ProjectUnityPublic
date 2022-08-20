@@ -113,8 +113,9 @@ public class TorqueDrill extends Drill implements GraphBlock{
         }
 
         @Override
-        public float efficiency(){
-            return super.efficiency() * Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,torqueNode().maxSpeed,0,maxEfficiency),0,maxEfficiency);
+        public void updateConsumption(){
+            super.updateConsumption();
+            efficiency *= Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,torqueNode().maxSpeed,0,maxEfficiency),0,maxEfficiency);
         }
 
         @Override

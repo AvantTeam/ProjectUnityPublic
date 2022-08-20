@@ -41,9 +41,10 @@ public class BatchPress extends GenericGraphCrafter{
 
     public class BatchPressBuild extends GenericGraphCrafterBuild{
         public float lidopened = 0;
+
         @Override
-        public float efficiency(){
-            return super.efficiency() * (items.has(outputItem.item)?0:1) * Mathf.clamp((torqueNode().getGraph().lastVelocity / torqueNode().maxSpeed));
+        public float getProgressIncrease(float baseTime){
+            return super.getProgressIncrease(baseTime) * (items.has(outputItem.item)?0:1) * Mathf.clamp((torqueNode().getGraph().lastVelocity / torqueNode().maxSpeed));
         }
 
         @Override
