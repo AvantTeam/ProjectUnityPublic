@@ -16,6 +16,7 @@ import unity.parts.types.*;
 import unity.content.effects.*;
 import unity.type.weapons.*;
 
+//TODO OH GOD THE INDENTING WHOS USING 3 SPACES 
 public class UnityParts{
     //unit
     //misc
@@ -56,9 +57,13 @@ public class UnityParts{
            mass(20);
            usesPower(5);
            weapon(1,new Weapon("unity-part-gun"){{
-               rotate = true;
-               reload = 18f;
-               bullet = Bullets.placeholder;
+              rotate = true;
+              reload = 18f;
+              bullet = new BasicBulletType(3f, 11){{
+                 width = 7f;
+                 height = 10f;
+                 lifetime = 60f;
+              }};
            }});
         }};
         cannon = new ModularWeaponMountType("cannon"){{
@@ -74,6 +79,7 @@ public class UnityParts{
                reload = 60f;
                ejectEffect = Fx.casing2;
                shootSound = Sounds.bang;
+               shootY = 4f; 
                bullet = new BasicBulletType(7f, 40){{
                    width = 11f;
                    height = 20f;
@@ -123,6 +129,7 @@ public class UnityParts{
                 shoot.shotDelay = 2f;
                 inaccuracy = 6;
                 shootSound = Sounds.artillery;
+                shootY = 7f;
                 bullet = new ArtilleryBulletType(5f, 50){{
                     width = 15f;
                     height = 25f;
@@ -235,6 +242,7 @@ public class UnityParts{
                 targetInterval = 0f;
                 targetSwitchInterval = 0f;
                 shootSound = Sounds.lasershoot;
+                shootY = 4f;
                 bullet = new BulletType(){{
                     smokeEffect = Fx.pointHit;
                     hitEffect = Fx.pointHit;
@@ -296,7 +304,7 @@ public class UnityParts{
                    lifetime = 40f;
                    pierce = true;
                    pierceBuilding = true;
-                   pierceCap = 8;
+                   pierceCap = 3;
                    shootEffect = ShootFx.tonkCannon;
                    smokeEffect = ShootFx.tonkCannonSmoke;
                    hitEffect = Fx.massiveExplosion;
@@ -327,10 +335,12 @@ public class UnityParts{
            h = 2;
            weapon(2,new Weapon("unity-part-flamethrower"){{
                rotate = true;
-               reload = 8f;
+               reload = 2f;
                inaccuracy = 10;
                shootSound = Sounds.flame;
-               bullet = new BulletType(3.35f, 17f){{
+               shootY = 6f;
+               recoilTime = 15f;
+               bullet = new BulletType(3.35f, 12f){{
                    ammoMultiplier = 3f;
                    hitSize = 7f;
                    lifetime = 18f;
@@ -359,6 +369,7 @@ public class UnityParts{
                reload = 22f;
                inaccuracy = 3;
                shootSound = Sounds.shootBig;
+               shootY = 5f;
                bullet = new GrenadeBulletType(){{
                    damage = 5;
                    splashDamage = 45;
