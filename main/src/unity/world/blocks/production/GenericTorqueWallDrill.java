@@ -67,7 +67,7 @@ public class GenericTorqueWallDrill extends GenericGraphBlock{
                     break;
                 }
             }
-            Drawf.dashLine(linevalid ? Pal.placing: Pal.remove,
+            Drawf.dashLine(linevalid ? Pal.placing: Pal.lightishGray,
             searchOrigin.x * tilesize,
             searchOrigin.y * tilesize,
             (searchOrigin.x + Geometry.d4x(rotation)*dis) * tilesize,
