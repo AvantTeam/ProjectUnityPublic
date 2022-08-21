@@ -17,6 +17,7 @@ public class DriveShaft extends GenericGraphBlock{
         rotate = true;
         update = true;
         solid = true;
+        drawArrow = false;
     }
 
     @Override
