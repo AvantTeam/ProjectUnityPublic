@@ -73,10 +73,6 @@ public class UnitAssemblerArm extends GenericGraphBlock{
             return false;
         }
 
-        @Override
-        public float efficiency(){
-            return super.efficiency() * Mathf.clamp(torqueNode().getGraph().lastVelocity/torqueNode().maxSpeed);
-        }
 
         @Override
         public void updateTile(){
@@ -99,7 +95,7 @@ public class UnitAssemblerArm extends GenericGraphBlock{
                         currentJob = attached.getJob(this,item);
                     });
                 }else{
-                    buildProgress += edelta()*constructSpeed;
+                    buildProgress += edelta()*constructSpeed*torqueEfficiency();
                     boolean found = false;
                     for(var is:currentJob.remaining){
                         if(items.has(is.item) && is.amount>0){

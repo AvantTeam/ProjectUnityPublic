@@ -25,6 +25,7 @@ import unity.world.blocks.units.*;
 import unity.world.graph.*;
 
 import static mindustry.type.ItemStack.with;
+import static unity.content.UnityEnv.acidic;
 
 //frankly i do not wish to have my ide lag from an enormous unnavigable UnityBlocks file
 public class YoungchaBlocks{
@@ -163,6 +164,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.005f, 3f, b));
             config.fixedConnection(TorqueGraph.class, 1, 0, 1, 0);
             requirements(Category.power, with(Items.copper, 10, Items.lead, 10));
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         shaftRouter = new GenericGraphBlock("shaft-router"){{
             requirements(Category.power, with(Items.copper, 20, Items.lead, 20));
@@ -171,6 +173,7 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.04f, 4f, b));
             config.fixedConnection(TorqueGraph.class, 1, 1, 1, 1);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         smallTransmission = new SimpleTransmission("small-transmission"){{
             requirements(Category.power, with(UnityItems.nickel, 20, Items.copper, 20, Items.lead, 20));
@@ -179,6 +182,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(TorqueGraph.class, b -> new TransmissionTorqueGraphNode(0.05f, 8f, 2,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 0, 1, 0, 0, 0);
             config.fixedConnection(TorqueGraph.class, 1, 0, 0, 0, 0, 1, 0, 0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         torqueMeter = new TorqueMeter("torque-meter"){{
             requirements(Category.power, with(UnityItems.nickel, 20, Items.lead, 30));
@@ -188,6 +192,7 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueMeterGraphNode(0.01f, 5f, b));
             config.fixedConnection(TorqueGraph.class, 1, 0, 1, 0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
 
         }};
         driveBeltSmall = new DriveBelt("small-drive-belt"){{
@@ -198,6 +203,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(TorqueGraph.class, b -> new TransmissionTorqueGraphNode(0.03f, 8f, 1,b));
             config.fixedConnection(TorqueGraph.class, 0, 0, 1, 0);
             config.distanceConnection(TorqueGraph.class, 1);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         driveBeltLarge = new DriveBelt("large-drive-belt"){{
             requirements(Category.power, with(UnityItems.cupronickel, 30, Items.silicon, 40, Items.graphite, 50));
@@ -210,6 +216,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(TorqueGraph.class, b -> new TransmissionTorqueGraphNode(0.05f, 30f, 1,b));
             config.fixedConnection(TorqueGraph.class, 0, 0, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
             config.distanceConnection(TorqueGraph.class, 6);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         torqueSource = new TorqueSource("torque-source"){{
             solid = true;
@@ -224,6 +231,7 @@ public class YoungchaBlocks{
             rotate = true;
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.02f, 8f, 6,60,b));
             config.fixedConnection(TorqueGraph.class, 0, 0, 1, 0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         windTurbine = new WindTurbine("wind-turbine"){{
             requirements(Category.power, with(Items.lead, 80, Items.copper, 70,Items.titanium,15));
@@ -232,6 +240,7 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new WindTurbineTorqueGraphNode(0.03f, 20f, 1.2f, 20f, b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         rotaryWaterExtractor = new RotaryWaterExtractor("rotary-water-extractor"){{
             health = 2600;
@@ -245,6 +254,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.15f, 30f, 40,b));
             config.fixedConnection(TorqueGraph.class, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0);
             requirements(Category.production, with(Items.titanium, 50, UnityItems.nickel, 80, Items.metaglass, 30));
+            envEnabled |= UnityEnv.acidic;
         }};
 
         augerDrill = new TorqueDrill("auger-drill"){{
@@ -257,6 +267,7 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.13f, 50f, 40,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         wallDrill = new SmallWallDrill("wall-drill"){{
@@ -268,6 +279,7 @@ public class YoungchaBlocks{
             drillTime = 40;
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.07f, 20f, 50,b));
             config.fixedConnection(TorqueGraph.class, 0, 0,  0, 0,  1, 1,  0, 0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         batchPress = new BatchPress("graphite-batch-press"){{
             requirements(Category.crafting, with(UnityItems.nickel, 30, Items.copper, 130, Items.lead, 100));
@@ -282,6 +294,7 @@ public class YoungchaBlocks{
             outputItem = new ItemStack(Items.graphite, 8);
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.15f, 60f, 50,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 0, 0,  0, 1, 0,  0, 0, 0);
+            envEnabled |= UnityEnv.acidic;
         }};
 
         batchMixer = new BatchMixer("pyratite-batch-mixer"){{
@@ -294,6 +307,7 @@ public class YoungchaBlocks{
             outputItem = new ItemStack(Items.pyratite, 2);
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.3f, 100f, 70,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0,  0, 1, 0,  0, 1, 0,  0, 1, 0);
+            envEnabled |= UnityEnv.acidic;
         }};
 
         heatPipe = new HeatPipe("heat-pipe"){{
@@ -303,6 +317,7 @@ public class YoungchaBlocks{
             targetable = false;
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.005f, 0.4f, 1,2500 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 1, 1, 1, 1);
+            envEnabled |= Env.scorching  | UnityEnv.acidic;
         }};
 
         flywheel = new FlyWheel("flywheel"){{
@@ -313,6 +328,7 @@ public class YoungchaBlocks{
             solid = true;
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.05f, 1000f, 30f,10,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         steamPiston = new SteamPiston("steam-piston"){{
@@ -324,6 +340,7 @@ public class YoungchaBlocks{
             consumeLiquid(Liquids.water, 0.1f);
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 9, 1100 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 0,0,0, 0,0,0 ,0,1,0 ,0,0,0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         inserterArm = new PayloadArm("inserter-arm"){{
@@ -332,6 +349,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.07f, 13f, 40,b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 1);
             requirements(Category.units, with(UnityItems.cupronickel, 20, Items.graphite, 15, Items.silicon, 20));
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         combustionHeater = new CombustionHeater("combustion-heater"){{
@@ -342,6 +360,7 @@ public class YoungchaBlocks{
             solid = true;
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 4, 2100 + HeatGraphNode.celsiusZero, 1000 + HeatGraphNode.celsiusZero,0.015f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         thermalHeater = new ThermalHeater("thermal-heater"){{
@@ -353,6 +372,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.1f, 4, 2000 + HeatGraphNode.celsiusZero,1000 + HeatGraphNode.celsiusZero,0.015f));
             config.fixedConnection(HeatGraph.class, 1, 1,  0, 0,  0, 0,  0, 0);
             requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         heatSource = new HeatSource("heat-source"){{
@@ -371,6 +391,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.01f, 0.01f,9, 1800 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 0,1,0,  0,0,0,  0,1,0  ,0,0,0);
             requirements(Category.power, with(UnityItems.nickel, 50, Items.graphite, 30, Items.copper, 120,Items.titanium, 100, UnityItems.cupronickel, 30));
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         smallRadiator = new HeatRadiator("small-radiator"){{
 
@@ -381,6 +402,7 @@ public class YoungchaBlocks{
             config.nodeConfig.put(HeatGraph.class, b -> new HeatGraphNode(b, 0.4f, 0.15f, 4,2400 + HeatGraphNode.celsiusZero));
             config.fixedConnection(HeatGraph.class, 0, 0,  1, 1,  0, 0,  1, 1);
             requirements(Category.power, with(UnityItems.nickel, 30, Items.graphite, 30, Items.copper, 100, UnityItems.cupronickel, 30));
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         crucible = new CrucibleBlock("crucible"){{
@@ -393,6 +415,7 @@ public class YoungchaBlocks{
             config.fixedConnection(HeatGraph.class, 1,0,1,  1,0,1,  1,0,1,  1,0,1);
             config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,50));
             config.fixedConnection(CrucibleGraph.class, 0,1,0,  0,1,0,  0,1,0,  0,1,0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         crucibleChannel = new CrucibleChannel("crucible-channel"){{
@@ -400,7 +423,9 @@ public class YoungchaBlocks{
             health = 300;
             config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,5));
             config.fixedConnection(CrucibleGraph.class, 1,1,1,1);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
+
 
         cruciblePump = new CruciblePump("crucible-pump"){{
             requirements(Category.crafting, with(UnityItems.nickel, 30, Items.graphite, 30, Items.titanium, 30));
@@ -414,6 +439,7 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 10f, b));
             config.fixedConnection(TorqueGraph.class, 0, 1, 0, 1);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         crucibleFluidLoader = new CrucibleFluidLoader("crucible-fluid-loader"){{
@@ -424,6 +450,7 @@ public class YoungchaBlocks{
             liquidCapacity = 20;
             config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,15));
             config.fixedConnection(CrucibleGraph.class, 1,0,0,0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         crucibleCaster = new CrucibleCaster("casting-mold"){{
@@ -440,6 +467,7 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 100f, 15,b));
             config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         payloadCaster= new PayloadCaster("payload-casting-mold"){{
@@ -455,6 +483,8 @@ public class YoungchaBlocks{
 
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.1f, 100f,40, b));
             config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
+
         }};
 
         crucibleSource = new CrucibleSource("crucible-source"){{
@@ -462,6 +492,7 @@ public class YoungchaBlocks{
             requirements(Category.crafting,BuildVisibility.sandboxOnly,with());
             config.nodeConfig.put(CrucibleGraph.class, b -> new CrucibleGraphNode(b,99));
             config.fixedConnection(CrucibleGraph.class, 1,1,1,1);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         sandboxAssembler = new ModularUnitAssembler("sandbox-assembler"){{
@@ -480,6 +511,7 @@ public class YoungchaBlocks{
             constructSpeed = 0.14f;
             config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.2f, 100f,40, b));
             config.fixedConnection(TorqueGraph.class, 0,0,0,  0,1,0, 0,0,0, 0,1,0);
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         monomialHangar  = new ModularUnitAssembler("monomial-hangar"){{
             requirements(Category.units, with(Items.copper,100,Items.graphite,20, Items.metaglass,20));
@@ -488,6 +520,7 @@ public class YoungchaBlocks{
             unitModuleWidth = 3;
             unitModuleHeight = 4;
             rotate = true;
+            envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
 
         //to remove sometime

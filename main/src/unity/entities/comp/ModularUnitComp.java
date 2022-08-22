@@ -73,6 +73,8 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public transient float weaponrange = 0;
     public transient int itemcap = 0;
 
+    public transient float statHp = 0;
+
     @Override
     public void add(){
         if(ModularConstruct.cache.containsKey(this)){
@@ -127,6 +129,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         float hratio = Mathf.clamp(this.health / this.maxHealth);
         this.maxHealth = statmap.getOrCreate("health").getFloat("value");
+        statHp = maxHealth;
         if(savedHp<=0){
             this.health = hratio * this.maxHealth;
         }else{
@@ -257,6 +260,9 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         }
         moving = false;
+        if(maxHealth!=statHp){
+            maxHealth=statHp;
+        }
     }
 
     @Replace
