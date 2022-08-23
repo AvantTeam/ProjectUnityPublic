@@ -68,7 +68,7 @@ public class MechPad extends Block{
         
         @Override
         public void drawSelect(){
-            Draw.color(consValid() ? (inRange(player) ? Color.orange : Pal.accent) : Pal.darkMetal);
+            Draw.color(canConsume() ? (inRange(player) ? Color.orange : Pal.accent) : Pal.darkMetal);
             float length = tilesize * size / 2f + 3f + Mathf.absin(Time.time, 5f, 2f);
             
             Draw.rect(arrowRegion, x + length, y, (0f + 2f) * 90f);
@@ -81,7 +81,7 @@ public class MechPad extends Block{
         
         @Override
         public boolean shouldShowConfigure(Player player){
-            return consValid() && inRange(player);
+            return canConsume() && inRange(player);
         }
         
         @Override
@@ -95,7 +95,7 @@ public class MechPad extends Block{
         
         @Override
         public boolean configTapped(){
-            if(!consValid() || !inRange(player)) return false;
+            if(!canConsume() || !inRange(player)) return false;
             configure(null);
             //Sounds.click.at(self());
             return false;
@@ -120,7 +120,7 @@ public class MechPad extends Block{
         @Override
         public void updateTile(){
             if(inProgress()){
-                time += edelta() * (consValid() ? 1 : 0) * state.rules.unitBuildSpeedMultiplier;
+                time += edelta() * (canConsume() ? 1 : 0) * state.rules.unitBuildSpeedMultiplier;
                 if(time >= craftTime) finishUnit();
             }
             heat = Mathf.lerpDelta(heat, inProgress() ? 1 : 0, cooldown);

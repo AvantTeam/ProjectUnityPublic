@@ -152,7 +152,7 @@ public class ReflectingLaserBulletType extends BulletType{
 
             Tmp.v2.set(p).sub(b).scl(1.1f).add(b);
 
-            Drawf.light(b.team, b.x, b.y, Tmp.v2.x, Tmp.v2.y, width * 1.4f * b.fout(), colors[0], 0.6f);
+            Drawf.light(b.x, b.y, Tmp.v2.x, Tmp.v2.y, width * 1.4f * b.fout(), colors[0], 0.6f);
         }
     }
 

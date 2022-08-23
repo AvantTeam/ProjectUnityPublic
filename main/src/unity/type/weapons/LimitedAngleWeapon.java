@@ -13,6 +13,7 @@ import unity.util.*;
 
 import static mindustry.Vars.*;
 
+//TODO this seems like something that should just be added to the base game -Anuke
 /** @author EyeOfDarkness */
 public class LimitedAngleWeapon extends Weapon{
     public float angleCone = 45f;
@@ -45,18 +46,18 @@ public class LimitedAngleWeapon extends Weapon{
         // Find a new target.
         if(!controllable && autoTarget){
             if((mount.retarget -= Time.delta) <= 0f){
-                mount.target = findTarget(unit, mountX, mountY, bullet.range(), bullet.collidesAir, bullet.collidesGround);
+                mount.target = findTarget(unit, mountX, mountY, bullet.range, bullet.collidesAir, bullet.collidesGround);
                 mount.retarget = mount.target == null ? targetInterval : targetSwitchInterval;
             }
 
-            if(mount.target != null && checkTarget(unit, mount.target, mountX, mountY, bullet.range())){
+            if(mount.target != null && checkTarget(unit, mount.target, mountX, mountY, bullet.range)){
                 mount.target = null;
             }
 
             boolean shoot = false;
 
             if(mount.target != null){
-                shoot = mount.target.within(mountX, mountY, bullet.range() + Math.abs(shootY) + (mount.target instanceof Sized s ? s.hitSize()/2f : 0f)) && can;
+                shoot = mount.target.within(mountX, mountY, bullet.range + Math.abs(shootY) + (mount.target instanceof Sized s ? s.hitSize()/2f : 0f)) && can;
 
                 if(predictTarget){
                     Vec2 to = Predict.intercept(unit, mount.target, bullet.speed);
@@ -125,7 +126,7 @@ public class LimitedAngleWeapon extends Weapon{
         mount.reload <= 0.0001f &&
         Angles.within(rotate ? mount.rotation : unit.rotation, mount.targetRotation, mount.weapon.shootCone) //has to be within the cone
         ){
-            shoot(unit, mount, bulletX, bulletY, mount.aimX, mount.aimY, mountX, mountY, shootAngle, Mathf.sign(x));
+            shoot(unit, mount, bulletX, bulletY, shootAngle);
 
             mount.reload = reload;
 

@@ -74,6 +74,13 @@ public class Unity extends Mod{
 
             // Disclaimer, because apparently we're stupid enough to need this
             Events.on(ClientLoadEvent.class, e -> {
+                // Might break on mobile
+                try{
+                    Reflect.set(MenuFragment.class, Vars.ui.menufrag, "renderer", new UnityMenuRenderer());
+                }catch(Exception ex){
+                    Log.err("Failed to replace renderer", ex);
+                }
+
                 UnitySettings.init();
                 Vars.ui.showOkText("@mod.disclaimer.title", "@mod.disclaimer.text", () -> {});
 
@@ -107,12 +114,6 @@ public class Unity extends Mod{
 
                 }
             });
-                // Might break on mobile
-                try{
-                    Reflect.set(MenuFragment.class, Vars.ui.menufrag, "renderer", new UnityMenuRenderer());
-                }catch(Exception ex){
-                    Log.err("Failed to replace renderer", ex);
-                }
 
             Events.on(FileTreeInitEvent.class, e -> Core.app.post(UnityShaders::load));
 

@@ -56,7 +56,7 @@ public class ExpBulletType extends BulletType{
     @Override
     public void drawLight(Bullet b){
         if(lightOpacity <= 0f || lightRadius <= 0f) return;
-        Drawf.light(b.team, b, lightRadius, overrideLight ? getColor(b).mul(lightColor) : lightColor, lightOpacity);
+        Drawf.light(b, lightRadius, overrideLight ? getColor(b).mul(lightColor) : lightColor, lightOpacity);
     }
 
     public void handleExp(Bullet b, float x, float y, int amount){
@@ -102,7 +102,7 @@ public class ExpBulletType extends BulletType{
         if(fragBullet != null){
             for(int i = 0; i < fragBullets; i++){
                 float len = Mathf.random(1f, 7f);
-                float a = b.rotation() + Mathf.range(fragCone/2) + fragAngle;
+                float a = b.rotation() + Mathf.range(fragRandomSpread/2) + fragAngle;
                 fragBullet.create(b.owner, b.team, x + Angles.trnsx(a, len), y + Angles.trnsy(a, len), a, Mathf.random(fragVelocityMin, fragVelocityMax), Mathf.random(fragLifeMin, fragLifeMax));
             }
         }

@@ -3,9 +3,11 @@ package unity.world.blocks.production;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.util.*;
 import arc.util.io.*;
 import mindustry.content.*;
 import mindustry.entities.*;
+import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.meta.*;
@@ -44,6 +46,46 @@ public class GenericTorqueWallDrill extends GenericGraphBlock{
         return false;
     }
 
+    @Override
+    public void drawPlace(int x, int y, int rotation, boolean valid){
+        super.drawPlace(x, y, rotation, valid);
+        Point2 searchOrigin = new Point2();
+        for(int i = 0;i<size;i++){
+
+            int dis = 0;
+            boolean linevalid = false;
+            getCheckPos(x,y,rotation,i,searchOrigin);
+            for(int z = 0; z < range; z++){
+                int rx = searchOrigin.x + Geometry.d4x(rotation) * z, ry = searchOrigin.y + Geometry.d4y(rotation) * z;
+                dis = z;
+                Tile other = world.tile(rx, ry);
+                if(other != null && other.solid()){
+                    Item drop = other.wallDrop();
+                    if(drop != null && drop.hardness <= tier){
+                        linevalid = true;
+                    }
+                    break;
+                }
+            }
+            Drawf.dashLine(linevalid ? Pal.placing: Pal.lightishGray,
+            searchOrigin.x * tilesize,
+            searchOrigin.y * tilesize,
+            (searchOrigin.x + Geometry.d4x(rotation)*dis) * tilesize,
+            (searchOrigin.y + Geometry.d4y(rotation)*dis) * tilesize
+            );
+        }
+    }
+
+    public void getCheckPos(int tx, int ty, int rotation, int i, Point2 out){
+        int cornerX = tx - (size - 1) / 2, cornerY = ty - (size - 1) / 2, s = size;
+        switch(rotation){
+            case 0 -> out.set(cornerX + s, cornerY + i);
+            case 1 -> out.set(cornerX + i, cornerY + s);
+            case 2 -> out.set(cornerX - 1, cornerY + i);
+            case 3 -> out.set(cornerX + i, cornerY - 1);
+        }
+    }
+
     ////AAAAAAAAAaaaaaaaaaa
     public class GenericTorqueWallDrillBuild extends GenericGraphBuild{
         public float warmup = 0;
@@ -56,11 +98,14 @@ public class GenericTorqueWallDrill extends GenericGraphBlock{
         float drillAngle = 0,drillExtend = 0;
         int tilesDrilling = 0;
 
-        @Override
-        public float efficiency(){
-            return super.efficiency() * Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,torqueNode().maxSpeed,0,1.0f),0,1);
+        public float torqueEfficiency(){
+            return Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,torqueNode().maxSpeed,0,1.0f),0,1);
         }
 
+        @Override
+        public float getProgressIncrease(float baseTime){
+            return super.getProgressIncrease(baseTime)*  torqueEfficiency();
+        }
 
         @Override
         public void updateTile(){
@@ -123,12 +168,11 @@ public class GenericTorqueWallDrill extends GenericGraphBlock{
                 targetDrillAngle = -targetDrillAngle;
             }
 
-            drillAngle += (targetDrillAngle - drillAngle)*efficiency()*0.05;
-            drillExtend += (targetDrillExtend - drillExtend)*efficiency()*0.1;
-
-
-            time += edelta();
-            if(time >= drillTime){
+            float eff = torqueEfficiency();
+            drillAngle += (targetDrillAngle - drillAngle)* eff*0.05;
+            drillExtend += (targetDrillExtend - drillExtend)* eff*0.1;
+            time += getProgressIncrease(drillTime);
+            if(time >= 1){
                 for(int p = 0; p < size; p++){
                     if(items.total() >= itemCapacity){
                         break;
@@ -138,7 +182,7 @@ public class GenericTorqueWallDrill extends GenericGraphBlock{
                         lastItem = oredist[p].ore;
                     }
                 }
-                time %= drillTime;
+                time %= 1;
             }
             if(timer(timerDump, dumpTime)){
                 dump();
@@ -152,26 +196,10 @@ public class GenericTorqueWallDrill extends GenericGraphBlock{
             return BlockStatus.active;
         }
 
-        @Override
-        public void drawSelect(){
-            super.drawSelect();
-            float s2 = size*0.5f;
-            float rx = x + Geometry.d4x(rotation) * (s2+targetDrillExtend) * tilesize, ry = y + Geometry.d4y(rotation) * (s2+targetDrillExtend) * tilesize;
-            Lines.line(x,y,rx,ry);
-            Lines.lineAngle(rx,ry,targetDrillAngle+rotdeg()+90,s2 * tilesize);
-            Lines.lineAngle(rx,ry,targetDrillAngle+rotdeg()+270,s2 * tilesize);
 
-        }
 
-        void getCheckPos(int tx, int ty, int rotation, int i, Point2 out){
-            int cornerX = tx - (size - 1) / 2, cornerY = ty - (size - 1) / 2, s = size;
-            switch(rotation){
-                case 0 -> out.set(cornerX + s, cornerY + i);
-                case 1 -> out.set(cornerX + i, cornerY + s);
-                case 2 -> out.set(cornerX - 1, cornerY + i);
-                case 3 -> out.set(cornerX + i, cornerY - 1);
-            }
-        }
+
+
 
         class OreDistance{
             Item ore;

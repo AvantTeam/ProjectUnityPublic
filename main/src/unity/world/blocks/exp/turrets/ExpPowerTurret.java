@@ -24,7 +24,7 @@ public class ExpPowerTurret extends ExpTurret {
 
     @Override
     public void init(){
-        consumes.powerCond(powerUse, TurretBuild::isActive);
+        consumePower(powerUse);
         super.init();
     }
 

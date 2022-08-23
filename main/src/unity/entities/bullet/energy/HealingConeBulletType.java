@@ -37,7 +37,7 @@ public class HealingConeBulletType extends BulletType{
     }
 
     @Override
-    public float range(){
+    public float calculateRange(){
         return length;
     }
 

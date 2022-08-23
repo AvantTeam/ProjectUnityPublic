@@ -109,14 +109,14 @@ public class ExpLaserBlastBulletType extends LaserBulletType{
     }
 
     @Override
-    public float range(){
+    public float calculateRange(){
         return Math.max(length, maxRange);
     }
 
     @Override
     public void init(Bullet b){
         setDamage(b);
-        float resultLength = Damage.collideLaser(b, getLength(b), largeHit), rot = b.rotation();
+        float resultLength = Damage.collideLaser(b, getLength(b), largeHit, laserAbsorb, pierceCap), rot = b.rotation();
 
         laserEffect.at(b.x, b.y, rot, resultLength * 0.75f);
 
@@ -144,9 +144,9 @@ public class ExpLaserBlastBulletType extends LaserBulletType{
     }
 
     @Override
-    public void hitTile(Bullet b, Building build, float initialHealth, boolean direct){
+    public void hitTile(Bullet b, Building build, float x, float y, float initialHealth, boolean direct){
         handleExp(b, build.x, build.y, hitBuildingExpGain);
-        super.hitTile(b, build, initialHealth, direct);
+        super.hitTile(b, build, x, y, initialHealth, direct);
     }
 
     @Override
@@ -182,7 +182,7 @@ public class ExpLaserBlastBulletType extends LaserBulletType{
         Draw.reset();
 
         Tmp.v1.trns(b.rotation(), baseLen * 1.1f);
-        Drawf.light(b.team, b.x, b.y, b.x + Tmp.v1.x, b.y + Tmp.v1.y, cwidth * 1.4f * b.fout(), ((Color[])b.data)[0], 0.6f);
+        Drawf.light(b.x, b.y, b.x + Tmp.v1.x, b.y + Tmp.v1.y, cwidth * 1.4f * b.fout(), ((Color[])b.data)[0], 0.6f);
     }
 
     @Override

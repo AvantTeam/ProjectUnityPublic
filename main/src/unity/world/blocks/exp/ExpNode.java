@@ -54,7 +54,7 @@ public class ExpNode extends ExpTank {
     @Override
     public void setBars(){
         super.setBars();
-        bars.add("links", (ExpNodeBuild entity) -> new Bar(() -> Core.bundle.format("bar.reloading", (int)(100 * Mathf.clamp(entity.reload / reloadTime))), () -> Pal.accent, () -> Mathf.clamp(entity.reload / reloadTime)));
+        addBar("links", (ExpNodeBuild entity) -> new Bar(() -> Core.bundle.format("bar.reloading", (int)(100 * Mathf.clamp(entity.reload / reloadTime))), () -> Pal.accent, () -> Mathf.clamp(entity.reload / reloadTime)));
     }
 
     @Override

@@ -53,7 +53,7 @@ public class ExpLaserBulletType extends ExpBulletType {
     }
 
     @Override
-    public float range(){
+    public float calculateRange(){
         return Math.max(length, maxRange);
     }
 
@@ -76,8 +76,8 @@ public class ExpLaserBulletType extends ExpBulletType {
             hit(b, tile.x, tile.y);
             handleExp(b, tile.x, tile.y, expGain);
         }else{
-            float dst = (b.lifetime / lifetime) * range();
-            Vec2 v = new Vec2().trns(b.rotation(), scaleVelocity ? Math.min(dst, getLength(b)) : getLength(b)).add(b.x, b.y);
+            float dst = (b.lifetime / lifetime) * range;
+            Vec2 v = new Vec2().trns(b.rotation(), scaleLife ? Math.min(dst, getLength(b)) : getLength(b)).add(b.x, b.y);
             b.data = v;
             if(hitMissed) hit(b, v.x, v.y);
         }
@@ -108,7 +108,7 @@ public class ExpLaserBulletType extends ExpBulletType {
             }
             Draw.reset();
 
-            Drawf.light(b.team, b.x, b.y, Tmp.v1.x, Tmp.v1.y, width * 10 * b.fout(), Color.white, 0.6f);
+            Drawf.light(b.x, b.y, Tmp.v1.x, Tmp.v1.y, width * 10 * b.fout(), Color.white, 0.6f);
         }
     }
     

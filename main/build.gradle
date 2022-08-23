@@ -15,7 +15,7 @@ targetCompatibility = 8
 
 dependencies{
 
-    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    compileOnly "com.github.Anuken.MindustryJitpack:core:$mindustryVersion"
     compileOnly "com.github.Anuken.Arc:arc-core:$arcVersion"
     compileOnly project(':annotations')
     annotationProcessor project(':annotations')
@@ -106,13 +106,14 @@ class Fetcher{
                 run.run()
                 error = null
             }catch(Throwable e){
+                Log.err(e)
                 error = e
             }
 
             return error != null
         }
 
-        while(exec.get(run)){}
+        exec.get(run)
     }
 }
 
@@ -124,7 +125,7 @@ task fetchComps{
         final CopyOnWriteArrayList<Fetcher> fetches = new CopyOnWriteArrayList<>()
 
         UnsafeRunnable mainRun ={
-            Http.get("https://api.github.com/repos/Anuken/Mindustry/contents/core/src/mindustry/entities/comp?ref=$mindustryVersion")
+            Http.get("https://api.github.com/repos/Anuken/Mindustry/contents/core/src/mindustry/entities/comp?ref=$mindustryFetchVersion")
                 .error({ final t -> throw new RuntimeException(t) })
                 .block({ final res ->
                     final def list = Jval.read(res.getResultAsString()).asArray()

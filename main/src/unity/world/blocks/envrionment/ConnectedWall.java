@@ -40,8 +40,8 @@ public class ConnectedWall extends StaticWall{
         }else{
             Draw.rect(tiles[index], tile.worldx(), tile.worldy());
         }
-        if(tile.overlay() instanceof WallOreBlock ore){
-           ore.drawBase(tile);
+        if(tile.overlay().wallOre){
+           tile.overlay().drawBase(tile);
        }
     }
 }

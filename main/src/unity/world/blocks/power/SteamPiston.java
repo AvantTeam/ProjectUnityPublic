@@ -67,12 +67,12 @@ public class SteamPiston extends GenericGraphBlock{
                 boolean pulling = flywheeldir.dot(flywheel.attachY-y,-(flywheel.attachX-x))>0;
                 if(pulling ){
                     pushForce = 0;
-                    if(timer(smokeTimer,5) && liquids.total()>1){
+                    if(timer(smokeTimer,5) && liquids.currentAmount()>1){
                         float rand = Mathf.random()>0.5f?-1:1;
                         Fx.fuelburn.at(x+flywheeldir.y*tilesize*rand,y-flywheeldir.x*tilesize*rand);
                     }
                 }else{
-                    if(rwater<=0 && consValid()){
+                    if(rwater<=0 && canConsume()){
                         consume();
                         heatnode.addHeatEnergy(-eff*150);
                         rwater += 10;
@@ -130,7 +130,7 @@ public class SteamPiston extends GenericGraphBlock{
         public void draw(){
             float temp = heatNode().getTemp();
             Draw.rect(base,x,y,0);
-            Drawf.liquid(liquid, x, y, liquids.total() / liquidCapacity, liquids.current().color);
+            Drawf.liquid(liquid, x, y, liquids.currentAmount() / liquidCapacity, liquids.current().color);
             Draw.rect(sprite[rotation],x,y,0);
             drawTeamTop();
 

@@ -67,8 +67,8 @@ public class LargeStaticWall extends StaticWall{
         }
 
        //draw ore on top
-       if(tile.overlay() instanceof WallOreBlock ore){
-           ore.drawBase(tile);
+       if(tile.overlay().wallOre){
+           tile.overlay().drawBase(tile);
        }
     }
     void take(int rx, int ry, int s){

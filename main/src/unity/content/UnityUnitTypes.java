@@ -9,6 +9,8 @@ import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.entities.abilities.*;
 import mindustry.entities.bullet.*;
+import mindustry.entities.effect.*;
+import mindustry.entities.pattern.*;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -62,7 +64,7 @@ public final class UnityUnitTypes{
 
     public static void load(){
         caelifera = new UnityUnitType("caelifera"){{
-            defaultController = FlyingAI::new;
+            aiController = FlyingAI::new;
             circleTarget = false;
 
             speed = 5f;
@@ -115,7 +117,7 @@ public final class UnityUnitTypes{
         }};
 
         schistocerca = new UnityUnitType("schistocerca"){{
-            defaultController = FlyingAI::new;
+            aiController = FlyingAI::new;
             circleTarget = false;
 
             speed = 4.5f;
@@ -171,7 +173,22 @@ public final class UnityUnitTypes{
                 ejectEffect = Fx.casing1;
                 reload = 30f;
 
-                bullet = Bullets.standardIncendiary;
+                bullet = new BasicBulletType(3.2f, 16, "bullet"){{
+                    width = 10f;
+                    height = 12f;
+                    frontColor = Pal.lightishOrange;
+                    backColor = Pal.lightOrange;
+                    status = StatusEffects.burning;
+                    hitEffect = new MultiEffect(Fx.hitBulletSmall, Fx.fireHit);
+
+                    ammoMultiplier = 5;
+
+                    splashDamage = 10f;
+                    splashDamageRadius = 22f;
+
+                    makeFire = true;
+                    lifetime = 60f;
+                }};
             }});
 
             for(int i : Mathf.signs){
@@ -188,7 +205,7 @@ public final class UnityUnitTypes{
         }};
 
         anthophila = new UnityUnitType("anthophila"){{
-            defaultController = FlyingAI::new;
+            aiController = FlyingAI::new;
             circleTarget = false;
 
             speed = 4f;
@@ -225,7 +242,7 @@ public final class UnityUnitTypes{
                 y = 8.25f;
                 shootY = 5.25f;
                 reload = 30f;
-                shots = 3;
+                shoot.shots = 3;
                 shootSound = Sounds.spark;
 
                 bullet = new LightningBulletType(){{
@@ -256,7 +273,7 @@ public final class UnityUnitTypes{
         }};
 
         vespula = new UnityUnitType("vespula"){{
-            defaultController = FlyingAI::new;
+            aiController = FlyingAI::new;
             circleTarget = false;
 
             speed = 3.5f;
@@ -296,11 +313,18 @@ public final class UnityUnitTypes{
                 shootX = -0.25f;
                 shootY = 5.75f;
                 reload = 20f;
-                shots = 4;
-                shotDelay = 2f;
+                shoot.shots = 4;
+                shoot.shotDelay = 2f;
                 shootSound = Sounds.shootSnap;
 
-                bullet = Bullets.standardThorium;
+                bullet = new BasicBulletType(4f, 29, "bullet"){{
+                    width = 10f;
+                    height = 13f;
+                    shootEffect = Fx.shootBig;
+                    smokeEffect = Fx.shootBigSmoke;
+                    ammoMultiplier = 4;
+                    lifetime = 60f;
+                }};
             }}, new Weapon(name + "-laser-gun"){{
                 x = 13.5f;
                 y = 15.5f;
@@ -328,7 +352,7 @@ public final class UnityUnitTypes{
         }};
 
         lepidoptera = new UnityUnitType("lepidoptera"){{
-            defaultController = FlyingAI::new;
+            aiController = FlyingAI::new;
             circleTarget = false;
 
             speed = 3f;
@@ -367,8 +391,8 @@ public final class UnityUnitTypes{
                 shootY = 5.75f;
                 shootSound = Sounds.shootSnap;
                 ejectEffect = Fx.casing2;
-                shots = 2;
-                spacing = 2f;
+
+                shoot = new ShootSpread(2, 2f);
                 reload = 20f;
 
                 bullet = new MissileBulletType(6f, 1f){{
@@ -392,9 +416,8 @@ public final class UnityUnitTypes{
                 shootY = 6.75f;
                 shootSound = Sounds.shotgun;
                 ejectEffect = Fx.none;
-                shots = 3;
-                spacing = 15f;
-                shotDelay = 0f;
+
+                shoot = new ShootSpread(3, 15f);
                 reload = 45f;
 
                 bullet = new ShrapnelBulletType(){{
@@ -435,7 +458,7 @@ public final class UnityUnitTypes{
             health = 48750f;
             armor = 15f;
             mechStepParticles = true;
-            mechStepShake = 0.8f;
+            stepShake = 0.8f;
             canDrown = false;
             mechFrontSway = 2f;
             mechSideSway = 0.7f;
@@ -501,7 +524,7 @@ public final class UnityUnitTypes{
             health = 140000f;
             armor = 20f;
             mechStepParticles = true;
-            mechStepShake = 0.83f;
+            stepShake = 0.83f;
             canDrown = false;
             mechFrontSway = 4f;
             mechSideSway = 0.7f;
@@ -514,13 +537,13 @@ public final class UnityUnitTypes{
                 x = 36.5f;
                 y = 2.75f;
                 shootY = 19.25f;
-                xRand = 4.5f;
                 alternate = false;
                 rotate = true;
                 rotateSpeed = 1.2f;
                 inaccuracy = 4f;
                 reload = 3f;
-                shots = 2;
+                xRand = 4.5f; //TODO use something else instead? -Anuke
+                shoot.shots = 2;
                 angleCone = 20f;
                 angleOffset = -15f;
                 shootCone = 20f;
@@ -595,7 +618,7 @@ public final class UnityUnitTypes{
                 rotate = true;
                 rotateSpeed = 4f;
                 inaccuracy = 10f;
-                shots = 8;
+                shoot.shots = 8;
                 velocityRnd = 0.2f;
                 shootSound = Sounds.artillery;
                 reload = 40f;
@@ -620,17 +643,16 @@ public final class UnityUnitTypes{
             health = 45000f;
             hitSize = 37f;
             armor = 10f;
-            landShake = 1.5f;
-            commandLimit = 8;
+            mechLandShake = 1.5f;
             rotateSpeed = 1.3f;
 
             legCount = 6;
             legLength = 29f;
             legBaseOffset = 8f;
             legMoveSpace = 0.7f;
-            legTrns = 0.6f;
+            legForwardScl = 0.6f;
             hovering = true;
-            visualElevation = 0.23f;
+            shadowElevation = 0.23f;
             allowLegStep = true;
             ammoType = new PowerAmmoType(2000);
             groundLayer = Layer.legUnit;
@@ -644,7 +666,7 @@ public final class UnityUnitTypes{
                 shootSound = Sounds.lasershoot;
                 shootStatus = StatusEffects.slow;
                 shootStatusDuration = 80f;
-                firstShotDelay = ChargeFx.greenLaserChargeParent.lifetime;
+                shoot.firstShotDelay = ChargeFx.greenLaserChargeParent.lifetime;
 
                 bullet = new ReflectingLaserBulletType(500f){{
                     lifetime = 65f;
@@ -700,17 +722,16 @@ public final class UnityUnitTypes{
             health = 102500;
             hitSize = 55f;
             armor = 12f;
-            landShake = 2f;
-            commandLimit = 8;
+            mechLandShake = 2f;
             rotateSpeed = 0.8f;
 
             legCount = 4;
             legLength = 34.36f;
             legBaseOffset = 11f;
             legMoveSpace = 0.7f;
-            legTrns = 0.6f;
+            legForwardScl = 0.6f;
             hovering = true;
-            visualElevation = 0.23f;
+            shadowElevation = 0.23f;
             allowLegStep = true;
             ammoType = new PowerAmmoType(2000);
             groundLayer = Layer.legUnit;
@@ -725,7 +746,7 @@ public final class UnityUnitTypes{
                 shootY = 16.75f;
                 reload = 12f * 60f;
                 shootSound = Sounds.beam;
-                firstShotDelay = ChargeFx.sagittariusCharge.lifetime;
+                shoot.firstShotDelay = ChargeFx.sagittariusCharge.lifetime;
                 shootStatus = UnityStatusEffects.sagittariusFatigue;
                 shootStatusDuration = 10f * 60f + ChargeFx.sagittariusCharge.lifetime;
                 continuous = true;
@@ -756,7 +777,7 @@ public final class UnityUnitTypes{
                 inaccuracy = 5f;
                 rotate = true;
                 alternate = false;
-                shots = 2;
+                shoot.shots = 2;
                 shootSound = UnitySounds.energyBolt;
 
                 bullet = new ArrowBulletType(7f, 25f){{
@@ -793,7 +814,7 @@ public final class UnityUnitTypes{
             legLength = 112f;
             legExtension = -8.25f;
             legBaseOffset = 8f;
-            landShake = 2.4f;
+            mechLandShake = 2.4f;
             legLengthScl = 1f;
             rippleScale = 2f;
             legSpeed = 0.2f;
@@ -804,7 +825,7 @@ public final class UnityUnitTypes{
 
             armor = 13f;
             allowLegStep = true;
-            visualElevation = 0.95f;
+            shadowElevation = 0.95f;
 
             weapons.add(new Weapon("unity-araneidae-mount"){{
                 x = 15f;
@@ -815,11 +836,25 @@ public final class UnityUnitTypes{
                 rotateSpeed = 2f;
                 rotate = true;
                 shadow = 15f;
-                shots = 3;
-                spacing = 15f;
+                shoot = new ShootSpread(3, 15f);
                 shootSound = Sounds.laser;
 
-                bullet = UnityBullets.sapLaser;
+                bullet = new LaserBulletType(80f){{
+                    colors = new Color[]{Pal.sapBulletBack.cpy().a(0.4f), Pal.sapBullet, Color.white};
+                    length = 150f;
+                    width = 25f;
+                    sideLength = sideWidth = 0f;
+                    shootEffect = ShootFx.sapPlasmaShoot;
+                    hitColor = lightColor = lightningColor = Pal.sapBullet;
+                    status = StatusEffects.sapped;
+                    statusDuration = 80f;
+                    lightningSpacing = 17f;
+                    lightningDelay = 0.12f;
+                    lightningDamage = 15f;
+                    lightningLength = 4;
+                    lightningLengthRand = 2;
+                    lightningAngleRand = 15f;
+                }};
             }}, new MultiBarrelWeapon("unity-araneidae-cannon"){{
                 mirror = false;
                 x = 0f;
@@ -859,7 +894,7 @@ public final class UnityUnitTypes{
                     height = 23f;
                     shrinkY = 0f;
                     collidesAir = false;
-                    scaleVelocity = true;
+                    scaleLife = true;
                     pierceCap = 2;
 
                     status = StatusEffects.sapped;
@@ -889,13 +924,12 @@ public final class UnityUnitTypes{
             legLength = 176f;
             legExtension = -24f;
             legBaseOffset = 9f;
-            visualElevation = 1f;
+            shadowElevation = 1f;
             groundLayer = Layer.legUnit + 0.02f;
             rippleScale = 3.4f;
             legSplashDamage = 130f;
             legSplashRange = 60f;
             targetAir = false;
-            commandLimit = 5;
 
             weapons.add(new LimitedAngleWeapon(name + "-launcher"){{
                 layerOffset = -0.01f;
@@ -910,8 +944,8 @@ public final class UnityUnitTypes{
                 angleCone = 60f;
                 angleOffset = 45f;
                 inaccuracy = 25f;
-                xRand = 2.25f;
-                shots = 2;
+                xRand = 2.25f; //TODO use something else instead? -Anuke
+                shoot.shots = 2;
                 shootSound = Sounds.missile;
 
                 bullet = new MissileBulletType(3.7f, 15f){{
@@ -986,7 +1020,7 @@ public final class UnityUnitTypes{
                     height = 27f;
                     shrinkY = 0f;
                     collidesAir = false;
-                    scaleVelocity = true;
+                    scaleLife = true;
                     pierceCap = 3;
 
                     status = StatusEffects.sapped;
@@ -1009,7 +1043,6 @@ public final class UnityUnitTypes{
             rotateSpeed = 0.9f;
             flying = true;
             lowAltitude = true;
-            destructibleWreck = false;
             targetFlags = new BlockFlag[]{BlockFlag.reactor, null};
             hitSize = 80f;
             engineOffset = 42.75f;
@@ -1053,8 +1086,8 @@ public final class UnityUnitTypes{
                 rotate = true;
                 recoil = 5f;
                 reload = 55f;
-                shots = 4;
-                shotDelay = 4f;
+                shoot.shots = 4;
+                shoot.shotDelay = 4f;
                 rotateSpeed = 3f;
                 shadow = 22f;
                 shootSound = Sounds.shootBig;
@@ -1068,8 +1101,8 @@ public final class UnityUnitTypes{
                 rotate = true;
                 recoil = 5f;
                 reload = 60f;
-                shots = 4;
-                shotDelay = 4f;
+                shoot.shots = 4;
+                shoot.shotDelay = 4f;
                 rotateSpeed = 3f;
                 shadow = 22f;
                 shootSound = Sounds.shootBig;
@@ -1087,7 +1120,6 @@ public final class UnityUnitTypes{
             rotateSpeed = 0.7f;
             flying = true;
             lowAltitude = true;
-            destructibleWreck = false;
             targetFlags = new BlockFlag[]{BlockFlag.reactor, null};
             hitSize = 96f;
             engineOffset = 46.5f;
@@ -1167,7 +1199,7 @@ public final class UnityUnitTypes{
                 rotate = true;
                 rotateSpeed = 2f;
                 reload = 2f;
-                xRand = 3f;
+                xRand = 3f; //TODO use something else instead? -Anuke
                 inaccuracy = 4f;
                 shootSound = Sounds.shootBig;
 
@@ -1176,7 +1208,7 @@ public final class UnityUnitTypes{
         }};
 
         sedec = new UnityUnitType("sedec"){{
-            defaultController = HealingDefenderAI::new;
+            controller = u -> new HealingDefenderAI();
             health = 45000f;
             armor = 20f;
             speed = 0.7f;
@@ -1186,12 +1218,11 @@ public final class UnityUnitTypes{
             flying = true;
             engineOffset = 48f;
             engineSize = 7.8f;
-            rotateShooting = false;
+            faceTarget = false;
             hitSize = 85f;
             payloadCapacity = (6.2f * 6.2f) * tilePayload;
             buildSpeed = 5f;
             drawShields = false;
-            commandLimit = 8;
             buildBeamOffset = 29.5f;
 
             //ammo resupply mechanics removed in 129 until further notice; TODO remove or rework
@@ -1225,7 +1256,7 @@ public final class UnityUnitTypes{
         }};
 
         trigintaduo = new UnityUnitType("trigintaduo"){{
-            defaultController = HealingDefenderAI::new;
+            controller = u -> new HealingDefenderAI();
             health = 52500f;
             armor = 22f;
             speed = 0.6f;
@@ -1235,12 +1266,11 @@ public final class UnityUnitTypes{
             flying = true;
             engineOffset = 41.25f;
             engineSize = 6.5f;
-            rotateShooting = false;
+            faceTarget = false;
             hitSize = 105.5f;
             payloadCapacity = (8.1f * 8.1f) * tilePayload;
             buildSpeed = 6f;
             drawShields = false;
-            commandLimit = 12;
             buildBeamOffset = 47.75f;
 
             //ammo resupply mechanics removed in 129 until further notice; TODO remove or rework
@@ -1311,11 +1341,11 @@ public final class UnityUnitTypes{
             armor = 17f;
             accel = 0.19f;
             rotateSpeed = 0.86f;
-            rotateShooting = false;
+            faceTarget = false;
 
             trailLength = 70;
-            trailX = 18f;
-            trailY = -32f;
+            waveTrailX = 18f;
+            waveTrailY = -32f;
             trailScl = 3.5f;
 
             weapons.add(new Weapon(name + "-launcher"){{
@@ -1325,7 +1355,7 @@ public final class UnityUnitTypes{
                 rotate = true;
                 inaccuracy = 15f;
                 reload = 7f;
-                xRand = 2.25f;
+                xRand = 2.25f; //TODO use something else instead? -Anuke
                 shootSound = Sounds.missile;
 
                 bullet = UnityBullets.basicMissile;
@@ -1336,7 +1366,7 @@ public final class UnityUnitTypes{
                 rotate = true;
                 inaccuracy = 15f;
                 reload = 7f;
-                xRand = 2.25f;
+                xRand = 2.25f; //TODO use something else instead? -Anuke
                 shootSound = Sounds.missile;
 
                 bullet = UnityBullets.basicMissile;
@@ -1347,7 +1377,7 @@ public final class UnityUnitTypes{
                 mirror = false;
                 rotate = true;
                 rotateSpeed = 1f;
-                shots = 3;
+                shoot.shots = 3;
                 inaccuracy = 3f;
                 velocityRnd = 0.1f;
                 reload = 60f * 2f;
@@ -1362,7 +1392,15 @@ public final class UnityUnitTypes{
                     trailColor = Pal.bulletYellowBack;
                     hitEffect = HitFx.hitExplosionMassive;
                     lifetime = 65f;
-                    fragBullet = Bullets.artilleryDense;
+                    fragBullet = new ArtilleryBulletType(3f, 20, "shell"){{
+                        hitEffect = Fx.flakExplosion;
+                        knockback = 0.8f;
+                        lifetime = 80f;
+                        width = height = 11f;
+                        collidesTiles = false;
+                        splashDamageRadius = 25f * 0.75f;
+                        splashDamage = 33f;
+                    }};
                     fragBullets = 7;
                     fragLifeMax = 0.15f;
                     fragLifeMin = 0.15f;
@@ -1380,11 +1418,11 @@ public final class UnityUnitTypes{
             armor = 18f;
             accel = 0.19f;
             rotateSpeed = 0.78f;
-            rotateShooting = false;
+            faceTarget = false;
 
             trailLength = 70;
-            trailX = 26f;
-            trailY = -42f;
+            waveTrailX = 26f;
+            waveTrailY = -42f;
             trailScl = 4f;
 
             float spawnTime = 15f * 60f;
@@ -1398,15 +1436,23 @@ public final class UnityUnitTypes{
                 y = 30.25f;
                 shootY = 9.5f;
                 recoil = 5f;
-                shots = 5;
-                shotDelay = 3f;
+                shoot.shots = 5;
+                shoot.shotDelay = 3f;
                 inaccuracy = 5f;
                 shootCone = 15f;
                 rotate = true;
                 shootSound = Sounds.artillery;
                 reload = 25f;
 
-                bullet = Bullets.standardThoriumBig;
+                bullet = new BasicBulletType(8f, 80, "bullet"){{
+                    hitSize = 5;
+                    width = 16f;
+                    height = 23f;
+                    shootEffect = Fx.shootBig;
+                    pierceCap = 2;
+                    pierceBuilding = true;
+                    knockback = 0.7f;
+                }};
             }}, new LimitedAngleWeapon(name + "-side-silo"){
                 {
                     layerOffset = -0.01f;
@@ -1414,15 +1460,15 @@ public final class UnityUnitTypes{
                     x = 29.75f;
                     y = -13f;
                     shootY = 7f;
-                    xRand = 9f;
+                    xRand = 9f; //TODO use something else instead? -Anuke
                     defaultAngle = angleOffset = 90f;
                     angleCone = 0f;
                     shootCone = 125f;
                     alternate = false;
                     rotate = true;
                     reload = 50f;
-                    shots = 12;
-                    shotDelay = 3f;
+                    shoot.shots = 12;
+                    shoot.shotDelay = 3f;
                     inaccuracy = 5f;
                     shootSound = Sounds.missile;
 
@@ -1443,21 +1489,10 @@ public final class UnityUnitTypes{
                 }
 
                 @Override
-                protected Bullet bullet(Unit unit, float shootX, float shootY, float angle, float lifescl){
-                    Bullet b = super.bullet(unit, shootX, shootY, angle, lifescl);
+                public void handleBullet(Unit unit, WeaponMount mount, Bullet b){
                     if(b.type instanceof GuidedMissileBulletType){
-                        WeaponMount m = null;
-                        for(WeaponMount mount : unit.mounts){
-                            if(mount.weapon == this){
-                                m = mount;
-                                break;
-                            }
-                        }
-
-                        if(m != null) b.data = m;
+                        b.data = mount;
                     }
-
-                    return b;
                 }
             }, new LimitedAngleWeapon(fin.name + "-launcher"){{
                 x = 0f;
@@ -1467,7 +1502,7 @@ public final class UnityUnitTypes{
                 mirror = false;
                 inaccuracy = 15f;
                 reload = 7f;
-                xRand = 2.25f;
+                xRand = 2.25f; //TODO use something else instead? -Anuke
                 shootSound = Sounds.missile;
                 angleCone = 135f;
 
@@ -1499,7 +1534,7 @@ public final class UnityUnitTypes{
                     bulletDamage = 18f;
                     width = 8f;
                     height = 12f;
-                    scaleVelocity = true;
+                    scaleLife = true;
                     collidesGround = false;
                     status = StatusEffects.blasted;
                     statusDuration = 60f;
@@ -1523,9 +1558,15 @@ public final class UnityUnitTypes{
                     splashDamageRadius = 30f;
                     pierceDamageFactor = 0.15f;
                     pierceCap = -1;
-                    fragBullet = Bullets.standardDense;
+                    fragBullet = new BasicBulletType(3.5f, 18){{
+                        width = 9f;
+                        height = 12f;
+                        reloadMultiplier = 0.6f;
+                        ammoMultiplier = 4;
+                        lifetime = 60f;
+                    }};
                     fragBullets = 2;
-                    fragCone = 20f;
+                    fragRandomSpread = 20f;
                     fragLifeMin = 0.4f;
                     fragLifeMax = 0.7f;
                     trailSpacing = 40f;
@@ -1538,7 +1579,7 @@ public final class UnityUnitTypes{
         }};
 
         modularUnitSmall = new UnityUnitType("modularUnit"){{
-            rotateShooting = false;
+            faceTarget = false;
             omniMovement = false;
             weapons.add(new Weapon("gun")); //blank weapon so mobile doesn't die
             //stats? what stats? :D

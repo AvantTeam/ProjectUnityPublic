@@ -60,8 +60,8 @@ public class TorqueDrill extends Drill implements GraphBlock{
     public void drawPlace(int x, int y, int rotation, boolean valid){
         super.drawPlace(x, y, rotation, valid);
     }
-    @Override public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
-         super.drawRequestRegion(req,list);
+    @Override public void drawPlanRegion(BuildPlan req, Eachable<BuildPlan> list){
+         super.drawPlanRegion(req,list);
          config.drawConnectionPoints(req,list); }
     @Override public Block getBuild(){
             return this;
@@ -113,8 +113,9 @@ public class TorqueDrill extends Drill implements GraphBlock{
         }
 
         @Override
-        public float efficiency(){
-            return super.efficiency() * Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,torqueNode().maxSpeed,0,maxEfficiency),0,maxEfficiency);
+        public void updateConsumption(){
+            super.updateConsumption();
+            efficiency *= Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,torqueNode().maxSpeed,0,maxEfficiency),0,maxEfficiency);
         }
 
         @Override

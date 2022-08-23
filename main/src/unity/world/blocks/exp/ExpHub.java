@@ -98,7 +98,7 @@ public class ExpHub extends ExpTank{
     @Override
     public void setBars(){
         super.setBars();
-        bars.add("links", (ExpHubBuild entity) -> new Bar(() -> Core.bundle.format("bar.iconlinks", entity.links.size, maxLinks, Iconc.turret), () -> Pal.accent, () -> entity.links.size / (float)maxLinks));
+        addBar("links", (ExpHubBuild entity) -> new Bar(() -> Core.bundle.format("bar.iconlinks", entity.links.size, maxLinks, Iconc.turret), () -> Pal.accent, () -> entity.links.size / (float)maxLinks));
     }
 
     @Override
@@ -148,7 +148,7 @@ public class ExpHub extends ExpTank{
     }
 
     @Override
-    public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
+    public void drawPlanRegion(BuildPlan req, Eachable<BuildPlan> list){
         Draw.rect(region, req.drawx(), req.drawy());
         Draw.rect(topRegion, req.drawx(), req.drawy(), req.rotation * 90);
     }
@@ -251,7 +251,7 @@ public class ExpHub extends ExpTank{
                 Tmp.v1.set(Tmp.v2).sub(this).nor().scl(size * tilesize / 2f);
                 Tmp.v2.sub(Tmp.v1);
                 Tmp.v1.add(this);
-                Drawf.laser(team, laser, laserEnd, Tmp.v1.x, Tmp.v1.y, Tmp.v2.x, Tmp.v2.y, 0.3f);
+                Drawf.laser(laser, laserEnd, Tmp.v1.x, Tmp.v1.y, Tmp.v2.x, Tmp.v2.y, 0.3f);
             }
             Draw.reset();
         }
@@ -259,7 +259,7 @@ public class ExpHub extends ExpTank{
         @Override
         public void drawLight(){
             super.drawLight();
-            Drawf.light(team, x, y, lightRadius * expf(), UnityPal.exp, 0.5f);
+            Drawf.light(x, y, lightRadius * expf(), UnityPal.exp, 0.5f);
         }
 
         @Override
@@ -287,7 +287,7 @@ public class ExpHub extends ExpTank{
         }
 
         @Override
-        public boolean onConfigureTileTapped(Building other){
+        public boolean onConfigureBuildTapped(Building other){
             if(linkValid(this, other, false)){
                 configure(other.pos());
                 return false;

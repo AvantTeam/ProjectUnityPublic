@@ -199,7 +199,7 @@ public class EntityProcessor extends BaseProcessor{
                     write(inter.build(), getImports(comp));
 
                     if(compAnno.base()){
-                        Seq<TypeElement> deps = depends.copy().and(comp);
+                        Seq<TypeElement> deps = depends.copy().add(comp);
                         baseClassDeps.get(comp, ObjectSet::new).addAll(deps);
 
                         if(annotation(comp, EntityDef.class) == null){
@@ -227,7 +227,7 @@ public class EntityProcessor extends BaseProcessor{
                         }
                     }
                 }else if(compAnno.base()){
-                    Seq<TypeElement> deps = depends.copy().and(comp);
+                    Seq<TypeElement> deps = depends.copy().add(comp);
                     baseClassDeps.get(comp, ObjectSet::new).addAll(deps);
                 }
             }
@@ -1068,7 +1068,7 @@ public class EntityProcessor extends BaseProcessor{
             }
 
             out.remove(component);
-            componentDependencies.put(component, result.asArray());
+            componentDependencies.put(component, result.toSeq());
         }
 
         return componentDependencies.get(component);

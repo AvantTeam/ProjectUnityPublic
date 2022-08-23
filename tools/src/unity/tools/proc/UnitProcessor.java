@@ -134,7 +134,7 @@ public class UnitProcessor implements Processor{
             }
 
             Pixmap icon = Pixmaps.outline(new PixmapRegion(conv(type.region).pixmap()), type.outlineColor, type.outlineRadius);
-            add.get(conv(type.region), type.name + "-outline", icon.copy());
+            add.get(conv(type.region), type.name, icon.copy());
 
             if(unit instanceof Mechc){
                 GraphicUtils.drawCenter(icon, conv(type.baseRegion).pixmap());
@@ -150,7 +150,8 @@ public class UnitProcessor implements Processor{
             type.weapons.sort(w -> w.layerOffset);
             for(var weapon : type.weapons){
                 GenRegion reg = conv(weapon.region);
-                Pixmap pix = weapon.name.isEmpty() ? null : add.get(reg, weapon.name + "-outline", Pixmaps.outline(new PixmapRegion(reg.pixmap()), type.outlineColor, type.outlineRadius)).pixmap();
+                //TODO: outline regions are still needed for certain weapons, e.g. mech guns; look into this -Anuke
+                Pixmap pix = weapon.name.isEmpty() ? null : add.get(reg, weapon.name, Pixmaps.outline(new PixmapRegion(reg.pixmap()), type.outlineColor, type.outlineRadius)).pixmap();
                 if(pix != null && weapon.flipSprite) pix = pix.flipX();
 
                 if(weapon instanceof MultiBarrelWeapon w){
@@ -223,7 +224,8 @@ public class UnitProcessor implements Processor{
             for(var weapon : type.weapons){
                 if(weapon.layerOffset < 0f) continue;
 
-                Pixmap pix = weapon.name.isEmpty() ? null : conv(weapon.top ? weapon.outlineRegion : weapon.region).pixmap();
+                //TODO: needs tweaking, may need to use different region for "top" weapons -Anuke
+                Pixmap pix = weapon.name.isEmpty() ? null : conv(weapon.region).pixmap();
                 if(pix != null && weapon.flipSprite) pix = pix.flipX();
 
                 if(weapon instanceof MultiBarrelWeapon w){

@@ -86,7 +86,7 @@ public class ModularConstructBuilder{
                 }
             }
         }
-        return partsList.asArray();
+        return partsList.toSeq();
     }
 
     public void rebuildValid(){
@@ -181,7 +181,7 @@ public class ModularConstructBuilder{
         byte[] output = new byte[2+partsList.size*(ModularConstruct.idSize+2)];
         output[0] = ModularConstruct.sb(maxx-minx+1);
         output[1] = ModularConstruct.sb(maxy-miny+1);
-        var partseq = partsList.asArray();
+        var partseq = partsList.toSeq();
         int blocksize = (ModularConstruct.idSize+2);
         for(int i = 0; i<partseq.size;i++){
             var part = partseq.get(i);
@@ -220,7 +220,7 @@ public class ModularConstructBuilder{
             return;
         }
         ///temp
-        var partseq = partsList.asArray();
+        var partseq = partsList.toSeq();
         for(int i = 0; i<partseq.size;i++){
             partseq.get(i).type.appendStats(mstat,partseq.get(i),parts);
         }

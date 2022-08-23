@@ -202,7 +202,7 @@ public class ModularPartType implements Displayable{
             header.labelWrap(() -> Core.bundle.get("part."+name))
             .left().width(190f).padLeft(5);
             header.add().growX();
-            header.button("?", Styles.clearPartialt, () -> {
+            header.button("?", Styles.flatBordert, () -> {
                 //Unity.ui.partinfo.show(this);
             }).size(8 * 5).padTop(-5).padRight(-5).right().grow().name("blockinfo");
         });

@@ -55,7 +55,7 @@ public class SeebeckGenerator extends GenericGraphBlock{
     @Override
     public void setBars(){
         super.setBars();
-        bars.add("power", (SeebeckGeneratorBuild entity) -> new Bar(() ->
+        addBar("power", (SeebeckGeneratorBuild entity) -> new Bar(() ->
         Core.bundle.format("bar.poweroutput",
         Strings.fixed(entity.getPowerProduction() * 60 * entity.timeScale(), 1)),
         () -> Pal.powerBar,

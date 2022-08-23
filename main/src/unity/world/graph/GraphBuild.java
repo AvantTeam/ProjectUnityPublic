@@ -1,6 +1,7 @@
 package unity.world.graph;
 
 import arc.func.*;
+import arc.math.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.struct.ObjectMap.*;
@@ -150,5 +151,10 @@ public interface GraphBuild{
     }
     default float get2SpriteRotationVert(){
         return (getBuild().rotdeg()) % 180f;
+    }
+
+    //conv for power
+    default float torqueEfficiency(){
+        return  Mathf.clamp(torqueNode().getGraph().lastVelocity/torqueNode().maxSpeed);
     }
 }

@@ -33,8 +33,8 @@ public class GenericGraphBlock extends Block implements GraphBlock{
     @Override public GraphBlockConfig getConfig(){
         return config;
     }
-    @Override public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
-        super.drawRequestRegion(req,list);
+    @Override public void drawPlanRegion(BuildPlan req, Eachable<BuildPlan> list){
+        super.drawPlanRegion(req,list);
         config.drawConnectionPoints(req,list); }
 
 

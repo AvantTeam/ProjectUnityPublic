@@ -140,7 +140,7 @@ public class ExpTurret extends Turret {
         if(pregrade != null){
             stats.add(Stat.buildCost, "[#84ff00]" + Iconc.up + Core.bundle.format("exp.upgradefrom", pregradeLevel, pregrade.localizedName) + "[]");
             stats.add(Stat.buildCost, t -> {
-                t.button(Icon.infoCircleSmall, Styles.clearTransi, 20f, () -> ui.content.show(pregrade)).size(26).color(UnityPal.exp);
+                t.button(Icon.infoCircleSmall, Styles.cleari, 20f, () -> ui.content.show(pregrade)).size(26).color(UnityPal.exp);
             });
         }
 
@@ -162,7 +162,7 @@ public class ExpTurret extends Turret {
             c.toggle(false);
         };
         l.clicked(toggle);
-        t.button(Icon.downOpenSmall, Styles.clearToggleTransi, 20f, toggle).size(26f).color(UnityPal.exp).padLeft(8);
+        t.button(Icon.downOpenSmall, Styles.clearTogglei, 20f, toggle).size(26f).color(UnityPal.exp).padLeft(8);
         t.row();
         t.add(c).colspan(2).left(); //label + button
     }
@@ -170,7 +170,7 @@ public class ExpTurret extends Turret {
     @Override
     public void setBars(){
         super.setBars();
-        bars.remove("health");
+        removeBar("health");
     }
 
     @Override
@@ -240,8 +240,7 @@ public class ExpTurret extends Turret {
 
     public class ExpTurretBuild extends TurretBuild implements ExpHolder, LevelHolder {
         public int exp;
-        public @Nullable
-        ExpHub.ExpHubBuild hub = null;
+        public @Nullable ExpHub.ExpHubBuild hub = null;
 
         public int incExp(int amount, boolean hub){
             int ehub = (hub && hubValid()) ? this.hub.takeAmount(amount, this) : 0;
@@ -365,6 +364,8 @@ public class ExpTurret extends Turret {
             super.drawLight();
         }
 
+        //TODO broken -Anuke
+        /*
         @Override
         @Ignore
         protected void effects(){
@@ -381,7 +382,7 @@ public class ExpTurret extends Turret {
             }
 
             recoil = recoilAmount;
-        }
+        }*/
 
         @Override
         @Ignore
@@ -500,13 +501,13 @@ public class ExpTurret extends Turret {
 
         @Override
         public String toString(){
-            return Core.bundle.format("field.linearreload", Strings.autoFixed(shots * 60f / start, 2), Strings.autoFixed(shots * 60f / (start + scale * maxLevel), 2));
+            return Core.bundle.format("field.linearreload", Strings.autoFixed(shoot.shots * 60f / start, 2), Strings.autoFixed(shoot.shots * 60f / (start + scale * maxLevel), 2));
         }
 
         @Override
         public void buildTable(Table table, int end){
             table.left();
-            Graph g = new Graph(i -> shots * 60f / fromLevel(i), end, UnityPal.exp);
+            Graph g = new Graph(i -> shoot.shots * 60f / fromLevel(i), end, UnityPal.exp);
             table.add(g).size(graphWidth, graphHeight).left();
             table.row();
             table.label(() -> g.lastMouseOver ? Core.bundle.format("ui.graph.label", g.lastMouseStep, Strings.autoFixed(g.mouseValue(), 2) + "/s") : Core.bundle.get("ui.graph.hover"));

@@ -43,6 +43,10 @@ public class DriveBelt extends GenericGraphBlock{
         config(Integer.class, (DriveBeltBuild build, Integer point) -> {
             Building other = world.build(point);
             if(other instanceof DriveBeltBuild odb){
+                if(state.isEditor()){
+                    build.connector.recalcNeighbours();
+                    odb.connector.recalcNeighbours(); //normally the first update will 'do it', but since there is none in the editor we have to uh improvise.
+                }
                 boolean contains = build.connector.isConnected(odb);
                 if(contains){
                     build.connector.disconnectTo(odb.connector);
@@ -61,6 +65,7 @@ public class DriveBelt extends GenericGraphBlock{
             }
         });
     }
+
 
     @Override
     public void init(){
@@ -96,17 +101,15 @@ public class DriveBelt extends GenericGraphBlock{
 
         Geometry.circle(tile.x, tile.y, (int)(maxRange + 2), (x, y) -> {
             Building other = world.build(x, y);
-            if(valid.get(other) && !tempTileEnts.contains(other)){
-                tempTileEnts.add(other);
+            if(valid.get(other) && !tempBuilds.contains(other)){
+                tempBuilds.add(other);
             }
         });
-        tempTileEnts.sort((a, b) -> Float.compare(a.dst2(tile), b.dst2(tile)));
+        tempBuilds.sort((a, b) -> Float.compare(a.dst2(tile), b.dst2(tile)));
 
-        tempTileEnts.each(valid, others);
+        tempBuilds.each(valid, others);
 
     }
-
-
 
     protected boolean overlaps(float srcx, float srcy, Tile other, float range){
            return Intersector.overlaps(Tmp.cr1.set(srcx, srcy, range), other.getHitbox(Tmp.r1));
@@ -202,7 +205,7 @@ public class DriveBelt extends GenericGraphBlock{
     @Override
     public void setBars(){
         super.setBars();
-        bars.add("connections", entity -> {
+        addBar("connections", entity -> {
             if(entity instanceof DriveBeltBuild deb){
                 return new Bar(
                 () -> Core.bundle.format("bar.powerlines", deb.connector.validConnections(), deb.connector.maxConnections),
@@ -259,7 +262,7 @@ public class DriveBelt extends GenericGraphBlock{
 
 
         @Override
-        public boolean onConfigureTileTapped(Building other){
+        public boolean onConfigureBuildTapped(Building other){
 
             if(linkValid(this, other)){
                 configure(other.pos());

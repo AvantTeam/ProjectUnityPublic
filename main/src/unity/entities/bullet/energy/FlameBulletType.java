@@ -38,22 +38,22 @@ public class FlameBulletType extends BulletType{
     public void init(){
         super.init();
         hitColors = Arrays.copyOf(colors, Math.max(1, colors.length - 1));
-        shootEffect = new Effect(lifetime + 15f, range() * 2f, e -> {
+        shootEffect = new Effect(lifetime + 15f, range * 2f, e -> {
             Draw.color(tc.lerp(colors, e.fin()));
             tc2.set(tc).shiftSaturation(0.77f);
 
-            Angles.randLenVectors(e.id, particleAmount, e.finpow() * (range() + 15f), e.rotation, particleSpread, (x, y) -> {
+            Angles.randLenVectors(e.id, particleAmount, e.finpow() * (range + 15f), e.rotation, particleSpread, (x, y) -> {
                 Fill.circle(e.x + x, e.y + y, 0.65f + e.fout() * particleSizeScl);
-                Drawf.light(null, e.x + x, e.y + y, (0.65f + e.fout(Interp.pow4Out) * particleSizeScl) * 4f, tc2, 0.5f * e.fout(Interp.pow2Out));
+                Drawf.light(e.x + x, e.y + y, (0.65f + e.fout(Interp.pow4Out) * particleSizeScl) * 4f, tc2, 0.5f * e.fout(Interp.pow2Out));
             });
         }).layer(layer);
         if(smokeColors != null && smokeColors.length > 0){
-            smokeEffect = new Effect(lifetime * 3f, range() * 2.25f, e -> {
+            smokeEffect = new Effect(lifetime * 3f, range * 2.25f, e -> {
                 Draw.color(tc.lerp(smokeColors, e.fin()));
 
                 float slope = (0.5f - Math.abs(e.fin(Interp.pow2InInverse) - 0.5f)) * 2f;
 
-                Angles.randLenVectors(e.id, particleAmount, e.fin(Interp.pow5Out) * ((range() * 1.125f) + 15f), e.rotation, particleSpread, (x, y) -> {
+                Angles.randLenVectors(e.id, particleAmount, e.fin(Interp.pow5Out) * ((range * 1.125f) + 15f), e.rotation, particleSpread, (x, y) -> {
                     Fill.circle(e.x + x, e.y + y, 0.65f + slope * particleSizeScl);
                     Fill.circle(e.x + (x / 2f), e.y + (y / 2f), 0.5f + slope * (particleSizeScl / 2f));
                 });

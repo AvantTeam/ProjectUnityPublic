@@ -2,7 +2,6 @@ package unity.mod;
 
 import arc.util.*;
 import arc.util.Log.*;
-import arc.util.async.*;
 import unity.util.*;
 
 import java.util.*;
@@ -22,7 +21,6 @@ public class DevBuildImpl implements DevBuild{
 
     @Override
     public void init(){
-        enableConsole = true;
         JSBridge.importDefaults(JSBridge.defaultScope);
 
         if(!headless && !android){

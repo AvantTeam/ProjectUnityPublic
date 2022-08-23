@@ -51,7 +51,7 @@ public class SlowRailBulletType extends BasicBulletType{
                 float h = building.health;
                 float sub = Math.max(building.health * pierceDamageFactor, 0);
                 building.collision(b);
-                hitTile(b, building, h, true);
+                hitTile(b, building, b.x, b.y, h, true);
                 b.collided.add(building.id);
                 b.damage -= sub;
             }

@@ -32,7 +32,6 @@ public class OmniLiquidTurret extends ExpTurret {
 
     public OmniLiquidTurret(String name){
         super(name);
-        acceptCoolant = false;
         hasLiquids = true;
         loopSound = Sounds.spray;
         shootSound = Sounds.none;
@@ -52,12 +51,6 @@ public class OmniLiquidTurret extends ExpTurret {
         super.load();
         liquidRegion = atlas.find(name + "-liquid");
         topRegion = atlas.find(name + "-top");
-    }
-
-    @Override
-    public TextureRegion[] icons(){
-        if(topRegion.found()) return new TextureRegion[]{baseRegion, region, topRegion};
-        return super.icons();
     }
 
     public static boolean friendly(Liquid l){
@@ -114,15 +107,6 @@ public class OmniLiquidTurret extends ExpTurret {
     }
 
     public class OmniLiquidTurretBuild extends ExpTurretBuild{
-        @Override
-        public void draw(){
-            super.draw();
-
-            if(liquidRegion.found()){
-                Drawf.liquid(liquidRegion, x + tr2.x, y + tr2.y, liquids.total() / liquidCapacity, liquids.current().color, rotation - 90);
-            }
-            if(topRegion.found()) Draw.rect(topRegion, x + tr2.x, y + tr2.y, rotation - 90);
-        }
 
         @Override
         public boolean shouldActiveSound(){
@@ -172,24 +156,6 @@ public class OmniLiquidTurret extends ExpTurret {
         }
 
         @Override
-        protected void effects(){
-            BulletType type = peekAmmo();
-
-            Effect fshootEffect = shootEffect == Fx.none ? type.shootEffect : shootEffect;
-            Effect fsmokeEffect = smokeEffect == Fx.none ? type.smokeEffect : smokeEffect;
-
-            fshootEffect.at(x + tr.x, y + tr.y, rotation, liquids.current().color);
-            fsmokeEffect.at(x + tr.x, y + tr.y, rotation, liquids.current().color);
-            shootSound.at(tile);
-
-            if(shootShake > 0){
-                Effect.shake(shootShake, shootShake, tile.build);
-            }
-
-            recoil = recoilAmount;
-        }
-
-        @Override
         public BulletType useAmmo(){
             if(cheating()) return shootType;
             liquids.remove(liquids.current(), shootAmount);
@@ -203,7 +169,7 @@ public class OmniLiquidTurret extends ExpTurret {
 
         @Override
         public boolean hasAmmo(){
-            return liquids.total() >= shootAmount;
+            return liquids.currentAmount() >= shootAmount;
         }
 
         @Override
@@ -217,12 +183,12 @@ public class OmniLiquidTurret extends ExpTurret {
             return liquids.current() == liquid || liquids.currentAmount() < 0.2f;
         }
 
+        //TODO as far as I can tell, the old turret just set the bullet data to the liquid. but I could be wrong -Anuke
         @Override
-        protected void bullet(BulletType type, float angle){
-            Log.info("Shoot with " + liquids.current().name);
-            float lifeScl = type.scaleVelocity ? Mathf.clamp(Mathf.dst(x + tr.x, y + tr.y, targetPos.x, targetPos.y) / type.range(), minRange / type.range(), range / type.range()) : 1f;
-
-            type.create(this, team, x + tr.x, y + tr.y, angle, -1f, 1f + Mathf.range(velocityInaccuracy), lifeScl, liquids.current());
+        protected void handleBullet(@Nullable Bullet bullet, float offsetX, float offsetY, float angleOffset){
+            if(bullet != null){
+                bullet.data = liquids.current();
+            }
         }
     }
 }

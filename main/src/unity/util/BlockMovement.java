@@ -104,7 +104,7 @@ public class BlockMovement{
         }
 
         Tile next = build.tile.nearby(dirs[direction].x, dirs[direction].y);
-        return build.block.canPlaceOn(next, build.team);
+        return build.block.canPlaceOn(next, build.team, build.rotation);
     }
 
     //pushes a single building.

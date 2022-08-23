@@ -34,7 +34,7 @@ public class CygnusBulletType extends EmpBulletType{
 
     @Override
     public void drawLight(Bullet b){
-        Drawf.light(b.team, b.x, b.y, size * 3f, backColor, 0.3f);
+        Drawf.light(b.x, b.y, size * 3f, backColor, 0.3f);
     }
 
     @Override

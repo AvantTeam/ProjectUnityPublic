@@ -36,7 +36,7 @@ public class HeatPipe extends GenericGraphBlock{
     }
 
     @Override
-    public void drawRequestRegion(BuildPlan req, Eachable<BuildPlan> list){
+    public void drawPlanRegion(BuildPlan req, Eachable<BuildPlan> list){
         float scl = tilesize * req.animScale;
         int spriteIndex = 0;
         for(int i =0;i<4;i++){

@@ -7,7 +7,7 @@ sourceCompatibility = 8
 targetCompatibility = 8
 
 dependencies{
-    implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    implementation "com.github.Anuken.MindustryJitpack:core:$mindustryVersion"
     implementation "com.squareup:javapoet:$javapoetVersion"
 }
 

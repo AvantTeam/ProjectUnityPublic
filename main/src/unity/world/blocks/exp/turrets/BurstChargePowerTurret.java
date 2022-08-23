@@ -11,6 +11,8 @@ public class BurstChargePowerTurret extends ExpPowerTurret {
 
     public class BurstChargeTurretBuild extends ExpPowerTurretBuild {
 
+        //TODO broken, needs complete rewrite -Anuke
+        /*
         protected void shootCharge(BulletType type, float rotation){
             float rx = Mathf.range(xRand);
             tr.trns(rotation, shootLength, rx);
@@ -81,5 +83,6 @@ public class BurstChargePowerTurret extends ExpPowerTurret {
                 shotCounter++;
             }
         }
+        */
     }
 }

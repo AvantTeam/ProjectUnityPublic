@@ -16,6 +16,7 @@ import unity.parts.types.*;
 import unity.content.effects.*;
 import unity.type.weapons.*;
 
+//TODO OH GOD THE INDENTING WHOS USING 3 SPACES 
 public class UnityParts{
     //unit
     //misc
@@ -56,9 +57,13 @@ public class UnityParts{
            mass(20);
            usesPower(5);
            weapon(1,new Weapon("unity-part-gun"){{
-               rotate = true;
-               reload = 18f;
-               bullet = Bullets.standardCopper;
+              rotate = true;
+              reload = 18f;
+              bullet = new BasicBulletType(3f, 11){{
+                 width = 7f;
+                 height = 10f;
+                 lifetime = 60f;
+              }};
            }});
         }};
         cannon = new ModularWeaponMountType("cannon"){{
@@ -74,6 +79,7 @@ public class UnityParts{
                reload = 60f;
                ejectEffect = Fx.casing2;
                shootSound = Sounds.bang;
+               shootY = 4f; 
                bullet = new BasicBulletType(7f, 40){{
                    width = 11f;
                    height = 20f;
@@ -119,10 +125,11 @@ public class UnityParts{
                 rotateSpeed = 4f;
                 reload = 80f;
                 ejectEffect = Fx.casing3;
-                shots = 2;
+                shoot.shots = 2;
+                shoot.shotDelay = 2f;
                 inaccuracy = 6;
-                shotDelay = 2f;
                 shootSound = Sounds.artillery;
+                shootY = 7f;
                 bullet = new ArtilleryBulletType(5f, 50){{
                     width = 15f;
                     height = 25f;
@@ -134,7 +141,14 @@ public class UnityParts{
                     fragLifeMin = 0.1f;
                     fragLifeMax = 0.3f;
                     fragBullets = 5;
-                    fragBullet = Bullets.standardThorium;
+                    fragBullet = new BasicBulletType(4f, 29, "bullet"){{
+                        width = 10f;
+                        height = 13f;
+                        shootEffect = Fx.shootBig;
+                        smokeEffect = Fx.shootBigSmoke;
+                        ammoMultiplier = 4;
+                        lifetime = 60f;
+                    }};
                }};
             }});
         }};
@@ -228,6 +242,7 @@ public class UnityParts{
                 targetInterval = 0f;
                 targetSwitchInterval = 0f;
                 shootSound = Sounds.lasershoot;
+                shootY = 4f;
                 bullet = new BulletType(){{
                     smokeEffect = Fx.pointHit;
                     hitEffect = Fx.pointHit;
@@ -289,7 +304,7 @@ public class UnityParts{
                    lifetime = 40f;
                    pierce = true;
                    pierceBuilding = true;
-                   pierceCap = 8;
+                   pierceCap = 3;
                    shootEffect = ShootFx.tonkCannon;
                    smokeEffect = ShootFx.tonkCannonSmoke;
                    hitEffect = Fx.massiveExplosion;
@@ -320,10 +335,25 @@ public class UnityParts{
            h = 2;
            weapon(2,new Weapon("unity-part-flamethrower"){{
                rotate = true;
-               reload = 8f;
+               reload = 2f;
                inaccuracy = 10;
                shootSound = Sounds.flame;
-               bullet = Bullets.basicFlame;
+               shootY = 6f;
+               recoilTime = 15f;
+               bullet = new BulletType(3.35f, 12f){{
+                   ammoMultiplier = 3f;
+                   hitSize = 7f;
+                   lifetime = 18f;
+                   pierce = true;
+                   collidesAir = false;
+                   statusDuration = 60f * 4;
+                   shootEffect = Fx.shootSmallFlame;
+                   hitEffect = Fx.hitFlameSmall;
+                   despawnEffect = Fx.none;
+                   status = StatusEffects.burning;
+                   keepVelocity = false;
+                   hittable = false;
+               }};
            }});
         }};
 
@@ -339,6 +369,7 @@ public class UnityParts{
                reload = 22f;
                inaccuracy = 3;
                shootSound = Sounds.shootBig;
+               shootY = 5f;
                bullet = new GrenadeBulletType(){{
                    damage = 5;
                    splashDamage = 45;
@@ -348,7 +379,12 @@ public class UnityParts{
                    fragLifeMin = 0.1f;
                    fragLifeMax = 0.2f;
                    fragBullets = 3;
-                   fragBullet = Bullets.standardCopper;
+                   fragBullet = new BasicBulletType(2.5f, 9){{
+                       width = 7f;
+                       height = 9f;
+                       lifetime = 60f;
+                       ammoMultiplier = 2;
+                   }};
                    collidesAir = false;
                }};
            }});
