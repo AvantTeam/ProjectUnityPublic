@@ -14,6 +14,7 @@ import mindustry.io.*;
 import mindustry.io.SaveFileReader.*;
 import mindustry.type.*;
 import mindustry.world.*;
+import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
 import unity.content.blocks.*;
 import unity.world.blocks.*;
@@ -40,7 +41,7 @@ public class GroundFluidControl implements CustomChunk{
 
     public static void initialiseContent(){
         water = new GroundLiquidProperties(Liquids.water);
-        sulfur = new GroundLiquidProperties("", Color.rgb(255, 180, 30));
+        sulfur = new GroundLiquidProperties("sulfur", Color.rgb(255, 180, 30));
         sulfur.setDensity(2); // twice as dense as water
         sulfur.setFlowspd(0.1f); // more viscous
         sulfur.minamount = 0.04f;
@@ -171,6 +172,9 @@ public class GroundFluidControl implements CustomChunk{
     public float getTransition(){
         return fluidThread.transition;
     }
+    public int getTimeStep(){
+        return fluidThread.currentTime;
+    }
 
     public static boolean supportsLiquid(Liquid g){
         return (liquidAssociationMap.containsKey(g.id));
@@ -214,6 +218,9 @@ public class GroundFluidControl implements CustomChunk{
             terrainImpassable[ind] = true;
         }
         if(tile.build != null){
+            if(tile.block() instanceof Wall){
+               theight = 5;
+            }
             if(tile.build instanceof GroundFluidTerrainBuild g){
                 theight += g.terrainHeight();
             }else{
@@ -524,6 +531,9 @@ public class GroundFluidControl implements CustomChunk{
     // used for drawin
     GroundLiquidProperties getVisualFluidType(int tileindex){
        return liquidProperties.get(Math.max(fluidType[tileindex],previousFluidType[tileindex]) - 1);
+   }
+    int getVisualFluidTypeID(int tileindex){
+       return Math.max(fluidType[tileindex],previousFluidType[tileindex]);
    }
 
     //Unity.groundFluidControl.addFluid(null,85,101,5)

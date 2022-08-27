@@ -4,6 +4,7 @@ import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.graphics.gl.*;
+import arc.math.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mindustry.*;
@@ -18,7 +19,8 @@ public class UnityShaders {
     public static @Nullable ModSurfaceShader lava,pit,waterpit;
 
     public static CacheLayer.ShaderLayer lavaLayer,pitLayer,waterpitLayer;
-    public static GroundLiquidShader groundLiquid;
+    public static GroundLiquidShader groundLiquid; //will be replaced if batched shader works
+    public static BatchedGroundLiquidShader batchedGroundLiquid;
 
     protected static boolean loaded;
 
@@ -42,6 +44,7 @@ public class UnityShaders {
         CacheLayer.add(waterpitLayer);
 
         groundLiquid = new GroundLiquidShader();
+        batchedGroundLiquid = new BatchedGroundLiquidShader();
     }
 
     public static void dispose(){
@@ -77,6 +80,28 @@ public class UnityShaders {
 
             control.renderer.fluidSprites.getTexture().bind(1);
             control.renderer.fluidFrameBuffer.getTexture().bind(0);
+            setUniformi("u_sprites", 1);
+            setUniformi("u_sprites_width", control.renderer.fluidSpritesWidth);
+        }
+    }
+    public static class BatchedGroundLiquidShader extends Shader{
+        public BatchedGroundLiquidShader(){
+            super(tree.get("shaders/groundliquid.vert"),tree.get("shaders/groundliquid2.frag"));
+        }
+        @Override
+        public void apply(){
+
+            var control = Unity.groundFluidControl;
+            var renderer =  control.renderer;
+            var fbo = renderer.fluidFrameBuffer;
+            setUniformf("u_time", Time.time / Scl.scl(1f));
+            setUniformf("u_trans", Mathf.clamp(control.getTransition()));
+            setUniformf("u_resolution", fbo.getWidth(), fbo.getHeight());
+            setUniformf("u_chunksize", renderer.prevChunkW, renderer.prevChunkH);
+            setUniformf("u_offset", renderer.prevMinX, renderer.prevMinY);
+
+            renderer.fluidSprites.getTexture().bind(1);
+            renderer.fluidFrameBuffer.getTexture().bind(0);
             setUniformi("u_sprites", 1);
             setUniformi("u_sprites_width", control.renderer.fluidSpritesWidth);
         }
