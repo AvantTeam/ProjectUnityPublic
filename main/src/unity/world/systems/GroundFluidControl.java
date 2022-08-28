@@ -1,12 +1,16 @@
 package unity.world.systems;
 
 import arc.*;
+import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.content.*;
+import mindustry.entities.*;
+import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -16,8 +20,13 @@ import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.environment.*;
+import mindustry.world.meta.*;
+import unity.*;
 import unity.content.blocks.*;
+import unity.gen.*;
+import unity.util.*;
 import unity.world.blocks.*;
+import unity.world.graph.*;
 
 import java.io.*;
 import java.util.*;
@@ -32,37 +41,96 @@ public class GroundFluidControl implements CustomChunk{
     static final int D_RIGHT = 3;
 
     //content
-
+    public static float liquidPerUnit = 10f; // the amount of game liquid needed to fill 1 tile with 1 unit of ground fluid.
+    public static float UnitPerLiquid = 1f / liquidPerUnit;
     public static final Seq<GroundLiquidProperties> liquidProperties = new Seq<>();
     static final IntMap<GroundLiquidProperties> liquidAssociationMap = new IntMap<>();
     static LiquidInteraction[] interactions;
     static GroundLiquidProperties[] liquidPropertiesArray;
-    public static GroundLiquidProperties water, sulfur, neoplasm;
+    public static GroundLiquidProperties water, sulfur, neoplasm, slag, acid, cryofluid, tar; /// thats it >:(
 
     public static void initialiseContent(){
         water = new GroundLiquidProperties(Liquids.water);
+
         sulfur = new GroundLiquidProperties("sulfur", Color.rgb(255, 180, 30));
-        sulfur.setDensity(2); // twice as dense as water
-        sulfur.setFlowspd(0.1f); // more viscous
-        sulfur.minamount = 0.04f;
-        sulfur.maxLiquidOutflow = 0.7f;
+        sulfur.setDensity(1.5f); // twice as dense as water
+        sulfur.setFlowspd(0.6f); // more viscous
+        sulfur.minamount = 0.02f;
+        sulfur.maxLiquidOutflow = 1.5f;
+        sulfur.shallowColor.set(211 / 256f, 126 / 256f, 74 / 256f, 0.5f);
+
         neoplasm = new GroundLiquidProperties(Liquids.neoplasm);
         neoplasm.setDensity(3);
         neoplasm.setFlowspd(0.2f);
         neoplasm.minamount = 0.03f;
         neoplasm.maxLiquidOutflow = 1f;
+        neoplasm.shallowColor.set(211 / 256f, 126 / 256f, 74 / 256f, 0.9f);
+
+        slag = new GroundLiquidProperties(Liquids.slag);
+        slag.setDensity(4);
+        slag.setFlowspd(0.1f);
+        slag.minamount = 0.05f;
+        slag.maxLiquidOutflow = 0.8f;
+        slag.shallowColor.set(1f, 186 / 256f, 124 / 256f, 1f);
+
+        slag.onUnitTouch = (unit, slag) -> {
+            if(unit.isImmune(StatusEffects.melting)){
+                return;
+            }
+            float mul = 5;
+            if(unit.isImmune(StatusEffects.burning)){
+                mul = 1;
+            }
+            unit.damage(slag * Time.delta* mul);
+        };
+
+        slag.onBuildTouch = (build,slag,pos)->{
+           if(build instanceof GraphBuild gb){
+               var v = gb.heatNode();
+               if(v!=null && v.maxTemp>700 || gb.crucibleNode()!=null){
+                   return;
+               }
+           }
+           if(build==null){
+               return;
+           }
+           build.damage(Time.delta*(slag*1.5f+0.5f));
+           Fires.create(world.tile(pos));
+        };
+
         //blah blah
         liquidPropertiesArray = liquidProperties.toArray(GroundLiquidProperties.class);
         interactions = new LiquidInteraction[liquidProperties.size * liquidProperties.size];
         //interactions after etc
-        addInteraction(neoplasm.id,water.id,(neo, water, am) -> {
+        //do particle effects go in update?
+        addInteraction(neoplasm.id, water.id, (neo, water, am) -> {
             float n = am[water];
-            n = Math.min(n,n*0.5f+0.1f)*dt;
-            am[neo]+=n*0.5; // nom nom
-            am[water]-=n;
+            n = Math.min(n, n * 0.5f + 0.1f) * dt;
+            am[neo] += n * 0.5; // nom nom
+            am[water] -= n;
         });
 
+        addInteraction(slag.id, water.id, (slag, water, am) -> {
+            float n = am[water];
+            n = Math.min(n, am[slag] + 0.01f) * dt;
+            am[slag] -= n * 0.1;
+            am[water] -= n;
+        });
 
+        //todo: temp
+        addFloorHeight((Floor)Blocks.shale,0.1f);
+        addFloorHeight((Floor)Blocks.darksand,0.5f);
+
+    }
+
+    //testing
+    public static IntMap<Float> floorHeights = new IntMap<>();
+
+    public static void addFloorHeight(Floor r, float t){
+        floorHeights.put(r.id, t);
+        if(Unity.groundFluidControl!=null && Unity.groundFluidControl.loadedStatic){
+            Unity.groundFluidControl.pushStaticBlocks(false);
+        }
     }
 
     //local
@@ -75,6 +143,7 @@ public class GroundFluidControl implements CustomChunk{
 
     boolean[] terrainImpassable;
     boolean[] terrainAbsorber;
+    boolean[] hasBuilding; // something cache friendly
 
     float[] tmpvel;
     float[] vel;
@@ -110,34 +179,31 @@ public class GroundFluidControl implements CustomChunk{
             stop();
 
             loadedStatic = false;
-            w = world.width();
-            h = world.height();
-            stride = w + 2;
-
-            terrainHeight = new float[getArrayLength()];
-            liquidAmount = new float[getArrayLength()];
-            previousLiquidAmount = new float[getArrayLength()];
-            pressure = new float[getArrayLength()];
-            previousFluidType = new int[getArrayLength()];
-            fluidType = new int[getArrayLength()];
-            terrainImpassable = new boolean[getArrayLength()];
-            terrainAbsorber = new boolean[getArrayLength()];
-            vel = new float[getArrayLength() * 4];
-            tmpvel = new float[getArrayLength() * 4];
+            createGridAnew(world.width(), world.height());
             reloadOffsets();
-            Log.info("fluid array size:" + liquidAmount.length);
-            Log.info("vel array size:" + vel.length);
             pushStaticBlocks(true);
             loadedStatic = true;
-
-
             Log.info("Loaded world");
         });
 
 
         Events.on(TileChangeEvent.class, event -> {
             if(loadedStatic){
-                updateTerrain(event.tile.x,event.tile.y);
+                if(event.tile.build != null){
+                    updateBuildTerrain(event.tile.build);
+                }else{
+                    updateTerrain(event.tile.x, event.tile.y);
+                }
+            }
+        });
+        //on tile removed
+        Events.on(TilePreChangeEvent.class, event -> {
+            if(loadedStatic){
+                if(event.tile.build != null){
+                    updateBuildTerrain(event.tile.build);
+                }else{
+                    updateTerrain(event.tile.x, event.tile.y);
+                }
             }
         });
 
@@ -150,9 +216,21 @@ public class GroundFluidControl implements CustomChunk{
                         Log.info("Started Fluid");
                     }
                     fluidThread.updateTime(Time.delta * 0.2f);
+
+                    Groups.unit.each(u -> !u.isFlying(), unit -> {
+                        int ind = tileIndexOf(unit.tileX(), unit.tileY());
+                        if(ind >= 0 && ind < liquidAmount.length && liquidAmount[ind] > 0){
+                            var fluidtype = getFluidType(ind);
+                            float scl = MathU.hyperbolicLimit(unit.hitSize * Mathf.clamp(liquidAmount[ind] - (unit instanceof LegsUnit ? unit.hitSize * 0.1f : 0), 0, unit.hitSize * 0.125f) * fluidtype.density * 50f / unit.mass());
+                            unit.vel.lerp(fluidVelX(ind) * 0.5f, fluidVelY(ind) * 0.5f, scl);
+                            fluidtype.onUnitTouch.get(unit, liquidAmount[ind]);
+                        }
+                    });
+                    activateTouched();
                 }
             }
         });
+
 
         if(!net.server()){
             Log.info("Activated Fluid Drawer");
@@ -169,9 +247,28 @@ public class GroundFluidControl implements CustomChunk{
         }
     }
 
+    public void createGridAnew(int w, int h){
+        this.w = w;
+        this.h = h;
+        stride = w + 2;
+
+        terrainHeight = new float[getArrayLength()];
+        liquidAmount = new float[getArrayLength()];
+        previousLiquidAmount = new float[getArrayLength()];
+        pressure = new float[getArrayLength()];
+        previousFluidType = new int[getArrayLength()];
+        fluidType = new int[getArrayLength()];
+        terrainImpassable = new boolean[getArrayLength()];
+        terrainAbsorber = new boolean[getArrayLength()];
+        hasBuilding = new boolean[getArrayLength()];
+        vel = new float[getArrayLength() * 4];
+        tmpvel = new float[getArrayLength() * 4];
+    }
+
     public float getTransition(){
         return fluidThread.transition;
     }
+
     public int getTimeStep(){
         return fluidThread.currentTime;
     }
@@ -200,18 +297,44 @@ public class GroundFluidControl implements CustomChunk{
         fluidType[ind] = g == null ? water.id : g.id;
     }
 
+    public void addFluidNonPadded(GroundLiquidProperties g, int x, int y, float amount){
+        int ind = x + y * stride;
+        if(ind < 0 || ind >= liquidAmount.length || amount <= 0 || terrainImpassable[ind]){
+            return;
+        }
+
+        liquidAmount[ind] += amount;
+        fluidType[ind] = g == null ? water.id : g.id;
+    }
+
+    public void updateBuildTerrain(Building b){
+        if(b.block.size == 1){
+            updateTerrain(b.tile.x, b.tile.y);
+        }else{
+            int offset = (b.block.size - 1) / 2;
+            for(int y = b.tile.y - offset; y < b.tile.y - offset + b.block.size; y++){
+                for(int x = b.tile.x - offset; x < b.tile.x - offset + b.block.size; x++){
+                    updateTerrain(x, y);
+                }
+            }
+        }
+    }
+
     public void updateTerrain(int x, int y){
         int ind = tileIndexOf(x, y);
         var tile = world.tile(x, y);
         //how to save floor data?
         float theight = 1;
-        if(tile.floor().liquidDrop != null || tile.floor()== YoungchaBlocks.pit){
+        if(tile.floor().liquidDrop != null || tile.floor() == YoungchaBlocks.pit){
             theight = 0;
             terrainImpassable[ind] = true;
             terrainAbsorber[ind] = true;
         }
-        if(tile.block()!=Blocks.air){
+        if(tile.block() != Blocks.air){
             terrainAbsorber[ind] = false;
+        }
+        if(floorHeights.containsKey(tile.floorID())){
+            theight = floorHeights.get(tile.floorID());
         }
         if(tile.block() instanceof StaticWall){
             theight = 99;
@@ -219,13 +342,16 @@ public class GroundFluidControl implements CustomChunk{
         }
         if(tile.build != null){
             if(tile.block() instanceof Wall){
-               theight = 5;
+                theight += 5;
             }
-            if(tile.build instanceof GroundFluidTerrainBuild g){
+            if(tile.build instanceof CustomGroundFluidTerrain g){
                 theight += g.terrainHeight();
             }else{
                 theight += tile.block().solid ? 2 : 0.5;
             }
+            hasBuilding[ind] = true;
+        }else{
+            hasBuilding[ind] = false;
         }
         terrainHeight[ind] = theight;
         ind++;
@@ -244,7 +370,14 @@ public class GroundFluidControl implements CustomChunk{
         c_amcount = new float[liquidProperties.size];
         int originIndex = tileIndexOf(0, 0);
         int ind = originIndex;
-
+        for(int y = 0; y < h; y++){
+            for(int x = 0; x < w; x++){
+                updateInteractions(ind,x,y);
+                ind++;
+            }
+            ind += 2;
+        }
+        ind = originIndex;
         for(int y = 0; y < h; y++){
             for(int x = 0; x < w; x++){
                 pressure[ind] = updatePressure(ind);
@@ -279,6 +412,7 @@ public class GroundFluidControl implements CustomChunk{
             }
             ind += 2;
         }
+        transferTouched();
     }
 
     private void stop(){
@@ -293,11 +427,37 @@ public class GroundFluidControl implements CustomChunk{
     @Override
     public void write(DataOutput stream) throws IOException{
 
+        stream.writeShort(w);
+        stream.writeShort(h);
+        //todo: Deflate encoding, esp for fluid type, the data is very suited for it
+        for(int i = 0; i < liquidAmount.length; i++){
+            stream.writeFloat(liquidAmount[i]);
+        }
+        for(int i = 0; i < fluidType.length; i++){
+            stream.writeInt(fluidType[i]);
+        }
+        //velocity cant be used for run length very well, we can make it very lossy however, but such will only be used in networking packets.
+        //splitting the directions also makes it easier for redundancy to show up to be compressed
+        for(int i = 0; i < vel.length; i++){
+            stream.writeFloat(vel[i]);
+        }
+        //another way to further compression is to send a traversal path in the beginning.
+        //fluids are encoded going from lowest (static) land to highest in a set path designed by the server.
     }
 
     @Override
     public void read(DataInput stream) throws IOException{
-
+        createGridAnew(stream.readShort(), stream.readShort());
+        for(int i = 0; i < liquidAmount.length; i++){
+            previousLiquidAmount[i] = liquidAmount[i] = stream.readFloat();
+        }
+        for(int i = 0; i < fluidType.length; i++){
+            previousFluidType[i] = fluidType[i] = stream.readInt();
+        }
+        for(int i = 0; i < vel.length; i++){
+            vel[i] = stream.readFloat();
+        }
+        pushStaticBlocks(false);
     }
 
     float[] c_amcount = new float[4];
@@ -359,14 +519,35 @@ public class GroundFluidControl implements CustomChunk{
     LiquidInteraction getInteraction(int l1, int l2){
         return interactions[(l1 - 1) + liquidProperties.size * (l2 - 1)];
     }
-
-    float updatePressure(int index){
-        if(liquidAmount[index] == 0){
-            return 0;
+    //                prop.onBuildTouch.get(world.tile(x, y).build, liquidAmount[index]);
+    IntSeq threadBuildingTouched = new IntSeq();
+    IntSeq buildingTouched = new IntSeq();
+    final Object touchylock = new Object(); // very touchy
+    void transferTouched(){
+        synchronized(touchylock){
+            Log.info(threadBuildingTouched.size);
+            buildingTouched.addAll(threadBuildingTouched);
+            threadBuildingTouched.clear(); // yeh fuck the clear
         }
-        float olevel = liquidAmount[index] + terrainHeight[index];
+    }
+    void activateTouched(){
+        synchronized(touchylock){
+            if(buildingTouched.size==0){
+                return;
+            }
+            for(int i = 0;i<buildingTouched.size;i+=3){
+                liquidProperties.get(buildingTouched.items[i]-1)
+                    .onBuildTouch.get(world.build(buildingTouched.items[i+1]), buildingTouched.items[i+2]/256f,buildingTouched.items[i+1]);
+            }
+            buildingTouched.clear();
+        }
+    }
+    void updateInteractions(int index, int x, int y){
+        if(liquidAmount[index] == 0){
+            return;
+        }
         int ot = fluidType[index], tt;
-        float p = 0;
+        var prop = liquidProperties.get(ot-1);
         int t;
         LiquidInteraction it;
         for(int i = 0; i < 4; i++){
@@ -377,6 +558,29 @@ public class GroundFluidControl implements CustomChunk{
                 if(it != null){
                     it.interact(index, t, liquidAmount);
                 }
+            }
+            if(hasBuilding[t] && prop.onBuildTouch != null){
+                threadBuildingTouched.add(prop.id);
+                threadBuildingTouched.add(world.tile(x+positionOffsets[i*2], y+positionOffsets[i*2+1]).pos());
+                threadBuildingTouched.add((int)(liquidAmount[index]*256));
+            }
+        }
+        return;
+
+    }
+
+    float updatePressure(int index){
+        if(liquidAmount[index] == 0){
+            return 0;
+        }
+        float olevel = liquidAmount[index] + terrainHeight[index];
+        int ot = fluidType[index], tt;
+        float p = 0;
+        int t;
+        for(int i = 0; i < 4; i++){
+            t = offset(index, i);
+            tt = fluidType[t];
+            if(ot != tt && tt != 0){
                 p += Math.max(0, liquidAmount[t] + terrainHeight[t] - olevel) * liquidPropertiesArray[tt - 1].fluxDensity;
             }
         }
@@ -425,7 +629,7 @@ public class GroundFluidControl implements CustomChunk{
         }
         float terrainO = terrainHeight[origin];
         float terrainT = terrainHeight[target];
-        float hdiff = originHeight - liquidAmount[target] - terrainT-  pressure[target];
+        float hdiff = originHeight - liquidAmount[target] - terrainT - pressure[target];
         if(liquidAmount[target] == 0){
             hdiff -= prop.minamount;
         }
@@ -447,6 +651,8 @@ public class GroundFluidControl implements CustomChunk{
     }
 
     static final int[] offsets = new int[4];
+    static final int[] positionOffsets = {0,-1, -1,0,  0,1,  1,0};
+
 
     void reloadOffsets(){
         offsets[D_BOTTOM] = -stride;
@@ -503,9 +709,11 @@ public class GroundFluidControl implements CustomChunk{
         int t = tileIndexOf(x, y) * 4;
         return vel[t + D_RIGHT] - vel[t + D_LEFT];
     }
+
     public float fluidVelX(int index){
         return vel[index * 4 + D_RIGHT] - vel[index * 4 + D_LEFT];
     }
+
     public float tmpfluidVelX(int index){
         return tmpvel[index * 4 + D_RIGHT] - tmpvel[index * 4 + D_LEFT];
     }
@@ -514,9 +722,11 @@ public class GroundFluidControl implements CustomChunk{
         int t = tileIndexOf(x, y) * 4;
         return vel[t + D_TOP] - vel[t + D_BOTTOM];
     }
+
     public float fluidVelY(int index){
         return vel[index * 4 + D_TOP] - vel[index * 4 + D_BOTTOM];
     }
+
     public float tmpfluidVelY(int index){
         return tmpvel[index * 4 + D_TOP] - tmpvel[index * 4 + D_BOTTOM];
     }
@@ -528,13 +738,15 @@ public class GroundFluidControl implements CustomChunk{
     GroundLiquidProperties getFluidType(int tileindex){
         return liquidProperties.get(fluidType[tileindex] - 1);
     }
+
     // used for drawin
     GroundLiquidProperties getVisualFluidType(int tileindex){
-       return liquidProperties.get(Math.max(fluidType[tileindex],previousFluidType[tileindex]) - 1);
-   }
+        return liquidProperties.get(Math.max(fluidType[tileindex], previousFluidType[tileindex]) - 1);
+    }
+
     int getVisualFluidTypeID(int tileindex){
-       return Math.max(fluidType[tileindex],previousFluidType[tileindex]);
-   }
+        return Math.max(fluidType[tileindex], previousFluidType[tileindex]);
+    }
 
     //Unity.groundFluidControl.addFluid(null,85,101,5)
     //Unity.groundFluidControl.fluidAmount(85,101)
@@ -553,21 +765,26 @@ public class GroundFluidControl implements CustomChunk{
         float outflowMomentumDamp = 0.8f;
         public Liquid association;
         private static int idAcc = 0;
-        public Color color;
+        public Color shallowColor = new Color(1, 1, 1, 0.2f);
+        public Color deepColor;
+
+        public Cons2<Unit, Float> onUnitTouch = (u, am) -> {
+        };
+        public Cons3<Building, Float, Integer> onBuildTouch = null;
         //texture as well probably
 
         int id = ++idAcc;
 
-        public GroundLiquidProperties(String name, Color color){
+        public GroundLiquidProperties(String name, Color deepColor){
             this.name = name;
-            this.color = color;
+            this.deepColor = deepColor;
             liquidProperties.add(this);
         }
 
         public GroundLiquidProperties(Liquid l){
             this(l.name, l.color);
             association = l;
-            liquidAssociationMap.put(l.id,this);
+            liquidAssociationMap.put(l.id, this);
         }
 
         public float getFlowspd(){
@@ -631,7 +848,7 @@ public class GroundFluidControl implements CustomChunk{
         }
 
         private void updateTransition(){
-            transition = 1f-Mathf.clamp(currentTime-targetTime);
+            transition = 1f - Mathf.clamp(currentTime - targetTime);
 
         }
 

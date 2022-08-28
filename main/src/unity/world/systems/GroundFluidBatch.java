@@ -3,13 +3,9 @@ package unity.world.systems;
 import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
-import arc.graphics.gl.*;
-import arc.math.*;
 import arc.util.*;
 import mindustry.*;
 import unity.graphics.UnityShaders.*;
-
-import static arc.Core.camera;
 
 //yeh this is a slightly modified spritebatch.
 
@@ -209,6 +205,9 @@ public class GroundFluidBatch extends Batch{
 
     public void rect(TextureRegion region, float x, float y, float w, float h,int fid){
         fluidSetting = fid;
+        setColor(GroundFluidControl.liquidProperties.get(fid-1).shallowColor);
+        setMixColor(GroundFluidControl.liquidProperties.get(fid-1).deepColor);
+
         draw(region, x , y, 0, 0, w, h, 0);
     }
 }

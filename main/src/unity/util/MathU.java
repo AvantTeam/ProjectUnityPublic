@@ -32,6 +32,10 @@ public final class MathU{
         return vec;
     }
 
+    public static float hyperbolicLimit(float t){
+        return 1f-1f/(t+1);
+    }
+
     public interface UParticleConsumer{
         void get(float x, float y, float fin);
     }

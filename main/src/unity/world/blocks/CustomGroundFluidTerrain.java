@@ -1,5 +1,5 @@
 package unity.world.blocks;
 
-public interface GroundFluidTerrainBuild{
+public interface CustomGroundFluidTerrain{
     public float terrainHeight();
 }

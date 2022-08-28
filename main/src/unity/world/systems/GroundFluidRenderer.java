@@ -7,7 +7,6 @@ import arc.graphics.g2d.*;
 import arc.graphics.gl.*;
 import arc.math.*;
 import arc.util.*;
-import mindustry.gen.*;
 import unity.*;
 import unity.graphics.*;
 
@@ -241,7 +240,7 @@ public class GroundFluidRenderer{
             int index = fluidsToBeDrawn[i];
             if(index != -1){
                 var prop = GroundFluidControl.liquidProperties.get(i-1);
-                Draw.color(prop.color);
+                Draw.color(prop.shallowColor);
                 batch.drawGroundFluid(fluidFrameBuffer.getTexture(),(index%currentColumns) * bWidth, (index/currentColumns) * bHeight, bWidth, bHeight,minx,miny, i);
             }
         }
@@ -313,7 +312,7 @@ public class GroundFluidRenderer{
             TextureRegion tr = Core.atlas.find("unity-ground-liquid-" + g_liquids.get(i).name);
             TextureRegion tr2 = Core.atlas.find("unity-ground-liquid-" + g_liquids.get(i).name+"-data");
             if(tr == null){
-                Draw.color(g_liquids.get(i).color);
+                Draw.color(g_liquids.get(i).shallowColor);
                 Fill.crect(x * 96, y * 96, 96, 96);
                 continue;
             }

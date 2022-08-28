@@ -172,7 +172,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             abilities(resultAbilities);
         }
 
-        this.massStat = statmap.getOrCreate("mass").getFloat("value");
+        this.massStat = statmap.getOrCreate("mass").getFloat("value")*8f;
 
 
         float wheelspd = getFloat(statmap.getOrCreate("wheel"), "nominal speed", 0);

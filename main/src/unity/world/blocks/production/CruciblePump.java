@@ -88,7 +88,7 @@ public class CruciblePump extends GenericGraphBlock{
             if(front()==null){
                 if(config!=null){
                     var f = crucibleNode.getFluid(config);
-                    float remove = Mathf.clamp(eff * f.melted + 0.001f,0,f.melted);
+                    float remove = Mathf.clamp(eff>0?(eff * f.melted + 0.001f):0,0,f.melted);
                     f.melted-=remove;
                     Liquid liquid = Liquids.slag;
                     if(f.getIngredient() instanceof CrucibleLiquid cl){
@@ -96,7 +96,8 @@ public class CruciblePump extends GenericGraphBlock{
                     }
 
                     if( GroundFluidControl.supportsLiquid(liquid)){
-                        Unity.groundFluidControl.addFluid(liquid,frontTile(),remove);
+                        Unity.groundFluidControl.addFluid(liquid,frontTile(),remove*GroundFluidControl.UnitPerLiquid);
+                        //todo: make this delta time agnostic. A minilag spike causes a huge wave.
                     }else{
                         Puddles.deposit(frontTile(), this.tile, liquid, remove * 8);
                     }

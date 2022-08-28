@@ -9,7 +9,8 @@ uniform vec2 u_chunksize;
 uniform vec2 u_offset;
 uniform int u_sprites_width;
 
-varying vec4 v_color;
+varying vec4 v_shallowcolor;
+varying vec4 v_deepcolor;
 varying vec2 v_texCoords;
 varying float v_fluidType;
 varying float v_tx;
@@ -29,11 +30,11 @@ vec4 getTex(vec2 offset){
 
 float getNoise(vec2 offset){
     offset = mod(offset,vec2(2.0))/3.0;
-    return texture2D(u_sprites,vec2(v_tx2+offset.x*v_ts,v_ty2+(offset.y+0.334)*v_ts)).r;
+    return texture2D(u_sprites,vec2(v_tx2+offset.x*(v_ts-epsilon),v_ty2+(offset.y+0.3333)*(v_ts-epsilon))).r;
 }
 
 float getLayeredNoise(vec2 offset){
-    return (getNoise(offset*0.1) + 0.5* getNoise(offset*0.333) + 0.25* getNoise(offset))/1.75;
+    return (getNoise(offset*0.08) + 0.5* getNoise(offset*0.333) + 0.25* getNoise(offset))/1.75;
 }
 
 float blendFun(float x){
@@ -73,8 +74,7 @@ void main(){
     vec2 vel = (color.gb-vec2(0.5))*10.0;
     float vdis = length(vel);
     gl_FragColor = getBlendedTex(tilepos ,-vel, u_time * 0.007);
-    gl_FragColor.a *= clamp(depth*2.0,0.0,1.0);
-    gl_FragColor.rgb *= 1.0-(depth-0.1)*0.5;
+    gl_FragColor.rgba *= mix(v_shallowcolor,v_deepcolor,(depth-0.1)*1.5).rgba;
     float wavedepth = clamp((depth-0.1)*10.0,0.0,1.0);
     bool isWave = depth+sin(u_time*0.07+wavedepth*wavedepth*9.0)*0.4*(1.0-wavedepth) < 0.2; // border ripples
 
