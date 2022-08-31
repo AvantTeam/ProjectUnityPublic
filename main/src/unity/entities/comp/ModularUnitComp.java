@@ -61,7 +61,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     transient boolean constructLoaded = false;
     public transient Seq<PanelDoodad> doodadlist = new Seq<>();
     public byte[] constructdata;
-
+    //todo: PREPARE FOR COSMETICS!
     //visuals
     public transient float driveDist = 0;
     public transient float clipsize = 0;
@@ -177,7 +177,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         float wheelspd = getFloat(statmap.getOrCreate("wheel"), "nominal speed", 0);
         float wheelcap = getFloat(statmap.getOrCreate("wheel"), "weight capacity", 0);
-        speed = eff * Mathf.clamp(wheelcap / this.massStat, 0, 1) * wheelspd;
+        speed = eff * Mathf.clamp(wheelcap * 8f / this.massStat, 0, 1) * wheelspd;
         rotateSpeed = Mathf.clamp(10f * speed / (float)Math.max(construct.parts.length, construct.parts[0].length), 0, 5);
 
         armor = statmap.getValue("armour", "realValue");

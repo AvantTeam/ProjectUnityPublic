@@ -298,6 +298,7 @@ public abstract class GraphConnector<T extends Graph>{
     public static class FixedGraphConnector<U extends Graph> extends GraphConnector<U>{
         int[] connectionPointIndexes;
         public ConnectionPort connectionPoints[];
+        public Boolf2<ConnectionPort,ConnectionPort> portCompatibility;
 
         public FixedGraphConnector(GraphNode node, U graph, int... connections){
             super(node, graph);
@@ -333,9 +334,9 @@ public abstract class GraphConnector<T extends Graph>{
 
             Tile intrl = node.build().tile;
             Point2 temp = new Point2();
-            for(ConnectionPort cp : connectionPoints){
+            for(ConnectionPort port : connectionPoints){
                 //for each connection point get the relevant tile it connects to. If its a connection point, then attempt a connection.
-                temp.set(intrl.x, intrl.y).add(cp.relpos).add(cp.dir);
+                temp.set(intrl.x, intrl.y).add(port.relpos).add(port.dir);
                 Building building = Vars.world.build(temp.x, temp.y);
                 if(building != null && building instanceof GraphBuild igraph){
                     var extnode = igraph.getGraphNode(graph.getClass());
@@ -346,9 +347,9 @@ public abstract class GraphConnector<T extends Graph>{
                         if(!(extconnector instanceof FixedGraphConnector)){
                             continue;
                         }
-                        var edge = extconnector.tryConnect(cp.relpos.cpy().add(cp.dir), (GraphConnector)this);
+                        var edge = extconnector.tryConnect(port.relpos.cpy().add(port.dir), (GraphConnector)this);
                         if(edge != null){
-                            cp.edge = edge;
+                            port.edge = edge;
                             if(!connections.contains(edge)){
                                 connections.add(edge);
                             }
@@ -356,8 +357,8 @@ public abstract class GraphConnector<T extends Graph>{
 
                     }
                 }
-                if(cp.edge != null && !cp.edge.valid){
-                    cp.edge = null;
+                if(port.edge != null && !port.edge.valid){
+                    port.edge = null;
                 }
             }
             triggerConnectionChanged();
@@ -440,6 +441,19 @@ public abstract class GraphConnector<T extends Graph>{
             return areConnectionPortsConnectedTo(pt, conn.node.build()) != null;
         }
 
+        public GraphEdge tryConnectPorts(ConnectionPort port, GraphConnector<U> extconn){
+            Tile ext = extconn.node.build().tile;
+            var pos = port.relpos.cpy().add(port.dir).add(ext.x, ext.y);
+            var extport = areConnectionPortsConnectedTo(pos, extconn.node.build());
+            if(extport == null || portCompatibility.get(port,extport)){
+               return null;
+            }
+            GraphEdge edge = addEdge(extconn);
+            if(edge!=null){
+                extport.edge = edge;
+            }
+            return edge;
+        }
 
         @Override
         public GraphEdge tryConnect(Point2 pt, GraphConnector<U> extconn){
@@ -482,7 +496,7 @@ public abstract class GraphConnector<T extends Graph>{
 
         public static class ConnectionPort{
             Point2 relpos;// position of attachment within the block
-            Point2 dir; //if 0,0, is universal direction connector (?? thoh 6 months later idk if i want to do that)
+            Point2 dir;
             boolean occupied = false;
             GraphConnector connector;
             int index = -1;
