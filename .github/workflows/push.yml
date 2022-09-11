@@ -35,13 +35,13 @@ jobs:
         
       
     - name: Make a tag name
-      # if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master'
       run: |
         echo "::set-output name=tag::$(date +%Y%m%d%H%M%S)"
       id: tag_make
       
     - name: Create blank release
-      # if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run:
@@ -50,7 +50,7 @@ jobs:
     
     - name: Add jar Release
       uses: softprops/action-gh-release@v1
-      # if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master'
       with:
         tag_name: ${{ steps.tag_make.outputs.tag }}
         files: main/build/libs/ProjectUnity.jar
