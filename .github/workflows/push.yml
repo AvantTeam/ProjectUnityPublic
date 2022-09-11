@@ -33,8 +33,6 @@ jobs:
         name: ProjectUnity (zipped)
         path: main/build/libs/ProjectUnity.jar
         
-    - uses: geertvdc/setup-hub@master
-      # if: github.ref == 'refs/heads/master'
       
     - name: Make a tag name
       # if: github.ref == 'refs/heads/master'
