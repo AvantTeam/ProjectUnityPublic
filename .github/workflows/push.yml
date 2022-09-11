@@ -40,10 +40,15 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         title: Project Unity
+        
+    - name: What the tag names doin
+      run: |
+         echo "Tag name from GITHUB_REF_NAME: $GITHUB_REF_NAME"
+         echo "Tag name from github.ref_name: ${{  github.ref_name }}"    
     
     - name: Add jar Release
       uses: softprops/action-gh-release@v1
       # if: github.ref == 'refs/heads/master'
       with:
-        tag_name: $GITHUB_REF_NAME
+        tag_name: ${{ github.ref_name }}
         files: main/build/libs/ProjectUnity.jar
