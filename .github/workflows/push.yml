@@ -37,7 +37,7 @@ jobs:
     - name: Make a tag name
       # if: github.ref == 'refs/heads/master'
       run: |
-        echo "::set-output name=tag::$(date +%Y%m%d%H%M%S)\n"
+        echo "::set-output name=tag::$(date +%Y%m%d%H%M%S)"
       id: tag_make
       
     - name: Create blank release
