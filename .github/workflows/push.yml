@@ -33,25 +33,26 @@ jobs:
         name: ProjectUnity (zipped)
         path: main/build/libs/ProjectUnity.jar
         
+    - uses: geertvdc/setup-hub@master
+      # if: github.ref == 'refs/heads/master'
+      
+    - name: Make a tag name
+      # if: github.ref == 'refs/heads/master'
+      run: |
+        echo "::set-output name=tag::$(date +%Y%m%d%H%M%S)\n"
+      id: tag_make
+      
     - name: Create blank release
-      uses: elgohr/Github-Release-Action@v4
       # if: github.ref == 'refs/heads/master'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        title: Project Unity
+      run:
+        hub release create -m "Project Unity" "${{ steps.tag_make.outputs.tag }}"
         
-    - uses: oprypin/find-latest-tag@v1
-      with:
-        repository: AvantTeam/ProjectUnityPublic  # The repository to scan.
-        releases-only: true  # We know that all relevant tags have a GitHub release for them.
-      id: tagfind  # The step ID to refer to later.
-
-    - run: echo "Repo is at version ${{ steps.tagfind.outputs.tag }}"
     
     - name: Add jar Release
       uses: softprops/action-gh-release@v1
       # if: github.ref == 'refs/heads/master'
       with:
-        tag_name: ${{ steps.tagfind.outputs.tag }}
+        tag_name: ${{ steps.tag_make.outputs.tag }}
         files: main/build/libs/ProjectUnity.jar
