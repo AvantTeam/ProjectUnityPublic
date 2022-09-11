@@ -6,6 +6,5 @@
     "version": "0.1-youngcha.2.8",
     "minGameVersion": 137,
     "main": "unity.Unity",
-    "java": true,
-    "hideBrowser": true
+    "java": true
 }
