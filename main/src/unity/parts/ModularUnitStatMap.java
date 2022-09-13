@@ -1,22 +1,50 @@
 package unity.parts;
 
+import arc.struct.*;
+import arc.util.*;
 import unity.util.*;
 
 public class ModularUnitStatMap extends ModularPartStatMap{
+    public float health,mass,power,powerUsage,armour,armourPoints,rps,speed,turningspeed;
+    public int itemcapacity,abilityslotuse,abilityslots, weaponSlots,weaponslotuse;
+    public boolean differentialSteering;
+
     public ModularUnitStatMap(){
-        stats.put("health",(new ValueMap()).put("value",0f));
-        stats.put("mass",(new ValueMap()).put("value",0f));
-        stats.put("power",(new ValueMap()).put("value",0f));
-        stats.put("powerusage",(new ValueMap()).put("value",0f));
-        stats.put("speed",(new ValueMap()).put("value",0f));
-        stats.put("armour",(new ValueMap()).put("value",0f));
-        stats.put("weaponslots",(new ValueMap()).put("value",0f));
-        stats.put("weaponslotuse",(new ValueMap()).put("value",0f));
-        stats.put("abilityslots",(new ValueMap()).put("value",0f));
-        stats.put("abilityslotuse",(new ValueMap()).put("value",0f));
-        stats.put("itemcapacity",(new ValueMap()).put("value",0f));
         stats.put("weapons",new ValueList());
         stats.put("abilities",new ValueList());
         stats.put("wheel",(new ValueMap()));
+    }
+
+
+    @Override
+    public void calculatStat(ModularPart[][] partgrid, Seq<ModularPart> partseq){
+        Log.info("begining stat calc, "+ partseq.size+" parts found");
+        for(int i = 0; i < partseq.size; i++){
+            partseq.get(i).type.appendStats(this, partseq.get(i), partgrid);
+        }
+        for(int i = 0; i < partseq.size; i++){
+            partseq.get(i).type.appendStatsPost(this, partseq.get(i), partgrid);
+        }
+    }
+
+    @Override
+    public String toString(){
+        return "ModularUnitStatMap{" +
+        "health=" + health +
+        ", mass=" + mass +
+        ", power=" + power +
+        ", powerUsage=" + powerUsage +
+        ", armour=" + armour +
+        ", armourPoints=" + armourPoints +
+        ", rps=" + rps +
+        ", speed=" + speed +
+        ", turningspeed=" + turningspeed +
+        ", itemcapacity=" + itemcapacity +
+        ", abilityslotuse=" + abilityslotuse +
+        ", abilityslots=" + abilityslots +
+        ", weaponSlots=" + weaponSlots +
+        ", weaponslotuse=" + weaponslotuse +
+        ", differentialSteering=" + differentialSteering +
+        '}';
     }
 }

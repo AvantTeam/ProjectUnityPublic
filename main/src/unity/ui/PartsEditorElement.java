@@ -10,9 +10,11 @@ import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.event.*;
 import arc.struct.*;
-import arc.util.*;
+import arc.util.pooling.*;
 import mindustry.input.*;
+import mindustry.ui.*;
 import unity.parts.*;
+import unity.parts.ModularConstructBuilder.*;
 
 import static arc.Core.scene;
 import static unity.graphics.UnityPal.*;
@@ -83,8 +85,9 @@ public class PartsEditorElement extends Element{
                     Core.graphics.cursor(SystemCursor.hand);
                     return true;
                 }
-                if((selected!=null && builder.parts[g.x][g.y]!=null) ||
-                   (selected==null && builder.parts[g.x][g.y]==null) ){
+                int b = builder.index(g.x,g.y);
+                if((selected!=null && builder.parts[b]!=0) ||
+                   (selected==null && builder.parts[b]==0) ){
                     Core.graphics.cursor(SystemCursor.hand);
                 }else{
                     Core.graphics.cursor(SystemCursor.arrow);
@@ -188,7 +191,7 @@ public class PartsEditorElement extends Element{
         rectCorner(0,0, builder.w*32, builder.h*32);
         Draw.color(blueprintColAccent);
         //draw border and center lines
-        Lines.stroke(5);
+        Lines.stroke(5 * scl);
         rectLine(0,0, builder.w*32, builder.h*32);
         int mid = builder.w/2;
         if(builder.w % 2 == 1){
@@ -216,7 +219,7 @@ public class PartsEditorElement extends Element{
         for(int i = minx;i<=maxx;i++){
             for(int j = miny; j <= maxy; j++){
                 if(i>0 && j>0){
-                    Fill.square(gx + i * 32 * scl, gy + j * 32 * scl, 3, 45);
+                    Fill.square(gx + i * 32 * scl, gy + j * 32 * scl, 3 * scl, 45);
                 }
             }
         }
@@ -233,24 +236,44 @@ public class PartsEditorElement extends Element{
         //draw modules
         for(int i = minx;i<=maxx;i++){
             for(int j = miny;j<=maxy;j++){
-                var part = builder.parts[i][j];
-                if(part==null){
+                var partdata = builder.parts[builder.index(i,j)];
+                if(partdata==0){
                     continue;
                 }
-                if(!(Math.max(part.getX(),minx)==i && Math.max(part.getY(),miny)==j)){
+
+                int px = PartData.x(partdata);
+                int py = PartData.y(partdata);
+                if(!(Mathf.clamp(px,minx,maxx) == i && Mathf.clamp(py,miny,maxy) == j)){
                     continue;
                 }
-                Draw.color(bgCol);
-                rectCorner(part.getX()*32,part.getY()*32, part.type.w*32, part.type.h*32);
-                Draw.color(builder.valid[i][j]?Color.white:Color.red);
-                rectCorner(part.type.icon,part.getX()*32,part.getY()*32, part.type.w*32, part.type.h*32);
+                var type = PartData.Type(partdata);
+                if(scl<99){ // temp
+                    if(type.w > 1 || type.h > 1){
+                        Draw.color(bgCol);
+                        rectCorner(px * 32, py * 32, type.w * 32, type.h * 32);
+                        Draw.color(bgColMid);
+                        Lines.stroke(5 * scl);
+                        rectLine(px * 32 + 4, py * 32 + 4, type.w * 32 - 8, type.h * 32 - 8);
+                    }
+                    Draw.color(builder.valid[builder.index(i, j)] ? Color.white : Color.red);
+                    float maxsize = Math.min(Math.min(type.w,type.h)*32,32f/scl);
+                    rect(type.icon, (px + type.w * 0.5f) * 32, (py + type.h * 0.5f) * 32, maxsize, maxsize);
+                }else{
+                    Draw.color(builder.valid[builder.index(i, j)] ? Color.white : Color.red);
+                    rectCorner(type.icon, px * 32, py * 32, type.w * 32, type.h * 32);
+                    //todo: editor drawing
+                }
             }
         }
 
         if(selected!=null){
             Color highlight = Color.white;
-            if(!builder.canPlace(selected, cursor.x, cursor.y)){
+            var placeError = builder.canPlaceDebug(selected, cursor.x, cursor.y);
+            if(placeError != PlaceProblem.NO_PROBLEM){
                 highlight = Color.red;
+                var pos = gridToUi((cursor.x+0.5f)*32,(cursor.y+0.5f)*32);
+                Draw.color(highlight, 1f);
+                text(Fonts.outline, placeError.text, pos.x,pos.y-30);
             }
             Draw.color(bgCol, 0.5f);
             rectCorner(cursor.x*32,cursor.y*32, selected.w*32, selected.h*32);
@@ -275,6 +298,9 @@ public class PartsEditorElement extends Element{
         return builder.w-x-1;
     }
 
+    public void rect(TextureRegion tr,float x,float y,float w,float h){
+        Draw.rect(tr,gx + (x)*scl,gy + (y)*scl,w*scl,h*scl);
+    }
     public void rectCorner(float x,float y,float w,float h){
         Fill.rect(gx + (x+w*0.5f)*scl,gy + (y+h*0.5f)*scl,w*scl,h*scl);
     }
@@ -297,6 +323,22 @@ public class PartsEditorElement extends Element{
 
     public Point2 uiToGrid(float x,float y){
         return new Point2(Mathf.floor((x-gx()+this.x)/(32f*scl)), Mathf.floor((y-gy()+this.y)/(32f*scl)));
+    }
+    public Vec2 gridToUi(float x,float y){
+        return new Vec2(gx+x*scl,gy+y*scl);
+        }
+
+
+    public void text(Font font, String str,float x,float y){
+        GlyphLayout lay = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
+        lay.setText(font, str);
+
+        font.setColor(Draw.getColor());
+        font.getCache().clear();
+        font.getCache().addText(str, x - lay.width / 2f, y + lay.height / 2f + 1);
+        font.getCache().draw(parentAlpha);
+
+        Pools.free(lay);
     }
 
     @Override
@@ -327,7 +369,7 @@ public class PartsEditorElement extends Element{
     }
 
     public void onAction(){
-        prev.add(builder.export());
+        prev.add(builder.exportFull());
         if(index!=prev.size-2){
             prev.removeRange(index+2,prev.size-1);
         }
@@ -339,7 +381,7 @@ public class PartsEditorElement extends Element{
             index = prev.size-1;
             return;
         }
-        builder.set(prev.get(index));
+        builder.paste(prev.get(index));
     }
     public void undo(){
         index--;
@@ -347,7 +389,7 @@ public class PartsEditorElement extends Element{
             index = -1;
             return;
         }
-        builder.set(prev.get(index));
+        builder.paste(prev.get(index));
     }
 
 }

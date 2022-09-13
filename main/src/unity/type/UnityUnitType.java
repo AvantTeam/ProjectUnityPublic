@@ -202,7 +202,7 @@ public class UnityUnitType extends UnitType{
             });
         }else{
             if(unit.constructdata()!=null && unit.constructdata().length>0){
-                unit.construct(new ModularConstruct(unit.constructdata()));
+                unit.construct(ModularConstruct.get(unit.constructdata()));
                 UnitDoodadGenerator.initDoodads(unit.construct().parts.length, unit.doodadlist(), unit.construct());
             }
         }
@@ -223,7 +223,7 @@ public class UnityUnitType extends UnitType{
     }
 
 
-    public Unit spawn(Team t, float x, float y, byte[] data){
+    public Unit spawn(Team t, float x, float y, ModularConstruct data){
         var unit = this.create(t);
         unit.set(x, y);
         ModularConstruct.cache.put(unit,data);

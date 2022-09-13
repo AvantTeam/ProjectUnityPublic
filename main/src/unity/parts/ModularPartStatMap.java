@@ -5,7 +5,7 @@ import arc.util.serialization.*;
 import unity.util.*;
 
 
-public class ModularPartStatMap{
+public abstract class ModularPartStatMap{
     public ValueMap stats = new ValueMap();
 
     public ValueMap getOrCreate(String name){
@@ -24,5 +24,7 @@ public class ModularPartStatMap{
     public float getValue(String name,String subfield){
         return Utils.getFloat(stats.getValueMap(name),subfield,0);
     }
+
+    public abstract void calculatStat(ModularPart[][] partgrid,  Seq<ModularPart> partseq);
 
 }

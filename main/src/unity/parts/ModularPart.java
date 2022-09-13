@@ -3,6 +3,7 @@ package unity.parts;
 public class ModularPart{
     public ModularPartType type;
     int x,y;
+    int rotation;
     //position of lowest left tile
     public float ax,ay;
     //middle

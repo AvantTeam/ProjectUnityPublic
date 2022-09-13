@@ -14,7 +14,6 @@ import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.blocks.payloads.*;
-import mindustry.world.meta.*;
 import unity.*;
 import unity.content.*;
 import unity.gen.*;
@@ -41,9 +40,9 @@ public class ModularUnitAssembler extends PayloadBlock{
         solid = false;
         configurable = true;
         config(byte[].class, (ModularUnitAssemblerBuild build, byte[] data) -> {
-            build.blueprint.set(data);
+            build.blueprint.paste(data);
             build.doodads.clear();
-            build.construct = new ModularConstruct(build.blueprint.exportCropped());
+            build.construct = build.blueprint.createConstruct(true);
             for(var c:build.currentlyConstructing){
                 c.complete();
             }
@@ -160,7 +159,7 @@ public class ModularUnitAssembler extends PayloadBlock{
             //ui lamdba soup time
             var configureButtonCell = table.button(Tex.whiteui, Styles.cleari, 50,
             (() -> {
-                Unity.ui.partsEditor.show(blueprint.export(),
+                Unity.ui.partsEditor.show(blueprint.exportFull(),
                 (data)->{
                     this.configure(data);
                     Log.info("changed stuff");
@@ -218,15 +217,15 @@ public class ModularUnitAssembler extends PayloadBlock{
             if(Vars.net.client()){
                 return;
             }
-            var t = ((UnityUnitType)UnityUnitTypes.modularUnitSmall).spawn(team, x, y,blueprint.exportCropped());
+            var t = ((UnityUnitType)UnityUnitTypes.modularUnitSmall).spawn(team, x, y,blueprint.createConstruct(true));
             t.rotation = rotdeg();
             Events.fire(new UnitCreateEvent(t, this));
         }
 
         public void createUnit(){
             var t = UnityUnitTypes.modularUnitSmall.create(team);
-            ModularConstruct.cache.put(t,blueprint.exportCropped());
-            ((ModularUnitUnit) t).constructdata(ModularConstruct.cache.get(t));
+            ModularConstruct.cache.put(t,blueprint.createConstruct(true));
+            ((ModularUnitc) t).constructdata(ModularConstruct.cache.get(t).compressedData);
             payload = new UnitPayload(t);
             payVector.setZero();
             Events.fire(new UnitCreateEvent(payload.unit, this));
@@ -239,12 +238,12 @@ public class ModularUnitAssembler extends PayloadBlock{
         @Override
         public void updateTile(){
             super.updateTile();
-            if(blueprint.root!=null && !sandbox){
+            if(blueprint.rootIndex!=-1 && !sandbox){
                 if(doodads.isEmpty() && !Vars.headless){
-                    UnitDoodadGenerator.initDoodads(blueprint.parts.length, doodads, construct);
+                    UnitDoodadGenerator.initDoodads(blueprint.parts.length, doodads, construct); //replace with cosmetique
                 }
                 if(construct==null){
-                   construct = new ModularConstruct(blueprint.exportCropped());
+                   construct = blueprint.createConstruct(true);
                 }
                 if(built.size>=construct.partlist.size && payload==null){
                     createUnit();
@@ -388,7 +387,7 @@ public class ModularUnitAssembler extends PayloadBlock{
 
         @Override
         public byte[] config(){
-            return blueprint.export();
+            return blueprint.exportFull();
         }
 
         @Override
@@ -400,7 +399,7 @@ public class ModularUnitAssembler extends PayloadBlock{
         @Override
         public void write(Writes write){
             super.write(write);
-            var data  =blueprint.export();
+            var data  = blueprint.exportFull();
             write.i(data.length);
             write.b(data);
             write.i( built.size);
@@ -416,7 +415,7 @@ public class ModularUnitAssembler extends PayloadBlock{
             super.read(read, revision);
             byte[] data = new byte[read.i()];
             read.b(data);
-            blueprint.set(data);
+            blueprint.paste(data);
             int builtlen = read.i();
             for(int i =0;i<builtlen;i++){
                 built.add(read.i());

@@ -20,14 +20,14 @@ import unity.type.weapons.*;
 public class UnityParts{
     //unit
     //misc
-    public static ModularPartType panel, mediumPanel, smallRoot, mediumRoot, largeRoot, largePanel,storage;
+    public static ModularPartType panel, mediumPanel, smallRoot, mediumRoot, largeRoot, largePanel, storage;
     //weapons
     public static ModularPartType gun, flamethrower, grenadeLauncher, cannon, howitzer, pointDefense, tankCannon; //harpoon?
     public static ModularPartType gunBridge;
     //movement
     public static ModularPartType smallEngine, engine, smallWheel, smallTracks, mediumWheel, largeWheel, largeTracks, tankTracks, tankTracksLarge;
     //abilities
-    public static ModularPartType pipebomb,pretender;
+    public static ModularPartType pipebomb, pretender;
     //unit
     public static Seq<PanelDoodadPalette> unitDoodads = new Seq<>();
 
@@ -35,10 +35,26 @@ public class UnityParts{
         //region units
         ///DO NOT CHANGE ORDER (will break saves)
         panel = new ModularPartType("panel"){{
-            requirements(PartCategories.miscUnit, ItemStack.with(Items.copper, 5 ,UnityItems.nickel, 5));
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.copper, 5, UnityItems.nickel, 5));
             health(40);
             mass(20);
             armor(2);
+        }};
+        mediumPanel = new ModularPartType("medium-panel"){{
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 20, Items.titanium, 50));
+            w = 2;
+            h = 2;
+            health(200);
+            mass(120);
+            armor(100);
+        }};
+        largePanel = new ModularPartType("large-panel"){{
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 50, Items.titanium, 100, UnityItems.nickel, 50));
+            w = 3;
+            h = 3;
+            health(600);
+            mass(200);
+            armor(2000);
         }};
         smallRoot = new ModularPartType("root-small"){{
             requirements(PartCategories.miscUnit, ItemStack.with(UnityItems.nickel, 10));
@@ -51,68 +67,82 @@ public class UnityParts{
             root = true;
             hasCellDecal = true;
         }};
+        mediumRoot = new ModularPartType("root-medium"){{
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 30, Items.graphite, 20, UnityItems.cupronickel, 45));
+            w = 2;
+            h = 2;
+            health(250);
+            mass(40);
+            producesPower(50);
+            addsWeaponSlots(4);
+            itemCapacity(50);
+            armor(100);
+            addsAbilitySlots(2);
+            root = true;
+            hasCellDecal = true;
+        }};
+        largeRoot = new ModularPartType("root-large"){{
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 75, Items.titanium, 50, UnityItems.nickel, 30, UnityItems.superAlloy, 15));
+            w = 3;
+            h = 3;
+            health(900);
+            armor(4000);
+            mass(150);
+            producesPower(100);
+            addsWeaponSlots(10);
+            itemCapacity(100);
+            addsAbilitySlots(4);
+            root = true;
+            hasCellDecal = true;
+        }};
+        gunBridge = new ModularPartType("gun-bridge"){{
+            requirements(PartCategories.weaponsUnit, ItemStack.with(Items.graphite, 10, UnityItems.nickel, 10));
+            usesPower(20);
+            mass(20);
+            addsWeaponSlots(4);
+            hasCellDecal = true;
+        }};
         gun = new ModularWeaponMountType("gun"){{
-           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.graphite, 10));
-           health(10);
-           mass(20);
-           usesPower(5);
-           weapon(1,new Weapon("unity-part-gun"){{
-              rotate = true;
-              reload = 18f;
-              bullet = new BasicBulletType(3f, 11){{
-                 width = 7f;
-                 height = 10f;
-                 lifetime = 60f;
-              }};
-           }});
+            requirements(PartCategories.weaponsUnit, ItemStack.with(Items.graphite, 10));
+            health(10);
+            mass(20);
+            usesPower(5);
+            weapon(1, new Weapon("unity-part-gun"){{
+                rotate = true;
+                reload = 18f;
+                bullet = new BasicBulletType(3f, 11){{
+                    width = 7f;
+                    height = 10f;
+                    lifetime = 60f;
+                }};
+            }});
         }};
         cannon = new ModularWeaponMountType("cannon"){{
-           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 40, Items.graphite, 20, UnityItems.nickel, 30));
-           health(40);
-           mass(100);
-           usesPower(20);
-           w = 2;
-           h = 2;
-           weapon(2, new Weapon("unity-part-cannon"){{
-               rotate = true;
-               rotateSpeed = 6f;
-               reload = 60f;
-               ejectEffect = Fx.casing2;
-               shootSound = Sounds.bang;
-               shootY = 4f; 
-               bullet = new BasicBulletType(7f, 40){{
-                   width = 11f;
-                   height = 20f;
-                   lifetime = 24f;
-                   shootEffect = Fx.shootBig;
-                   splashDamage = 20;
-                   splashDamageRadius = 25;
-                   hitEffect = Fx.blastExplosion;
-               }};
-           }});
-        }};
-        smallEngine = new ModularPartType("engine-small"){{
-            requirements(PartCategories.movementUnit, ItemStack.with(Items.copper, 10, UnityItems.nickel, 5));
-            health(10);
-            mass(15);
-            producesPower(20);
-        }};
-        smallWheel = new ModularWheelType("wheel-small"){{
-            requirements(PartCategories.movementUnit, ItemStack.with(UnityItems.nickel, 5));
-            health(15);
-            mass(15);
-            wheel(1, 30, 1.5f);
-            usesPower(7);
-        }};
-        smallTracks = new ModularWheelType("tracks-small"){{
-            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 15,UnityItems.nickel, 10));
-            w = 1;
-            h = 3;
-            health(60);
-            mass(45);
-            wheel(6, 180, 0.6f);
+            requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 40, Items.graphite, 20, UnityItems.nickel, 30));
+            health(40);
+            mass(100);
             usesPower(20);
+            w = 2;
+            h = 2;
+            weapon(2, new Weapon("unity-part-cannon"){{
+                rotate = true;
+                rotateSpeed = 6f;
+                reload = 60f;
+                ejectEffect = Fx.casing2;
+                shootSound = Sounds.bang;
+                shootY = 4f;
+                bullet = new BasicBulletType(7f, 40){{
+                    width = 11f;
+                    height = 20f;
+                    lifetime = 24f;
+                    shootEffect = Fx.shootBig;
+                    splashDamage = 20;
+                    splashDamageRadius = 25;
+                    hitEffect = Fx.blastExplosion;
+                }};
+            }});
         }};
+
         howitzer = new ModularWeaponMountType("howitzer"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 80, Items.titanium, 120, Items.graphite, 80, UnityItems.nickel, 50));
             health(75);
@@ -149,23 +179,80 @@ public class UnityParts{
                         ammoMultiplier = 4;
                         lifetime = 60f;
                     }};
-               }};
+                }};
             }});
         }};
-        mediumPanel = new ModularPartType("medium-panel"){{
-            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 20, Items.titanium, 50));
+
+        flamethrower = new ModularWeaponMountType("flamethrower"){{
+            requirements(PartCategories.weaponsUnit, ItemStack.with(Items.coal, 10, Items.graphite, 30));
+            health(10);
+            mass(60);
+            usesPower(10);
+            w = 1;
+            h = 2;
+            weapon(2, new Weapon("unity-part-flamethrower"){{
+                rotate = true;
+                reload = 2f;
+                inaccuracy = 10;
+                shootSound = Sounds.flame;
+                shootY = 6f;
+                recoilTime = 15f;
+                bullet = new BulletType(3.35f, 12f){{
+                    ammoMultiplier = 3f;
+                    hitSize = 7f;
+                    lifetime = 18f;
+                    pierce = true;
+                    collidesAir = false;
+                    statusDuration = 60f * 4;
+                    shootEffect = Fx.shootSmallFlame;
+                    hitEffect = Fx.hitFlameSmall;
+                    despawnEffect = Fx.none;
+                    status = StatusEffects.burning;
+                    keepVelocity = false;
+                    hittable = false;
+                }};
+            }});
+        }};
+
+        grenadeLauncher = new ModularWeaponMountType("grenade-launcher"){{
+            requirements(PartCategories.weaponsUnit, ItemStack.with(Items.metaglass, 20, UnityItems.nickel, 30, Items.graphite, 30));
+            health(20);
+            mass(80);
+            usesPower(20);
             w = 2;
             h = 2;
-            health(200);
-            mass(120);
-            armor(100);
+            weapon(2, new Weapon("unity-part-grenade-launcher"){{
+                rotate = true;
+                reload = 22f;
+                inaccuracy = 3;
+                shootSound = Sounds.shootBig;
+                shootY = 5f;
+                bullet = new GrenadeBulletType(){{
+                    damage = 5;
+                    splashDamage = 45;
+                    splashDamageRadius = 25;
+                    lifetime = 130;
+                    speed = 3;
+                    fragLifeMin = 0.1f;
+                    fragLifeMax = 0.2f;
+                    fragBullets = 3;
+                    fragBullet = new BasicBulletType(2.5f, 9){{
+                        width = 7f;
+                        height = 9f;
+                        lifetime = 60f;
+                        ammoMultiplier = 2;
+                    }};
+                    collidesAir = false;
+                }};
+            }});
         }};
-        gunBridge = new ModularPartType("gun-bridge"){{
-            requirements(PartCategories.weaponsUnit, ItemStack.with(Items.graphite, 10, UnityItems.nickel, 10));
-            usesPower(20);
-            mass(20);
-            addsWeaponSlots(4);
-            hasCellDecal = true;
+
+
+        smallEngine = new ModularPartType("engine-small"){{
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.copper, 10, UnityItems.nickel, 5));
+            health(10);
+            mass(15);
+            producesPower(20);
         }};
         engine = new ModularPartType("engine"){{
             requirements(PartCategories.movementUnit, ItemStack.with(UnityItems.cupronickel, 90, Items.lead, 50, Items.silicon, 30));
@@ -175,49 +262,22 @@ public class UnityParts{
             mass(500);
             producesPower(400);
         }};
-        mediumRoot = new ModularPartType("root-medium"){{
-            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 30, Items.graphite, 20, UnityItems.cupronickel, 45));
-            w = 2;
-            h = 2;
-            health(250);
-            mass(40);
-            producesPower(50);
-            addsWeaponSlots(4);
-            itemCapacity(50);
-            armor(100);
-            addsAbilitySlots(2);
-            root = true;
-            hasCellDecal = true;
+        smallWheel = new ModularWheelType("wheel-small"){{
+            requirements(PartCategories.movementUnit, ItemStack.with(UnityItems.nickel, 5));
+            health(15);
+            mass(15);
+            wheel(1, 30, 1.5f);
+            usesPower(7);
         }};
-        largeRoot = new ModularPartType("root-large"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon, 75, Items.titanium, 50, UnityItems.nickel, 30, UnityItems.superAlloy, 15));
-            w = 3;
-            h = 3;
-            health(900);
-            armor(4000);
-            mass(150);
-            producesPower(100);
-            addsWeaponSlots(10);
-            itemCapacity(100);
-            addsAbilitySlots(4);
-            root = true;
-            hasCellDecal = true;
-        }};
-        largePanel = new ModularPartType("large-panel"){{
-            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 50, Items.titanium, 100, UnityItems.nickel, 50));
-            w = 3;
-            h = 3;
-            health(600);
-            mass(200);
-            armor(2000);
-        }};
+
+
         mediumWheel = new ModularWheelType("wheel-medium"){{
             requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 50, Items.titanium, 25));
             w = 2;
             h = 4;
             health(75);
             mass(100);
-            wheel(6,180,1.3f);
+            wheel(6, 180, 1.3f);
             usesPower(50);
         }};
         largeWheel = new ModularWheelType("wheel-large"){{
@@ -252,6 +312,16 @@ public class UnityParts{
                 }};
             }});
         }};
+        smallTracks = new ModularWheelType("tracks-small"){{
+            requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 15, UnityItems.nickel, 10));
+            w = 1;
+            h = 3;
+            health(60);
+            mass(45);
+            wheel(6, 180, 0.6f);
+            usesPower(20);
+        }};
+
         largeTracks = new ModularWheelType("tracks-large"){{
             requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 50, Items.thorium, 40, UnityItems.nickel, 30));
             w = 2;
@@ -280,45 +350,45 @@ public class UnityParts{
             usesPower(1200);
         }};
         tankCannon = new ModularWeaponMountType("arbiter"){{
-           requirements(PartCategories.weaponsUnit,ItemStack.with(Items.silicon, 500, Items.titanium, 500, UnityItems.superAlloy, 200, UnityItems.nickel, 300, UnityItems.cupronickel, 150));
-           health(750);
-           mass(1800);
-           usesPower(400);
-           w = 9;
-           h = 12;
-           weapon(30, new MultiBarrelWeapon("unity-part-tonk-cannon"){{
-               rotate = true;
-               rotateSpeed = 1.5f;
-               recoil = 0f;
-               reload = 160f;
-               shootY = 36f;
-               barrels = 1;
-               barrelRecoil = 7f;
-               ejectEffect = Fx.casing3Double;
-               shootSound = Sounds.bang;
-               cooldownTime = 120f;
-               shake = 4f;
-               bullet = new BasicBulletType(12f, 1000){{
-                   width = 25f;
-                   height = 80f;
-                   lifetime = 40f;
-                   pierce = true;
-                   pierceBuilding = true;
-                   pierceCap = 3;
-                   shootEffect = ShootFx.tonkCannon;
-                   smokeEffect = ShootFx.tonkCannonSmoke;
-                   hitEffect = Fx.massiveExplosion;
-                   despawnEffect = Fx.massiveExplosion;
-                   trailChance = 0f;
-                   trailLength = 10;
-                   trailWidth = 3f;
-                   trailColor = Pal.bulletYellowBack;
-               }};
-           }});
+            requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 500, Items.titanium, 500, UnityItems.superAlloy, 200, UnityItems.nickel, 300, UnityItems.cupronickel, 150));
+            health(750);
+            mass(1800);
+            usesPower(400);
+            w = 9;
+            h = 12;
+            weapon(30, new MultiBarrelWeapon("unity-part-tonk-cannon"){{
+                rotate = true;
+                rotateSpeed = 1.5f;
+                recoil = 0f;
+                reload = 160f;
+                shootY = 36f;
+                barrels = 1;
+                barrelRecoil = 7f;
+                ejectEffect = Fx.casing3Double;
+                shootSound = Sounds.bang;
+                cooldownTime = 120f;
+                shake = 4f;
+                bullet = new BasicBulletType(12f, 1000){{
+                    width = 25f;
+                    height = 80f;
+                    lifetime = 40f;
+                    pierce = true;
+                    pierceBuilding = true;
+                    pierceCap = 3;
+                    shootEffect = ShootFx.tonkCannon;
+                    smokeEffect = ShootFx.tonkCannonSmoke;
+                    hitEffect = Fx.massiveExplosion;
+                    despawnEffect = Fx.massiveExplosion;
+                    trailChance = 0f;
+                    trailLength = 10;
+                    trailWidth = 3f;
+                    trailColor = Pal.bulletYellowBack;
+                }};
+            }});
         }};
 
         storage = new ModularPartType("storage"){{
-            requirements(PartCategories.miscUnit,ItemStack.with(Items.silicon,75,Items.titanium,50,UnityItems.nickel,30,Items.thorium,15));
+            requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 75, Items.titanium, 50, UnityItems.nickel, 30, Items.thorium, 15));
             w = 2;
             h = 2;
             itemCapacity(20);
@@ -326,93 +396,19 @@ public class UnityParts{
             mass(150);
         }};
 
-        flamethrower = new ModularWeaponMountType("flamethrower"){{
-           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.coal, 10, Items.graphite,30));
-           health(10);
-           mass(60);
-           usesPower(10);
-           w = 1;
-           h = 2;
-           weapon(2,new Weapon("unity-part-flamethrower"){{
-               rotate = true;
-               reload = 2f;
-               inaccuracy = 10;
-               shootSound = Sounds.flame;
-               shootY = 6f;
-               recoilTime = 15f;
-               bullet = new BulletType(3.35f, 12f){{
-                   ammoMultiplier = 3f;
-                   hitSize = 7f;
-                   lifetime = 18f;
-                   pierce = true;
-                   collidesAir = false;
-                   statusDuration = 60f * 4;
-                   shootEffect = Fx.shootSmallFlame;
-                   hitEffect = Fx.hitFlameSmall;
-                   despawnEffect = Fx.none;
-                   status = StatusEffects.burning;
-                   keepVelocity = false;
-                   hittable = false;
-               }};
-           }});
-        }};
-
-        grenadeLauncher = new ModularWeaponMountType("grenade-launcher"){{
-           requirements(PartCategories.weaponsUnit, ItemStack.with(Items.metaglass, 20, UnityItems.nickel,30,Items.graphite,30));
-           health(20);
-           mass(80);
-           usesPower(20);
-           w = 2;
-           h = 2;
-           weapon(2,new Weapon("unity-part-grenade-launcher"){{
-               rotate = true;
-               reload = 22f;
-               inaccuracy = 3;
-               shootSound = Sounds.shootBig;
-               shootY = 5f;
-               bullet = new GrenadeBulletType(){{
-                   damage = 5;
-                   splashDamage = 45;
-                   splashDamageRadius = 25;
-                   lifetime = 130;
-                   speed = 3;
-                   fragLifeMin = 0.1f;
-                   fragLifeMax = 0.2f;
-                   fragBullets = 3;
-                   fragBullet = new BasicBulletType(2.5f, 9){{
-                       width = 7f;
-                       height = 9f;
-                       lifetime = 60f;
-                       ammoMultiplier = 2;
-                   }};
-                   collidesAir = false;
-               }};
-           }});
-        }};
 
         pipebomb = new ModularUnitAbilityType("pipebomb"){{
-            requirements(PartCategories.specialUnit, ItemStack.with(Items.coal, 20, Items.titanium,10, Items.lead,10));
+            requirements(PartCategories.specialUnit, ItemStack.with(Items.coal, 20, Items.titanium, 10, Items.lead, 10));
             health(20);
             mass(80);
             usesPower(5);
             w = 2;
             h = 1;
-            ability(1,new SuicideExplosionAbility(){{
+            ability(1, new SuicideExplosionAbility(){{
                 radius = 45f;
                 damage = 90f;
             }});
         }};
-
-        pretender = new ModularUnitAbilityType("pretender"){{
-            requirements(PartCategories.specialUnit, ItemStack.with(Items.sporePod, 20));
-            health(10);
-            mass(80);
-            usesPower(15);
-            w = 1;
-            h = 1;
-            ability(1,new SuspiciousAbility());
-        }};
-
 
 
         //endregion
@@ -433,7 +429,7 @@ public class UnityParts{
         int w = 1, h = 1, x1 = pos[0], x2 = pos[0], y1 = pos[1], y2 = pos[1];
         Point2[] pts = new Point2[pos.length / 2];
         for(int i = 0; i < pts.length; i++){
-            pts[i] = new Point2(pos[i * 2] ,pos[i * 2 + 1]);
+            pts[i] = new Point2(pos[i * 2], pos[i * 2 + 1]);
             x1 = Math.min(x1, pos[i * 2]);
             x2 = Math.max(x2, pos[i * 2]);
             y1 = Math.min(y1, pos[i * 2 + 1]);

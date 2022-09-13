@@ -7,7 +7,6 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.*;
-import mindustry.ai.types.*;
 import mindustry.entities.abilities.*;
 import mindustry.entities.units.*;
 import mindustry.game.EventType.*;
@@ -18,7 +17,6 @@ import mindustry.world.blocks.environment.*;
 import unity.annotations.Annotations.*;
 import unity.content.*;
 import unity.content.effects.*;
-import unity.gen.*;
 import unity.parts.*;
 import unity.parts.PanelDoodadType.*;
 import unity.parts.types.*;
@@ -78,23 +76,23 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     @Override
     public void add(){
         if(ModularConstruct.cache.containsKey(this)){
-            construct = new ModularConstruct(ModularConstruct.cache.get(this));
+            construct = ModularConstruct.cache.get(this);
         }else{
             if(constructdata != null){
-                construct = new ModularConstruct(constructdata);
+                construct = ModularConstruct.get(constructdata);
             }else{
                 String templatestr = ((UnityUnitType)type).templates.random();
                 ModularConstructBuilder test = new ModularConstructBuilder(3, 3);
-                test.set(Base64.getDecoder().decode(templatestr.trim().replaceAll("[\\t\\n\\r]+", "")));
-                construct = new ModularConstruct(test.exportCropped());
+                test.paste(Base64.getDecoder().decode(templatestr.trim().replaceAll("[\\t\\n\\r]+", "")));
+                construct = test.createConstruct(true);
             }
         }
-        constructdata = Arrays.copyOf(construct.data, construct.data.length);
+        var compdata = construct.getCompressedData();
+        constructdata = Arrays.copyOf(compdata, compdata.length);
 
-        var statmap = new ModularUnitStatMap();
-        ModularConstructBuilder.getStats(construct.parts, statmap);
+        var statmap = construct.getStatMap(ModularUnitStatMap.class);
         applyStatMap(statmap);
-        if(construct != ModularConstruct.test){
+        if(construct != ModularConstruct.placeholder){
             constructLoaded = true;
             if(!headless){
                 UnitDoodadGenerator.initDoodads(construct.parts.length, doodadlist, construct);
@@ -120,15 +118,19 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     }
 
     public void applyStatMap(ModularUnitStatMap statmap){
+        Log.info("Applying stats to unit...");
         if(construct.parts.length == 0){
+            Log.info("construct has no parts!");
             return;
         }
-        float power = statmap.getOrCreate("power").getFloat("value");
-        float poweruse = statmap.getOrCreate("powerusage").getFloat("value");
+        Log.info("Construct size: "+construct.parts.length+" by "+construct.parts[0].length);
+        Log.info(statmap);
+        float power = statmap.power;
+        float poweruse = statmap.powerUsage;
         float eff = Mathf.clamp(power / poweruse, 0, 1);
 
         float hratio = Mathf.clamp(this.health / this.maxHealth);
-        this.maxHealth = statmap.getOrCreate("health").getFloat("value");
+        this.maxHealth = statmap.health;
         statHp = maxHealth;
         if(savedHp<=0){
             this.health = hratio * this.maxHealth;
@@ -140,8 +142,8 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         mounts = new WeaponMount[weapons.length()];
         weaponrange = 0;
 
-        int weaponslots = Math.round(statmap.getValue("weaponslots"));
-        int weaponslotsused = Math.round(statmap.getValue("weaponslotuse"));
+        int weaponslots = statmap.weaponSlots;
+        int weaponslotsused = statmap.weaponslotuse;
 
         for(int i = 0; i < weapons.length(); i++){
             var weapon = getWeaponFromStat(weapons.getMap(i));
@@ -157,8 +159,8 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             weaponrange = Math.max(weaponrange, weapon.bullet.range + Mathf.dst(mpart.cx, mpart.cy) * ModularPartType.partSize);
         }
 
-        int abilityslots = Math.round(statmap.getValue("abilityslots"));
-        int abilityslotsused = Math.round(statmap.getValue("abilityslotuse"));
+        int abilityslots = statmap.abilityslots;
+        int abilityslotsused = statmap.abilityslotuse;
 
         if(abilityslotsused<=abilityslots){
             var abilitiesStats = statmap.stats.getList("abilities");
@@ -172,7 +174,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             abilities(resultAbilities);
         }
 
-        this.massStat = statmap.getOrCreate("mass").getFloat("value")*8f;
+        this.massStat = statmap.mass*8f;
 
 
         float wheelspd = getFloat(statmap.getOrCreate("wheel"), "nominal speed", 0);
@@ -180,8 +182,8 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         speed = eff * Mathf.clamp(wheelcap * 8f / this.massStat, 0, 1) * wheelspd;
         rotateSpeed = Mathf.clamp(10f * speed / (float)Math.max(construct.parts.length, construct.parts[0].length), 0, 5);
 
-        armor = statmap.getValue("armour", "realValue");
-        itemcap = (int)statmap.getValue("itemcapacity");
+        armor = statmap.armour;
+        itemcap = (int)statmap.itemcapacity;
     }
 
     @Replace
@@ -230,7 +232,8 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public void update(){
         if(construct != null && constructdata == null){
             Log.info("uh constructdata died");
-            constructdata = Arrays.copyOf(construct.data, construct.data.length);
+            var compdata = construct.getCompressedData();
+            constructdata = Arrays.copyOf(compdata, compdata.length);
         }
         float vellen = this.vel().len();
 

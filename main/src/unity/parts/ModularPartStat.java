@@ -3,7 +3,9 @@ package unity.parts;
 import arc.scene.ui.layout.*;
 
 public abstract class ModularPartStat{
-    public String name;
+    public final String name;
+    public int mergePriority = 0;
+    public int mergePostPriority = 999;
 
     public ModularPartStat(String name){
         this.name = name;

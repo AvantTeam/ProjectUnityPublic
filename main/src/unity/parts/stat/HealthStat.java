@@ -22,9 +22,10 @@ public class HealthStat extends ModularPartStat{
 
     @Override
     public void merge(ModularPartStatMap id, ModularPart part){
-        if(!percentage && id.has(name)){
-            var jo = id.getOrCreate(name);
-            jo.put("value", jo.getFloat("value") + hpboost);
+        if(id instanceof ModularUnitStatMap u){
+            if(!percentage){
+                u.health += hpboost;
+            }
         }
     }
 

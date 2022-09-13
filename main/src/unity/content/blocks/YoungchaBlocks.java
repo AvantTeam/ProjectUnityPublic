@@ -185,8 +185,8 @@ public class YoungchaBlocks{
             health = 1100;
             size = 2;
             config.nodeConfig.put(TorqueGraph.class, b -> new TransmissionTorqueGraphNode(0.05f, 8f, 2,b));
-            config.fixedConnection(TorqueGraph.class, 0, 1, 0, 0, 1, 0, 0, 0);
-            config.fixedConnection(TorqueGraph.class, 1, 0, 0, 0, 0, 1, 0, 0);
+            config.fixedConnection(TorqueGraph.class, 0, 0, 0, 1, 0, 0, 1, 0);
+            config.fixedConnection(TorqueGraph.class, 0, 0, 1, 0, 0, 0, 0, 1);
             envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         torqueMeter = new TorqueMeter("torque-meter"){{
@@ -239,7 +239,7 @@ public class YoungchaBlocks{
             envEnabled |= Env.scorching | UnityEnv.acidic;
         }};
         windTurbine = new WindTurbine("wind-turbine"){{
-            requirements(Category.power, with(Items.lead, 80, Items.copper, 70,Items.titanium,15));
+            requirements(Category.power, with(Items.lead, 80, Items.copper, 70,UnityItems.nickel,15));
             health = 2600;
             size = 3;
 
@@ -251,7 +251,7 @@ public class YoungchaBlocks{
             health = 2600;
             size = 3;
             result = Liquids.water;
-            pumpAmount = 0.5f;
+            pumpAmount = 0.2f;
             liquidCapacity = 60f;
             rotateSpeed = 1.4f;
             attribute = Attribute.water;

@@ -11,6 +11,7 @@ import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.meta.*;
+import unity.gen.*;
 import unity.parts.stat.*;
 import unity.parts.stat.AdditiveStat.*;
 import unity.util.*;
@@ -33,6 +34,10 @@ public class ModularPartType implements Displayable{
     public String category;
     public int w=1,h=1;
 
+    //behaviour
+    public boolean rotates = false;
+    public boolean updates = false;
+
     //graphics
     public TextureRegion icon;
     /**if true will not have paneling**/
@@ -53,7 +58,7 @@ public class ModularPartType implements Displayable{
 
 
     //stats
-    protected Seq<ModularPartStat> stats = new Seq<>();
+    protected Seq<ModularPartStat> stats = new Seq<>(); // todo: replace with better
 
     //places it can connect to
     public boolean root = false;
@@ -138,6 +143,10 @@ public class ModularPartType implements Displayable{
     public void drawOutline(DrawTransform transform, ModularPart part){
         if(hasExtraDecal)
             transform.drawRect(outline[part.front], part.cx*partSize,part.cy*partSize);
+    }
+
+    public void update(ModularUnitc unit, ModularPart part){
+
     }
 
     public static ModularPartType getPartFromId(int id){
