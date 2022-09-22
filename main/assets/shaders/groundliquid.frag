@@ -66,7 +66,7 @@ void main(){
     float wavedepth = clamp((depth-0.1)*10.0,0.0,1.0);
     bool isWave = depth+sin(u_time*0.07+wavedepth*wavedepth*9.0)*0.4*(1.0-wavedepth) < 0.2; // border ripples
 
-    float noiser = contrast(getBlendedNoise(tilepos*0.5 ,-vel*0.5, u_time * 0.007+1.0),1.5f); // the rapids foam
+    float noiser = contrast(getBlendedNoise(tilepos*0.5 ,-vel*0.5, u_time * 0.007+1.0),1.5); // the rapids foam
     if(isWave || noiser<vdis*0.1){
         gl_FragColor = mix(gl_FragColor,vec4(1.0),0.5);
     }

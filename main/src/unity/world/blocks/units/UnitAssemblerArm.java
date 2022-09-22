@@ -85,7 +85,7 @@ public class UnitAssemblerArm extends GenericGraphBlock{
                 }
                 return;
             }
-            boolean usedItem = false;
+            Item usedItem = null;
             if(attached!=null){
                 if(currentJob==null){
                     items.each((item, am) -> {
@@ -97,6 +97,7 @@ public class UnitAssemblerArm extends GenericGraphBlock{
                 }else{
                     buildProgress += edelta()*constructSpeed*torqueEfficiency();
                     boolean found = false;
+
                     for(var is:currentJob.remaining){
                         if(items.has(is.item) && is.amount>0){
                             found = true;
@@ -106,7 +107,7 @@ public class UnitAssemblerArm extends GenericGraphBlock{
                             if(attached.constructModule(currentJob, is.item)){
                                 items.remove(is.item, 1);
                                 buildProgress -= is.item.cost;
-                                usedItem = true;
+                                usedItem = is.item;
                                 break;
                             }
                         }
@@ -127,10 +128,11 @@ public class UnitAssemblerArm extends GenericGraphBlock{
             }
             if(!Vars.net.server()){
                 if(currentJob!=null){
+
                     var r =  attached.modulePos(currentJob.x+currentJob.type.w*0.5f, currentJob.y+currentJob.type.h*0.5f);
                     arm.end.lerp(r.x-x,r.y-y,0.1f);
-                    if(usedItem){
-                        weldspark.at(r.x,r.y,currentJob.x*69);
+                    if(usedItem!=null){
+                        weldspark.at(r.x,r.y,currentJob.x*69,usedItem.color);
                     }
                 }else{
                     arm.end.lerp(0.1f,0.1f,0.1f);

@@ -1583,8 +1583,7 @@ public final class UnityUnitTypes{
             omniMovement = false;
             weapons.add(new Weapon("gun")); //blank weapon so mobile doesn't die
             //stats? what stats? :D
-            templates.addAll("g4SFgICEgIGEgIKFgIOBgYCDgYGAgYOFgoCFgoM=","g4OFgICCgIGBgYCEgYGFgYKFgoCCgoE=","g4SFgICEgIGEgIKCgIOBgYCIgYGFgYOFgoCCgoM=",
-            "gYSFgICBgIGCgIKFgIM=","g4SFgICEgIGEgIKFgIOBgYCVgYGFgYOFgoCFgoM=","g4OFgICAgIGFgIKBgYCEgYGCgYKFgoCAgoGFgoI=");
+            templates.addAll("eJxjZmZg52PmY+dh52NgZAIiRgYGBkYwAgMACR4AXg==","eJxjZmHg5OPhYxbn4WPnY2BkYmBkAJFAgoERyIQDABF0AIw=");
         }};
     }
 }

@@ -62,16 +62,7 @@ public class AdditiveStat extends ModularPartStat{
     }
     ///use field info?
 
-    public static class PowerUsedStat extends AdditiveStat{
-        public PowerUsedStat(float power){
-            super("powerUsage",power);
-        }
-    }
-    public static class EngineStat extends AdditiveStat{
-        public EngineStat(float power){
-            super("power",power);
-        }
-    }
+
     public static class MassStat extends AdditiveStat{
         public MassStat(float power){
             super("mass",power);

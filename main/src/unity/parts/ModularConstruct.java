@@ -97,6 +97,7 @@ public class ModularConstruct implements Serializable{
                 part.cx = part.x - w * 0.5f + part.type.w * 0.5f;
                 part.cy = part.y - h * 0.5f + part.type.h * 0.5f;
                 partlist.add(part);
+                part.prop_index = partlist.size-1;
                 if(part.type.open || part.type.hasCellDecal || part.type.hasExtraDecal){
                     hasCustomDraw.add(part); // replace.
                 }

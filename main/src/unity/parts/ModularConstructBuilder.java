@@ -6,7 +6,6 @@ import mindustry.type.*;
 import unity.util.*;
 
 import java.util.*;
-import java.util.function.*;
 
 public class ModularConstructBuilder{
     public long[] parts;
@@ -242,6 +241,8 @@ public class ModularConstructBuilder{
                 index++;
             }
         }
+        minx = Math.min(minx,maxx);
+        miny = Math.min(miny,maxy);
         return new int[]{minx,miny,maxx,maxy};
     }
 
@@ -339,14 +340,10 @@ public class ModularConstructBuilder{
     public static void getStats(ModularConstructBuilder builder, ModularPartStatMap mstat){
         ///temp
         var partseqraw = builder.getList(false);
-
         getStats(new ModularPart[builder.w][builder.h], rawDataToPart(partseqraw), mstat);
     }
     public static void getStats(ModularPart[][] partgrid,  Seq<ModularPart> partseq, ModularPartStatMap mstat){
-        ///temp
-        //problem: the system needs to be done in multiple passes: i.e. torque/speed -> consumer speed -> other stats.
-        //todo: we can do that later, first we need to validate the new serialisation
-        mstat.calculatStat(partgrid,partseq);
+        mstat.initStat(partgrid,partseq);
     }
     public enum PlaceProblem{
         //todo: move to bundles
@@ -424,8 +421,8 @@ public class ModularConstructBuilder{
         if(selected.root){
             rootIndex = index(x,y);
         }
-        onChange.run();
         rebuildValid();
+        onChange.run();
         updatedItemReq = false;
         return true;
     }
@@ -443,9 +440,17 @@ public class ModularConstructBuilder{
         var type = PartData.Type(parts[ind]);
         fill(0,px,py,type.w,type.h);
 
-        onChange.run();
         rebuildValid();
+        onChange.run();
         updatedItemReq = false;
+    }
+
+    public ModularPartType partTypeAt(int x, int y){
+        int ind = index(x,y);
+        if(parts[ind] == 0){
+            return null;
+        }
+        return PartData.Type(parts[ind]);
     }
 
     ///todo: have the top decal be relatively light, the panel decal be made of a collage of different things pf various sizes seeded by the 1st 4 bits of the array.

@@ -1,6 +1,7 @@
 package unity.parts;
 
 import arc.*;
+import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
@@ -14,8 +15,13 @@ import mindustry.world.meta.*;
 import unity.gen.*;
 import unity.parts.stat.*;
 import unity.parts.stat.AdditiveStat.*;
+import unity.ui.*;
 import unity.util.*;
 import unity.world.blocks.payloads.*;
+
+import javax.swing.text.html.parser.*;
+
+import static unity.graphics.UnityPal.*;
 
 //like Block, this is a singleton
 public class ModularPartType implements Displayable{
@@ -39,6 +45,8 @@ public class ModularPartType implements Displayable{
     public boolean updates = false;
 
     //graphics
+    public boolean drawsTop = false;
+    public boolean drawsOverlay = false;
     public TextureRegion icon;
     /**if true will not have paneling**/
     public boolean open = false;
@@ -46,6 +54,22 @@ public class ModularPartType implements Displayable{
     /** texture will/may have three variants for the front middle and back **/
     public TextureRegion[] top;
     public TextureRegion[] outline;
+    public int variants = 1;
+    public VariantOrder variantOrder = VariantOrder.NONE;
+    public enum VariantOrder{
+        NONE,LEFT_MIDDLE_RIGHT,LEFT_MIDDLE_RIGHT_UP_DOWN;
+        public int flipX(int index){
+            switch(this){
+                case NONE: return index;
+                case LEFT_MIDDLE_RIGHT: return index==1?1:2-index;
+                case LEFT_MIDDLE_RIGHT_UP_DOWN: return (index==1 || index==3 || index==4) ?index:2-index;
+            }
+            return index;
+        }
+    }
+    public int drawPriority = 2;
+
+
     public boolean hasExtraDecal = false;
     public boolean hasCellDecal = false;
     public TextureRegion[] cell;
@@ -79,24 +103,30 @@ public class ModularPartType implements Displayable{
         panelling = GraphicUtils.getRegions(Core.atlas.find("unity-panel"), 12, 4,16);
     }
 
+
+
     public void load(){
         ///
         String prefix = "unity-part-"+name;
         icon = Core.atlas.find(prefix+"-icon");
-        top = new TextureRegion[]{
-            getPartSprite(prefix+"-front"),
-            getPartSprite(prefix+"-mid"),
-            getPartSprite(prefix+"-back"),
-        };
-        outline = new TextureRegion[]{
-            getPartSprite(prefix+"-front-outline"),
-            getPartSprite(prefix+"-mid-outline"),
-            getPartSprite(prefix+"-back-outline"),
-        };
+        top = getPartSprites(prefix,variants);
+        outline = getPartSprites(prefix+"-outline",variants);
+
         cell= new TextureRegion[]{
             getPartSprite(prefix+"-cell-side"),
             getPartSprite(prefix+"-cell-center")
         };
+    }
+    public static TextureRegion[] getPartSprites(String name, int am){
+        var t = new TextureRegion[am];
+        if(am == 1){
+            t[0] = getPartSprite(name);
+        }else{
+            for(int i = 0; i < am; i++){
+                t[i] = getPartSprite(name+"i");
+            }
+        }
+        return t;
     }
     public static TextureRegion getPartSprite(String e){
         var f = Core.atlas.find(e);
@@ -137,15 +167,45 @@ public class ModularPartType implements Displayable{
         if(hasExtraDecal)
             transform.drawRect(top[part.front],part.cx*partSize,part.cy*partSize);
     }
-    public void draw(DrawTransform transform, ModularPart part){
+    public void draw(DrawTransform transform, ModularPart part, Entityc c){
         transform.drawRect(panelling[part.panelingIndexes[0]],part.ax*partSize,part.ay*partSize);
     }
-    public void drawOutline(DrawTransform transform, ModularPart part){
+    public void drawOutline(DrawTransform transform, ModularPart part, Entityc c){
         if(hasExtraDecal)
             transform.drawRect(outline[part.front], part.cx*partSize,part.cy*partSize);
     }
 
-    public void update(ModularUnitc unit, ModularPart part){
+    //draw editor..
+
+    public void drawEditorOutline(PartsEditorElement editor, int x,int y, boolean valid){
+        Draw.color(valid?Color.white:Color.red);
+        editor.rect(outline[0], (x + w * 0.5f) * 32, (y + h * 0.5f) * 32, 2);
+    }
+    public void drawEditor(PartsEditorElement editor, int x,int y, boolean valid){
+        editor.rect(top[0], (x + w * 0.5f) * 32, (y + h * 0.5f) * 32, 2);
+    }
+
+    public void drawEditorMinimised(PartsEditorElement editor, float x,float y, boolean valid){
+        if(w > 1 || h > 1){
+            Draw.color(bgCol);
+            editor.rectCorner(x * 32, y * 32, w * 32, h * 32);
+            Draw.color(bgColMid);
+            Lines.stroke(5 * editor.scl);
+            editor.rectLine(x * 32 + 4, y * 32 + 4, w * 32 - 8, h * 32 - 8);
+        }
+        Draw.color(valid ? Color.white : Color.red);
+        float maxsize = Math.min(Math.min(w,h)*32,32f/editor.scl);
+        editor.rect(icon, (x + w * 0.5f) * 32, (y + h * 0.5f) * 32, maxsize, maxsize);
+    }
+
+    public void drawEditorTop(PartsEditorElement editor, int x,int y, boolean valid){ }
+    public void drawEditorSelect(PartsEditorElement editor, int x, int y, boolean placed){
+        Draw.color(Color.white,0.5f);
+        editor.rectCorner(icon, x * 32, y * 32, w * 32, h * 32);
+    }
+    public void drawEditorOverlay(PartsEditorElement editor, int x, int y){ }
+
+    public void update(Entityc unit, ModularPart part){
 
     }
 
@@ -172,6 +232,9 @@ public class ModularPartType implements Displayable{
     }
 
     //units
+    public void differentialSteer(){
+               stats.add(new DifferentialSteerStat());
+           }
     public void armor(float amount){
            stats.add(new ArmourStat(amount));
        }
@@ -181,11 +244,11 @@ public class ModularPartType implements Displayable{
     public void mass(float amount){
         stats.add(new MassStat(amount));
     }
-    public void producesPower(float amount){
-        stats.add(new EngineStat(amount));
+    public void producesPower(float amount, float speed){
+        stats.add(new EngineStat(amount,speed));
     }
-    public void usesPower(float amount){
-        stats.add(new PowerUsedStat(amount));
+    public void usesPower(float amount ,float speed, float maxSpeed){
+        stats.add(new PowerConsumerStat(amount/speed,maxSpeed));
     }
     public void addsWeaponSlots(float amount){
         stats.add(new WeaponSlotStat(amount));

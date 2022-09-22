@@ -162,7 +162,6 @@ public class ModularUnitAssembler extends PayloadBlock{
                 Unity.ui.partsEditor.show(blueprint.exportFull(),
                 (data)->{
                     this.configure(data);
-                    Log.info("changed stuff");
                 },
                 PartsEditorDialog.unitInfoViewer,
                 part->part.visible && part.w<=unitModuleWidth && part.h<=unitModuleHeight);
@@ -352,7 +351,6 @@ public class ModularUnitAssembler extends PayloadBlock{
             DrawTransform dt = new DrawTransform();
             dt.setTranslate(x,y);
             dt.setRotation(rotdeg());
-            ModularWheelType.rollDistance = 0;
             if(construct!=null && !sandbox && payload==null){
                 //9 slice?
 
@@ -363,7 +361,7 @@ public class ModularUnitAssembler extends PayloadBlock{
                 Draw.color();
                 for(var part:construct.partlist){
                     if(built.contains(Point2.pack(part.getX(),part.getY()))){
-                        part.type.draw(dt,part);
+                        part.type.draw(dt,part, null);
                     }else{
                         float dx = x + (part.ax - 0.5f) * partSize;
                         float dy = y + (part.ay - 0.5f) * partSize;

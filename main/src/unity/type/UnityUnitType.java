@@ -184,15 +184,14 @@ public class UnityUnitType extends UnitType{
         DrawTransform dt = new DrawTransform(new Vec2(unit.x,unit.y),unit.rotation);
         var construct = unit.construct();
         if(construct!=null){
-            ModularWheelType.rollDistance = unit.driveDist();
             unit.doodadlist().each(d->{
                 d.drawOutline(dt);
             });
             construct.hasCustomDraw.each((p) -> {
-                p.type.drawOutline(dt, p);
+                p.type.drawOutline(dt, p, unit);
             });
             construct.hasCustomDraw.each((p) -> {
-                p.type.draw(dt, p);
+                p.type.draw(dt, p, unit);
             });
             unit.doodadlist().each(d->{
                 d.drawTop(dt);
@@ -214,7 +213,6 @@ public class UnityUnitType extends UnitType{
         DrawTransform dt = new DrawTransform(new Vec2(unit.x,unit.y),unit.rotation);
         var construct = unit.construct();
         if(construct!=null){
-            ModularWheelType.rollDistance = unit.driveDist();
             construct.hasCustomDraw.each((p) -> {
                 p.type.drawCell(dt, p);
             });

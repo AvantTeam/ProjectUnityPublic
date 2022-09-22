@@ -29,7 +29,7 @@ public class PartsEditorDialog extends BaseDialog{
     public ModularConstructBuilder builder;
     Cons<byte[]> consumer;
     public PartsEditorElement editorElement;
-    public Cons2<ModularConstructBuilder, Table> infoViewer;
+    public Func2<ModularConstructBuilder, Table,ModularPartStatMap> infoViewer;
 
     public ObjectMap<String,Seq<ModularPartType>> avalibleParts = new ObjectMap<>();
     boolean info = false;
@@ -89,7 +89,6 @@ public class PartsEditorDialog extends BaseDialog{
         ImageButton partsSelectMenuButton = new ImageButton(Icon.box, Styles.clearNonei);
         partsSelectMenuButton.clicked(()->{
             partSelectBuilder.get(content);
-            builder.onChange = ()->{};
         });
         tabs.add(partsSelectMenuButton).size(64).pad(8);
 
@@ -178,9 +177,9 @@ public class PartsEditorDialog extends BaseDialog{
                     infoContent.clear();
                     openInfo = false;
                 }else{
-                    infoViewer.get(builder,infoContent);
+                    editorElement.statmap = infoViewer.get(builder,infoContent);
                     builder.onChange = ()->{
-                        infoViewer.get(builder,infoContent);
+                        editorElement.statmap = infoViewer.get(builder,infoContent);
                     };
                     openInfo = true;
                 }
@@ -219,7 +218,7 @@ public class PartsEditorDialog extends BaseDialog{
         });
     }
 
-    public void show(byte[] data, Cons<byte[]> modified,Cons2<ModularConstructBuilder, Table> viewer, Boolf<ModularPartType> allowed){
+    public void show(byte[] data, Cons<byte[]> modified,Func2<ModularConstructBuilder, Table,ModularPartStatMap> viewer, Boolf<ModularPartType> allowed){
         this.builder.paste(data);
         leftSideBuilder.get(selectSide);
         editorElement.setBuilder(this.builder);
@@ -241,7 +240,7 @@ public class PartsEditorDialog extends BaseDialog{
     }
 
 
-    public static Cons2<ModularConstructBuilder, Table> unitInfoViewer = (construct,table)->{
+    public static Func2<ModularConstructBuilder, Table,ModularPartStatMap> unitInfoViewer = (construct,table)->{
         table.clearChildren();
         var statmap = new ModularUnitStatMap();
         var itemcost = construct.itemRequirements();
@@ -255,8 +254,14 @@ public class PartsEditorDialog extends BaseDialog{
         table.row();
         table.table(req -> {
             req.top().left();
+            int t = 0;
             for(ItemStack stack : itemcost){
+                if(t%5==0 && t!=0){
+                    req.row();
+                }
                 req.add(new ItemDisplay(stack.item, stack.amount, false)).padRight(5);
+                t++;
+
             }
         }).growX().left().margin(3);
         table.row();
@@ -271,17 +276,19 @@ public class PartsEditorDialog extends BaseDialog{
         }
         float mass = statmap.mass;
 
-        table.add("[lightgray]" + Stat.powerUse.localized() + ": "+color+statmap.powerUsage + "/"+ statmap.power).left().top();
+        table.add("[lightgray]" + Stat.powerUse.localized() + ": "+color+Strings.fixed(statmap.powerUsage,1) + "/"+ statmap.power).left().top();
         table.row();
         table.add("[lightgray]" + Core.bundle.get("ui.parts.stat.efficiency") + ": "+color+Strings.fixed(Mathf.clamp(eff)*100,1)+"%").left().top();
         table.row();
         table.add("[lightgray]" + Core.bundle.get("ui.parts.stat.weight") + ":[accent] "+ mass).left().top();
 
 
-        float wcap = statmap.getValue("wheel","weight capacity");
-        float speed = eff *  Mathf.clamp(wcap/mass) * statmap.getValue("wheel","nominal speed");
+        float wcap = statmap.weightCapacity;
+        float speed = eff *  Mathf.pow(Mathf.clamp(wcap/mass),3) * statmap.speed;
         table.row();
         table.add("[lightgray]" + Stat.speed.localized()  + ":[accent] "+ Core.bundle.format("ui.parts.stat.speed",Strings.fixed(speed * 60f / tilesize,1))).left().top();
+        table.row();
+        table.add("[lightgray]" +  Core.bundle.get("ui.parts.stat.steerspeed")  + ":[accent] "+ Core.bundle.format("ui.parts.stattype.steerspeed",Strings.fixed(statmap.turningspeed * 60f,1))).left().top();
         table.row();
         table.add("[lightgray]" + Core.bundle.get("ui.parts.stat.armour-points") + ":[accent] "+ statmap.armourPoints).left().top();
         table.row();
@@ -296,6 +303,7 @@ public class PartsEditorDialog extends BaseDialog{
         int abilityslots = statmap.abilityslots;
         int abilityslotsused = statmap.abilityslotuse;
         table.add("[lightgray]" +  Core.bundle.get("ui.parts.stat.ability-slots") + ": "+(abilityslotsused>abilityslots?"[red]":"[green]")+ abilityslotsused+"/"+abilityslots).left().top().tooltip(Core.bundle.get("ui.parts.stat.ability-slots-tooltip"));
+        return statmap;
     };
 
     public void updateScrollFocus(){

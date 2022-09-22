@@ -223,6 +223,8 @@ public class GroundFluidControl implements CustomChunk{
                 if(!state.isPaused()){
                     if(fluidThread == null){
                         fluidThread = new FluidRunnerThread();
+                        fluidThread.setPriority(Thread.NORM_PRIORITY - 1);
+                        fluidThread.setDaemon(true);
                         fluidThread.start();
                         Log.info("Started Fluid");
                     }
@@ -860,18 +862,19 @@ public class GroundFluidControl implements CustomChunk{
         int currentTime;
         final Object waitSync = new Object();
         boolean terminate = false; // not really used, but if you want to 'play it safe' ig?
-
+        volatile boolean doStep = false;
         public void run(){
-
+            Log.info(" ---- Thread started");
             while(!terminate){
                 try{
-                    synchronized(waitSync){
-                        try{
-                            waitSync.wait();
-                        }catch(InterruptedException e){
+                    while(!doStep){
+                        Thread.sleep(16);
+                        if(Core.app.isDisposed()){
+                            Log.info(" >>>>> Thread terminated due to app"); // we have to busy wait bc theres no hook for app termination
                             return;
                         }
                     }
+
                     while(currentTime < targetTime){
                         step();
                         synchronized(waitSync){
@@ -879,10 +882,17 @@ public class GroundFluidControl implements CustomChunk{
                             updateTransition();
                         }
                     }
+                    doStep = false;
+                }catch(InterruptedException e){
+                    terminate = true;
+                    Log.info(" >>>>> Thread terminated");
+                    return;
                 }catch(Exception e){
                     Log.debug(e);
                     Log.debug(Arrays.asList(e.getStackTrace()).toString());
                     Call.sendChatMessage(e.toString());
+                    Log.info(" >>>>> Thread terminated");
+                    return;
                 }
             }
         }
@@ -894,11 +904,9 @@ public class GroundFluidControl implements CustomChunk{
 
         public void updateTime(float delta){
             targetTime += delta;
-            synchronized(waitSync){
-                updateTransition();
-                if(targetTime > currentTime){
-                    waitSync.notify();
-                }
+            updateTransition();
+            if(targetTime > currentTime){
+                doStep = true;
             }
         }
 

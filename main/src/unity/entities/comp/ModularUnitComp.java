@@ -63,6 +63,7 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     //visuals
     public transient float driveDist = 0;
     public transient float clipsize = 0;
+    public transient float[] partTransientProp;
     //stat
     public transient float enginepower = 0;
     public transient float speed = 0;
@@ -70,21 +71,25 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     public transient float massStat = 0;
     public transient float weaponrange = 0;
     public transient int itemcap = 0;
+    public transient boolean differentialSteer = true;
 
     public transient float statHp = 0;
+
 
     @Override
     public void add(){
         if(ModularConstruct.cache.containsKey(this)){
             construct = ModularConstruct.cache.get(this);
+            partTransientProp = new float[construct.partlist.size];
         }else{
             if(constructdata != null){
                 construct = ModularConstruct.get(constructdata);
+                partTransientProp = new float[construct.partlist.size];
             }else{
                 String templatestr = ((UnityUnitType)type).templates.random();
-                ModularConstructBuilder test = new ModularConstructBuilder(3, 3);
-                test.paste(Base64.getDecoder().decode(templatestr.trim().replaceAll("[\\t\\n\\r]+", "")));
-                construct = test.createConstruct(true);
+                constructdata = Base64.getDecoder().decode(templatestr.trim().replaceAll("[\\t\\n\\r]+", ""));
+                construct = ModularConstruct.get(constructdata);
+                partTransientProp = new float[construct.partlist.size];
             }
         }
         var compdata = construct.getCompressedData();
@@ -176,14 +181,13 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
 
         this.massStat = statmap.mass*8f;
 
-
-        float wheelspd = getFloat(statmap.getOrCreate("wheel"), "nominal speed", 0);
-        float wheelcap = getFloat(statmap.getOrCreate("wheel"), "weight capacity", 0);
-        speed = eff * Mathf.clamp(wheelcap * 8f / this.massStat, 0, 1) * wheelspd;
-        rotateSpeed = Mathf.clamp(10f * speed / (float)Math.max(construct.parts.length, construct.parts[0].length), 0, 5);
+        speed = eff * Mathf.pow(Mathf.clamp(statmap.weightCapacity * 8f / this.massStat, 0, 1),3) * statmap.speed;
+        rotateSpeed = Mathf.clamp(statmap.turningspeed / (float)Math.max(construct.parts.length, construct.parts[0].length), 0, 5);
 
         armor = statmap.armour;
         itemcap = (int)statmap.itemcapacity;
+
+        differentialSteer = statmap.differentialSteering;
     }
 
     @Replace
@@ -235,32 +239,17 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             var compdata = construct.getCompressedData();
             constructdata = Arrays.copyOf(compdata, compdata.length);
         }
-        float vellen = this.vel().len();
-
-        if(construct != null && vellen > 0.01f && elevation<0.01){
-            driveDist += vellen;
-            DrawTransform dt = new DrawTransform(new Vec2(this.x(), this.y()), rotation);
-            float dustvel = 0;
-            if(moving){
-                dustvel = vellen - speed;
-            }
-            Vec2 nv = vel().cpy().nor().scl(dustvel * 40);//
-            Vec2 nvt = new Vec2();
-            final Vec2 pos = new Vec2();
-            construct.partlist.each(part -> {
-                boolean b = part.getY()-1 <0 || (construct.parts[part.getX()][part.getY()-1]!=null  && construct.parts[part.getX()][part.getY()-1].type instanceof ModularWheelType);
-                if(!(Mathf.random() > 0.1 || !(part.type instanceof ModularWheelType)) && b){
-                    pos.set(part.cx * ModularPartType.partSize, part.ay * ModularPartType.partSize);
-                    dt.transform(pos);
-                    nvt.set(nv.x + Mathf.range(3), nv.y + Mathf.range(3));
-                    Tile t = Vars.world.tileWorld(pos.x, pos.y);
-                    if(t != null){
-                        OtherFx.dust.at(pos.x, pos.y, 0, t.floor().mapColor, nvt);
-                    }
-
-                }
+        if(partTransientProp == null){
+            Log.info("partTransientProp was null fsr");
+            partTransientProp = new float[construct.partlist.size];
+        }
+        if(construct != null){
+            construct.hasCustomUpdate.each(part -> {
+                part.type.update(this, part);
             });
-
+        }
+        if(construct != null && elevation<0.01){
+            steerAngle *= 0.98;
         }
         moving = false;
         if(maxHealth!=statHp){
@@ -307,13 +296,45 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     }
 
     transient boolean moving = false;
+    public transient float rotateVel = 0;
+    public transient float steerAngle = 0;
+
+    private float steerAngle(float from, float to){
+        from = Mathf.mod(from, 360.0F);
+        to = Mathf.mod(to, 360.0F);
+        float b = Angles.backwardDistance(from, to);
+        float f = Angles.forwardDistance(from, to);
+        if (from > to == b > f) {
+            return - b;
+        }else{
+            return f;
+        }
+    }
 
     @Replace
     public void rotateMove(Vec2 vec){
-        moveAt(Tmp.v2.trns(rotation, vec.len()));
-        moving = vec.len2() > 0.1;
-        if(!vec.isZero()){
-            rotation = Angles.moveToward(rotation, vec.angle(), rotateSpeed * Math.max(Time.delta, 1));
+        float vecangle = vec.angle();
+        boolean isZero = vec.isZero();
+
+        if(differentialSteer && Math.abs(Angles.angleDist(rotation,vecangle)) > rotateSpeed * 16 && !isZero){
+            moveAt(Tmp.v2.trns(rotation, 0));
+            moving = vec.len2() > 0.1;
+            rotateVel = Angles.moveToward(rotation, vecangle, 16 * speed * Math.max(Time.delta, 1) / hitSize()) - rotation;
+            rotation += rotateVel;
+        }else{
+            moveAt(Tmp.v2.trns(rotation, vec.len()));
+            moving = vec.len2() > 0.1;
+
+            if(!vec.isZero()){
+                rotateVel = Angles.moveToward(rotation, vecangle, 4 * rotateSpeed * Math.max(Time.delta, 1) * (vec.len() + 0.1f)) - rotation;
+                rotation += rotateVel;
+            }
+        }
+        if(isZero){
+            rotateVel*=0.8;
+            steerAngle*=0.8;
+        }else{
+            steerAngle =  steerAngle(rotation,vecangle);
         }
     }
 
