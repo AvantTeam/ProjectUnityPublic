@@ -21,6 +21,10 @@ const float epsilon = 0.002;
 
 uniform vec2 u_viewportInverse;
 
+float round(float a){
+    return floor(a + 0.5);
+}
+
 void main(){
     gl_Position = u_projTrans * a_position;
     v_texCoords = a_texCoord0;
