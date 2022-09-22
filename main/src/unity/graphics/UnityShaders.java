@@ -19,7 +19,6 @@ public class UnityShaders {
     public static @Nullable ModSurfaceShader lava,pit,waterpit;
 
     public static CacheLayer.ShaderLayer lavaLayer,pitLayer,waterpitLayer;
-    public static GroundLiquidShader groundLiquid; //will be replaced if batched shader works
     public static BatchedGroundLiquidShader batchedGroundLiquid;
 
     protected static boolean loaded;
@@ -42,8 +41,6 @@ public class UnityShaders {
         CacheLayer.add(lavaLayer);
         CacheLayer.add(pitLayer);
         CacheLayer.add(waterpitLayer);
-
-        groundLiquid = new GroundLiquidShader();
         batchedGroundLiquid = new BatchedGroundLiquidShader();
     }
 

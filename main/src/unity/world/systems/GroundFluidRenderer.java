@@ -49,60 +49,9 @@ public class GroundFluidRenderer{
         maxx = Mathf.clamp(maxx, minx, control.w - 1);
         maxy = Mathf.clamp(maxy, miny, control.h - 1);
 
-        if(useOldRendering){
-            boolean resized = fluidFrameBuffer.resizeCheck(world.width(), world.height());
-            if(fluidDataMap == null || resized){
-                if(fluidDataMap != null){
-                    fluidDataMap.dispose();
-                }
-                fluidDataMap = new Pixmap(world.width(), world.height());
-            }
-            drawFluidAll(minx, miny, maxx, maxy);
-        }else{
-            drawFluidsBatched(minx, miny, maxx, maxy);
-        }
+        drawFluidsBatched(minx, miny, maxx, maxy);
 
         //drawDebug();
-    }
-
-    public void drawFluidAll(int minx, int miny, int maxx, int maxy){
-        GroundFluidControl control = Unity.groundFluidControl;
-        float t = Mathf.clamp(control.getTransition());
-        Color tmpCol = new Color();
-        bufferDirect = new byte[(maxx - minx + 1) * 4];
-        //red - type, green- X vel, blue - Y vel, alpha - depth.
-        float transam;
-        for(int y = miny; y <= maxy; y++){
-            int tile = control.tileIndexOf(minx, y);
-            for(int x = 0; x < bufferDirect.length; x += 4){
-                if(control.liquidAmount[tile] + control.previousLiquidAmount[tile] > 0.001){
-                    var fluid = control.getVisualFluidType(tile);
-                    tmpCol.r(fluid.id / 256f);
-                    transam = 1f / (1f + Mathf.lerp(control.previousLiquidAmount[tile], control.liquidAmount[tile], t));
-                    tmpCol.g(transformVel(control.fluidVelX(tile) * transam));
-                    tmpCol.b(transformVel(control.fluidVelY(tile) * transam));
-                    tmpCol.a(transformDepth(control.previousLiquidAmount[tile], control.liquidAmount[tile], fluid.minamount * 0.5f, t));
-                    writePixel(bufferDirect, x, tmpCol);
-                }else{
-                    clearPixel(bufferDirect, x);
-                }
-                tile += 1; // tile index advances along the row
-            }
-            int byteOffset = (minx + y * fluidDataMap.width) * 4; //the offset of the raw byte data in the texture
-            for(int i = 0; i < bufferDirect.length; i++){
-                fluidDataMap.pixels.put(byteOffset + i, bufferDirect[i]);
-            }
-        }
-        fluidFrameBuffer.begin(Color.clear);
-        fluidFrameBuffer.getTexture().draw(fluidDataMap);
-        fluidFrameBuffer.end();
-
-        fluidFrameBuffer.getTexture().setFilter(TextureFilter.linear);
-
-        Draw.shader(UnityShaders.groundLiquid);
-        Draw.fbo(fluidFrameBuffer.getTexture(), world.width(), world.height(), tilesize, tilesize * 0.5f);
-        Draw.shader();
-
     }
 
     private int[] fluidsToBeDrawn; // records the index in the fbo
