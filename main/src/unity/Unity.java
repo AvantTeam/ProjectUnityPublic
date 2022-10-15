@@ -1,16 +1,17 @@
 package unity;
 
 import arc.*;
+import arc.scene.actions.*;
+import arc.scene.ui.*;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
-
 import mindustry.ui.dialogs.*;
 import mindustry.ui.dialogs.JoinDialog.*;
-
 import mindustry.ui.fragments.*;
 
 import mindustry.world.blocks.environment.*;
@@ -82,7 +83,7 @@ public class Unity extends Mod{
                 }
 
                 UnitySettings.init();
-                Vars.ui.showOkText("@mod.disclaimer.title", "@mod.disclaimer.text", () -> {});
+                new DisclaimerDialog().show();
 
                 //bc they are not a contentType
                 ModularPartType.loadStatic();
