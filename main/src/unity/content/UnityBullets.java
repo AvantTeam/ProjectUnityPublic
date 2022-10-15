@@ -10,7 +10,6 @@ import mindustry.graphics.*;
 import unity.content.effects.*;
 import unity.entities.bullet.energy.*;
 import unity.entities.bullet.exp.*;
-import unity.entities.bullet.misc.BlockStatusEffectBulletType;
 import unity.gen.*;
 
 import static unity.content.UnityStatusEffects.distort;
@@ -21,7 +20,7 @@ public class UnityBullets{
 
     citadelFlame,
 
-    statusEffect, upgradeEffect,
+    statusEffect,
 
     sapLaser, sapArtilleryFrag, continuousSapLaser,
 
@@ -364,18 +363,10 @@ public class UnityBullets{
             expChance = 0.5f;
         }};
 
-        statusEffect = new BlockStatusEffectBulletType(0f, 0){{
+        statusEffect = new BasicBulletType(0f, 0){{
             hitEffect = despawnEffect = Fx.none;
             lifetime = 180f;
             width = height = 1f;
-        }};
-
-        upgradeEffect = new BlockStatusEffectBulletType(0f, 0){{
-            hitEffect = Fx.none;
-            despawnEffect = UnityFx.expPoof;
-            lifetime = 180f;
-            width = height = 1f;
-            upgrade = true;
         }};
     }
 }
