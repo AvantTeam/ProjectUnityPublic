@@ -68,17 +68,20 @@ public class SimpleTransmission extends GenericGraphBlock{
     }
 
     public class SimpleTransmissionBuildGeneric extends GenericGraphBuild{
+        //oh god :(
         @Override
         public void draw(){
             TorqueGraphNode torqueNode = (TorqueGraphNode)getGraphNode(TorqueGraph.class);
             float graphRot0 = torqueNode.connector.get(0).getGraph().rotation;
             float graphRot1 = torqueNode.connector.get(1).getGraph().rotation;
-            float fixedRot = (rotdeg() + 90f) % 180f - 90f;
-            int variant = (rotation + 1) % 4 >= 2 ? 1 : 0;
-            Draw.rect(bottomRegion, x, y);
-            Draw.rect(mbaseRegion, x, y, rotdeg());
 
-            Point2 offset = Geometry.d4(rotation + 1);
+            int rectifiedRotation = rotation+1; // haha i dont understand my draw code either
+            float fixedRot = (rectifiedRotation*90 + 90f) % 180f - 90f;
+            int variant = (rectifiedRotation + 1) % 4 >= 2 ? 1 : 0;
+            Draw.rect(bottomRegion, x, y);
+            Draw.rect(mbaseRegion, x, y, rectifiedRotation*90);
+
+            Point2 offset = Geometry.d4(rectifiedRotation + 1);
             float ox = offset.x * 4f;
             float oy = offset.y * 4f;
             //xelo..
@@ -91,9 +94,9 @@ public class SimpleTransmission extends GenericGraphBlock{
             UnityDrawf.drawRotRect(movingRegions[2], x - ox, y - oy, 16f, 2.5f, 2.5f, fixedRot, graphRot1, graphRot1 + 180f);
             UnityDrawf.drawRotRect(movingRegions[2], x - ox, y - oy, 16f, 2.5f, 2.5f, fixedRot, graphRot1 + 180f, graphRot1 + 360f);
 
-            Draw.rect(overlayRegions[variant], x, y, rotdeg());
+            Draw.rect(overlayRegions[variant], x, y, rectifiedRotation*90);
 
-            Draw.rect(topRegions[rotation % 2], x, y);
+            Draw.rect(topRegions[rectifiedRotation % 2], x, y);
             drawTeamTop();
         }
     }

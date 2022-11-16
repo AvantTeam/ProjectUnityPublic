@@ -8,6 +8,7 @@ import arc.util.*;
 import arc.util.io.*;
 import mindustry.content.*;
 import mindustry.entities.*;
+import mindustry.gen.*;
 import mindustry.ui.*;
 
 import static unity.graphics.UnityPal.*;
@@ -118,8 +119,10 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
         write.f(this.heatenergy );
     }
 
-    public void generateHeat(float targetTemp, float eff){
-        heatenergy += (targetTemp-getTemp())*eff;
+    public float generateHeat(float targetTemp, float eff){
+        float gen = (targetTemp-getTemp())*eff;
+        heatenergy += gen;
+        return gen;
     }
     public void generateHeat(){
         lastEnergyInput = Math.max(minGenerate,(targetTemp-getTemp())*efficency*prodEfficency);
@@ -128,6 +131,32 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
 
     public float getTemp(){
         return heatenergy/ heatcapacity;
+    }
+
+    public void affectUnit(Unit unit, float intensityScl){
+        float temp = getTemp();
+        if(temp > HeatGraphNode.celsiusZero+Math.max(400-intensityScl*100f,150)){
+            float intensity = Mathf.clamp(Mathf.map(temp, HeatGraphNode.celsiusZero + 400, HeatGraphNode.celsiusZero + 2000f, 0f, 1f));
+            unit.apply(StatusEffects.burning, (intensity * 40f + 7f) * intensityScl);
+            if(unit.isImmune(StatusEffects.burning)){
+                intensity*=0.2;
+            }
+            if(unit.isImmune(StatusEffects.melting)){
+                intensity*=0.2;
+            }
+            unit.damage(intensity * 50f * intensityScl);
+        }else if(temp < HeatGraphNode.celsiusZero-Math.max(100-intensityScl*50f,30)){
+            float intensity = Mathf.clamp(Mathf.map(temp, HeatGraphNode.celsiusZero - 100, 0, 0f, 1f));
+            unit.apply(StatusEffects.freezing, (intensity * 40f + 7f) * intensityScl);
+            if(unit.isImmune(StatusEffects.freezing)){
+                intensity*=0.2;
+            }
+            if(unit.hasEffect(StatusEffects.wet)){
+                intensity*=2;
+                unit.apply(StatusEffects.slow, (intensity * 20f + 7f) * intensityScl);
+            }
+            unit.damage(intensity * 50f * intensityScl);
+        }
     }
 
     public void setTemp(float temp){

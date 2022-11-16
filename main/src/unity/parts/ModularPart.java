@@ -3,13 +3,16 @@ package unity.parts;
 public class ModularPart{
     public ModularPartType type;
     int x,y;
+    int rotation;
     //position of lowest left tile
     public float ax,ay;
     //middle
     public float cx,cy;
     public int[] panelingIndexes;
     //which lighting variation to draw
-    int front = 0;
+    public int front = 0;
+    //transient properties index
+    public int prop_index = -1;
 
     //editor only fields
     boolean valid = false;

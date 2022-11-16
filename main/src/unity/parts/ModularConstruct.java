@@ -4,108 +4,186 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.gen.*;
+import unity.content.*;
+import unity.parts.ModularConstructBuilder.*;
 import unity.parts.PanelDoodadType.*;
 
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 
-//probably immutable
+// OK this is the plan:
+// ModularConstructBuilder -> actual edits the bytes, add Modules, removes them, loads, saves, compresses, formats, etc.
+// ModularConstruct -> 'cache', stuff related to a complete modular contruct is stored here, ie. positions, stats, cosmetic vertexes etc.
 public class ModularConstruct implements Serializable{
-    public static ObjectMap<Unitc,byte[]> cache = new ObjectMap<>();
-    public static ModularConstruct test = new ModularConstruct(new byte[]{
-        sb(3),sb(3),
-        sb(1),sb(1),sb(1),
-        sb(0),sb(2),sb(1),
-        sb(2),sb(2),sb(0),
-        sb(0),sb(0),sb(1),
-        sb(2),sb(0),sb(0),
+    public static ObjectMap<Unitc, ModularConstruct> cache = new ObjectMap<>();
+    public static ModularConstruct placeholder = new ModularConstruct(1, 1, new long[]{
+    ModularConstructBuilder.PartData.create(UnityParts.smallRoot.id, 0, 0)
     });
 
-    public ModularPart [][] parts;
+    //for editor -> unit
+    private static class ConstructBuildkey{
+        long[] data;
+
+        public ConstructBuildkey(long[] data){
+            this.data = data;
+        }
+
+        @Override
+        public boolean equals(Object o){
+            if(this == o) return true;
+            if(!(o instanceof ConstructBuildkey)) return false;
+            ConstructBuildkey that = (ConstructBuildkey)o;
+            return Arrays.equals(data, that.data);
+        }
+
+        @Override
+        public int hashCode(){
+            return Arrays.hashCode(data);
+        }
+    }
+
+    private static ObjectMap<ConstructBuildkey, ModularConstruct> createdCache = new ObjectMap<>();
+
+    //for data -> unit
+    private static class ConstructDatakey{
+        byte[] data;
+
+        public ConstructDatakey(byte[] data){
+            this.data = data;
+        }
+
+        @Override
+        public boolean equals(Object o){
+            if(this == o) return true;
+            if(!(o instanceof ConstructDatakey)) return false;
+            ConstructDatakey that = (ConstructDatakey)o;
+            return Arrays.equals(data, that.data);
+        }
+
+        @Override
+        public int hashCode(){
+            return Arrays.hashCode(data);
+        }
+    }
+
+    private static ObjectMap<ConstructDatakey, ModularConstruct> dataCache = new ObjectMap<>();
+
+    public ModularPart[][] parts;
     public Seq<ModularPart> partlist = new Seq<>();
     public Seq<ModularPart> hasCustomDraw = new Seq<>();
-    static final int idSize = 1;
-    public byte[] data;
+    public Seq<ModularPart> hasCustomUpdate = new Seq<>();
 
-    //designed to be synced over the net
-    //byte[] structure
-    // w , h
-    // (type-id,  x ,y )-- repeats
-    public ModularConstruct(byte[] data){
+    public long[] data;
+    public byte[] compressedData;
+
+    ModularPartStatMap statMap;
+
+    private ModularConstruct(int w, int h, long[] data){
         try{
-            int w = ub(data[0]);
-            int h = ub(data[1]);
             parts = new ModularPart[w][h];
-            int partamount = (data.length - 2) / (2 + idSize);
-            int blocksize = (2 + idSize);
-            for(int i = 0; i < partamount; i++){
-                int id = getID(data, 2 + i * blocksize);
-                int x = ub(data[2 + i * blocksize + idSize]);
-                int y = ub(data[2 + i * blocksize + idSize + 1]);
-                var part = ModularPartType.getPartFromId(id).create(x, y);
-                partlist.add(part);
-                if(part.type.open || part.type.hasCellDecal || part.type.hasExtraDecal){
-                    hasCustomDraw.add(part);
-                }
-                part.ax = x-w*0.5f + 0.5f;
-                part.ay = y-h*0.5f + 0.5f;
-                part.cx = x-w*0.5f + part.type.w*0.5f;
-                part.cy = y-h*0.5f + part.type.h*0.5f;
+            for(int index = 0; index < data.length; index++){
 
-                for(int px = 0; px < part.type.w; px++){
-                    for(int py = 0; py < part.type.h; py++){
-                        parts[x + px][y + py] = part;
+                ModularPart part = PartData.get(data[index]);
+                int pw = (part.rotation & 1) == 0 ? part.type.w : part.type.h;
+                int ph = (part.rotation & 1) == 0 ? part.type.h : part.type.w;
+                for(int i = 0; i < pw; i++){
+                    for(int j = 0; j < ph; j++){
+                        parts[part.x + i][part.y + j] = part;
                     }
                 }
+                part.ax = part.x - w * 0.5f + 0.5f;
+                part.ay = part.y - h * 0.5f + 0.5f;
+                part.cx = part.x - w * 0.5f + part.type.w * 0.5f;
+                part.cy = part.y - h * 0.5f + part.type.h * 0.5f;
+                partlist.add(part);
+                part.prop_index = partlist.size-1;
+                if(part.type.open || part.type.hasCellDecal || part.type.hasExtraDecal){
+                    hasCustomDraw.add(part); // replace.
+                }
+                if(part.type.updates){
+                    hasCustomUpdate.add(part);
+                }
             }
-            for(ModularPart mp:partlist){
-                mp.type.setupPanellingIndex(mp,parts);
-            }
-            this.data = data;
+            //for(ModularPart mp:partlist){
+            //    mp.type.setupPanellingIndex(mp,parts);
+            //}
+            //this.data = data;
+            // populate parts.
+            // d
         }catch(Exception e){
             Log.err(e.toString());
             var est = e.getStackTrace();
-            for(StackTraceElement st:est){
+            for(StackTraceElement st : est){
                 Log.err(st.toString());
             }
         }
+        this.data = new long[data.length];
+        System.arraycopy(data,0,this.data,0,data.length);
+
     }
 
-    ///todo: have the top decal be relatively light, the panel decal be made of a collage of different things pf various sizes seeded by the 1st 4 bits of the array.
+    public static ModularConstruct get(byte[] data){
+        var key = new ConstructDatakey(data);
+        if(dataCache.containsKey(key)){
+            Log.info("ModularConstruct: created data construct exists!");
+            return dataCache.get(key);
+        }
+        ModularConstructBuilder b = ModularConstructBuilder.decompressAndParse(data);
+        var cons = b.createConstruct(false);
+        cons.compressedData = data;
+        dataCache.put(key, cons);
+        return cons;
+    }
 
-    public static int getID(byte[] data, int s){
-        if(idSize==1){
-            return ub(data[s]);
+    public static ModularConstruct get(int w, int h, long[] data){
+        var key = new ConstructBuildkey(data);
+        if(createdCache.containsKey(key)){
+            Log.info("ModularConstruct: created construct exists!");
+            return createdCache.get(key);
         }
-        int id = 0;
-        for(int i = 0;i<idSize;i++){
-            id += ub(data[s+i])*(256<<(i*8)); //ignore warning, its for if there is somehow more then 255 parts
+        var cons = new ModularConstruct(w, h, data);
+        createdCache.put(key, cons);
+        return cons;
+    }
+
+    public <T extends ModularPartStatMap> T getStatMap(Class<T> maptype){
+
+        if(statMap == null){
+            try{
+                statMap = maptype.getConstructor().newInstance();
+            }catch(NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e){
+                Log.err(e.toString() + "\n"+ Arrays.toString(e.getStackTrace()));
+            }
+            ModularConstructBuilder.getStats(this, statMap);
         }
-        return id;
+        return (T)statMap;
     }
-    public static void writeID(byte[] data, int s, int id){
-        if(idSize==1){
-            data[s]=sb(id);
+
+    public byte[] getCompressedData(){
+        if(compressedData == null){
+            var c = new ModularConstructBuilder(parts.length, parts[0].length);
+            c.parts = this.data;
+            c.findRoot();
+            c.rebuildValid();
+            compressedData = c.exportAndCompress();
+            Log.info("Had to compress from scratch..");
         }
-        for(int i = 0;i<idSize;i++){
-            data[s+i]= sb(id & (0xFF<<(i*8))); //ignore warning, its for if there is somehow more then 255 parts
-        }
+        return compressedData;
     }
-    public static ModularConstruct read(Reads reads){
-        int length = reads.b();
-        byte[] bytes = new byte[length];
-        return new ModularConstruct(reads.b(bytes));
+
+    @Override
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if(!(o instanceof ModularConstruct)) return false;
+        ModularConstruct that = (ModularConstruct)o;
+        return Arrays.equals(parts, that.parts) && Objects.equals(partlist, that.partlist) && Objects.equals(hasCustomDraw, that.hasCustomDraw) && Arrays.equals(data, that.data);
     }
-    public void write(Writes writes){
-        int len = partlist.size*3 + 2;
-        writes.b(len);
-        writes.b(data);
-    }
-    public static int ub(byte a){
-        return (int)(a) + 128;
-    }
-    public static byte sb(int a){
-        return (byte)(a - 128);
+
+    @Override
+    public int hashCode(){
+        int result = Objects.hash(partlist, hasCustomDraw);
+        result = 31 * result + Arrays.hashCode(data);
+        return result;
     }
 }

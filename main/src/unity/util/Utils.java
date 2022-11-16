@@ -15,6 +15,9 @@ import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 
+import java.io.*;
+import java.util.zip.*;
+
 import static java.lang.Math.exp;
 import static mindustry.Vars.*;
 
@@ -594,5 +597,38 @@ public final class Utils{
     public static boolean isCrash = false;
     public static void crash(){
         isCrash = true;
+    }
+
+    public static byte[] compress(byte[] in) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            DeflaterOutputStream defl = new DeflaterOutputStream(out);
+            defl.write(in);
+            defl.flush();
+            defl.close();
+
+            var o = out.toByteArray();
+            out.close();
+            return o;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public static byte[] decompress(byte[] in) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            InflaterOutputStream infl = new InflaterOutputStream(out);
+            infl.write(in);
+            infl.flush();
+            infl.close();
+            var o = out.toByteArray();
+            out.close();
+            return o;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(150);
+            return null;
+        }
     }
 }

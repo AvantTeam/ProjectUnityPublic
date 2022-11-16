@@ -9,35 +9,35 @@ import unity.util.*;
 import static mindustry.Vars.tilesize;
 
 public class WheelStat extends ModularPartStat{
-    float wheelStrength;
+    float speedPerRps;
+    float traction;
     float nominalWeight; //max weight supported until speed penalties
-    float maxSpeed;
+    float steeringAngle;
 
-    public WheelStat(float wheelStrength, float nominalWeight, float maxSpeed){
+    public WheelStat(float speedPerRps,float traction, float nominalWeight, float steeringAngle){
         super("wheel");
-        this.wheelStrength = wheelStrength;
+        this.speedPerRps = speedPerRps;
+        this.traction = traction;
         this.nominalWeight = nominalWeight;
-        this.maxSpeed = maxSpeed;
+        this.steeringAngle = steeringAngle;
     }
 
     @Override
     public void merge(ModularPartStatMap id, ModularPart part){
-        if(id.has("wheel")){
-            ValueMap wheelstat = id.getOrCreate("wheel");
-            Utils.add(wheelstat,"total strength",wheelStrength);
-            Utils.add(wheelstat,"total speedpower",wheelStrength*maxSpeed);
-            Utils.add(wheelstat,"weight capacity", nominalWeight);
+        if(id instanceof ModularUnitStatMap map){
+            map.weightCapacity += nominalWeight;
+            float pow = traction * map.rps * speedPerRps;
+            map.speedPower += pow;
+            map.turningPower += pow * steeringAngle;
+            map.tractionTotal += traction;
         }
     }
 
     @Override
     public void mergePost(ModularPartStatMap id, ModularPart part){
-        if(id.has("wheel")){
-            ValueMap wheelstat = id.getOrCreate("wheel");
-            if(wheelstat.has("nominal speed")){
-                return;
-            }
-            wheelstat.put("nominal speed", wheelstat.getFloat("total speedpower")/wheelstat.getFloat("total strength"));
+        if(id instanceof ModularUnitStatMap map){
+            map.speed = map.speedPower/map.tractionTotal;
+            map.turningspeed = map.turningPower/map.speedPower;
         }
     }
 
@@ -46,6 +46,6 @@ public class WheelStat extends ModularPartStat{
         table.row();
         table.add("[lightgray]" + Core.bundle.get("ui.parts.stattype.weightcap") +": [accent]"+ nominalWeight).left().top();
         table.row();
-        table.add("[lightgray]" + Core.bundle.get("ui.parts.stattype.maxspeed")  +": [accent]"+ Core.bundle.format("ui.parts.stat.speed", Strings.fixed(maxSpeed * 60f / tilesize,1))).left().top();
+        table.add("[lightgray]" + Core.bundle.get("ui.parts.stattype.wheelspeed")  +": [accent]"+ Core.bundle.format("ui.parts.stat.speedRatio", Strings.fixed(speedPerRps * 60f / tilesize,1))).left().top();
     }
 }

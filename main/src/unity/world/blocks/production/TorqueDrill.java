@@ -19,7 +19,7 @@ import static arc.Core.atlas;
 
 public class TorqueDrill extends Drill implements GraphBlock{
     public GraphBlockConfig config = new GraphBlockConfig(this);
-    public float maxEfficiency = 2.0f;
+    public float maxEfficiency = 3.0f;
 
     public final TextureRegion[] bottomRegions = new TextureRegion[2], topRegions = new TextureRegion[2], oreRegions = new TextureRegion[2];
     public TextureRegion rotorRegion, rotorRotateRegion, mbaseRegion, wormDrive, gearRegion, rotateRegion, overlayRegion;
@@ -115,7 +115,7 @@ public class TorqueDrill extends Drill implements GraphBlock{
         @Override
         public void updateConsumption(){
             super.updateConsumption();
-            efficiency *= Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,torqueNode().maxSpeed,0,maxEfficiency),0,maxEfficiency);
+            efficiency *= Mathf.sqrt(Mathf.clamp(Mathf.map(getGraph(TorqueGraph.class).lastVelocity,0,torqueNode().maxSpeed,0,maxEfficiency),0,maxEfficiency));
         }
 
         @Override
@@ -126,7 +126,7 @@ public class TorqueDrill extends Drill implements GraphBlock{
             int variant = rotation % 2;
 
             float deg = rotation == 0 || rotation == 3 ? rot : -rot;
-            float shaftRot = rot * 2f;
+            float shaftRot = rot * 0.75f;
 
             Point2 offset = Geometry.d4(rotation + 1);
 
@@ -138,12 +138,12 @@ public class TorqueDrill extends Drill implements GraphBlock{
                 Draw.rect(oreRegions[variant], x, y);
                 Draw.color();
             }
-
+            float bottomrotor = 360f - rot * 0.05f;
             //bottom rotor
-            Draw.rect(rotorRegion, x, y, 360f - rot * 0.25f);
+            Draw.rect(rotorRegion, x, y, bottomrotor);
 
-            UnityDrawf.drawRotRect(rotorRotateRegion, x, y, 24f, 3.5f, 3.5f, 450f - rot * 0.25f, shaftRot, shaftRot + 180f);
-            UnityDrawf.drawRotRect(rotorRotateRegion, x, y, 24f, 3.5f, 3.5f, 450f - rot * 0.25f, shaftRot + 180f, shaftRot + 360f);
+            UnityDrawf.drawRotRect(rotorRotateRegion, x, y, 24f, 3.5f, 3.5f, 90 + bottomrotor, shaftRot, shaftRot + 180f);
+            UnityDrawf.drawRotRect(rotorRotateRegion, x, y, 24f, 3.5f, 3.5f, 90 + bottomrotor, shaftRot + 180f, shaftRot + 360f);
 
             //shaft
             Draw.rect(mbaseRegion, x, y, fixedRot);

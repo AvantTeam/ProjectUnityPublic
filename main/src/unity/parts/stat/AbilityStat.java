@@ -24,8 +24,4 @@ public class AbilityStat extends ModularPartStat{
         }
     }
 
-    @Override
-    public void mergePost(ModularPartStatMap id, ModularPart part){
-
-    }
 }

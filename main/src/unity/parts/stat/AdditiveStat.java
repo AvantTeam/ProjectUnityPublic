@@ -2,8 +2,10 @@ package unity.parts.stat;
 
 import arc.*;
 import arc.scene.ui.layout.*;
-import mindustry.world.meta.*;
 import unity.parts.*;
+import unity.util.*;
+
+import java.lang.reflect.*;
 
 public class AdditiveStat extends ModularPartStat{
     float value  = 0;
@@ -12,14 +14,6 @@ public class AdditiveStat extends ModularPartStat{
         this.value = value;
     }
 
-    @Override
-    public void merge(ModularPartStatMap id, ModularPart part){
-        if(id.has(name)){
-            var jo = id.getOrCreate(name);
-            jo.put("value", jo.getFloat("value") + value);
-        }
-
-    }
 
     public void display(Table table){
         String valuestr = ": [accent]"+value;
@@ -30,21 +24,45 @@ public class AdditiveStat extends ModularPartStat{
         table.add("[lightgray]" + Core.bundle.get("ui.parts.stattype."+name) + valuestr).left().top();
     }
 
+    Field field = null;
+    boolean searchedField = false;
+
+    @Override
+    public void merge(ModularPartStatMap id, ModularPart part){
+        if(!searchedField){
+            field = ReflectUtils.getField(id,name);
+            searchedField = true;
+        }
+        if(field==null){
+            Utils.add(id.getOrCreate(name),"value",value);
+        }else{
+            try{
+                var type = field.getType();
+                if( type == float.class ){
+                    field.set(id, field.getFloat(id) + value);
+                }else if( type == int.class ){
+                    field.set(id,  Math.round(field.getInt(id) + value));
+                }else if( type == long.class ){
+                    field.set(id,  field.getLong(id) + (long)value);
+                }else if( type == double.class ){
+                    field.set(id,  field.getDouble(id) + value);
+                }else{
+                    throw new IllegalArgumentException("Type"+type+" is not a number and cannot be used in a AdditiveStat");
+                }
+
+            }catch(Exception e){
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     @Override
     public void mergePost(ModularPartStatMap id, ModularPart part){
 
     }
+    ///use field info?
 
-    public static class PowerUsedStat extends AdditiveStat{
-        public PowerUsedStat(float power){
-            super("powerusage",power);
-        }
-    }
-    public static class EngineStat extends AdditiveStat{
-        public EngineStat(float power){
-            super("power",power);
-        }
-    }
+
     public static class MassStat extends AdditiveStat{
         public MassStat(float power){
             super("mass",power);
@@ -52,7 +70,7 @@ public class AdditiveStat extends ModularPartStat{
     }
     public static class WeaponSlotStat extends AdditiveStat{
         public WeaponSlotStat(float slot){
-            super("weaponslots",slot);
+            super("weaponSlots",slot);
         }
     }
     public static class WeaponSlotUseStat extends AdditiveStat{

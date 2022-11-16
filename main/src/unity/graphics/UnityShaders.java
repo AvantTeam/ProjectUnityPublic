@@ -4,9 +4,13 @@ import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.graphics.gl.*;
+import arc.math.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
+import mindustry.*;
 import mindustry.graphics.*;
+import mindustry.graphics.Shaders.*;
+import unity.*;
 
 import static mindustry.Vars.*;
 import static mindustry.graphics.CacheLayer.all;
@@ -15,6 +19,7 @@ public class UnityShaders {
     public static @Nullable ModSurfaceShader lava,pit,waterpit;
 
     public static CacheLayer.ShaderLayer lavaLayer,pitLayer,waterpitLayer;
+    public static BatchedGroundLiquidShader batchedGroundLiquid;
 
     protected static boolean loaded;
 
@@ -36,6 +41,7 @@ public class UnityShaders {
         CacheLayer.add(lavaLayer);
         CacheLayer.add(pitLayer);
         CacheLayer.add(waterpitLayer);
+        batchedGroundLiquid = new BatchedGroundLiquidShader();
     }
 
     public static void dispose(){
@@ -55,6 +61,46 @@ public class UnityShaders {
 
         for(int i = 0; i < all.length; i++){
             all[i].id = i;
+        }
+    }
+
+    public static class GroundLiquidShader extends Shader{
+
+        public GroundLiquidShader(){
+            super(Core.files.internal("shaders/default.vert"),tree.get("shaders/groundliquid.frag"));
+        }
+        @Override
+        public void apply(){
+            var control = Unity.groundFluidControl;
+            setUniformf("u_time", Time.time / Scl.scl(1f));
+            setUniformf("u_resolution", world.width(), world.height());
+
+            control.renderer.fluidSprites.getTexture().bind(1);
+            control.renderer.fluidFrameBuffer.getTexture().bind(0);
+            setUniformi("u_sprites", 1);
+            setUniformi("u_sprites_width", control.renderer.fluidSpritesWidth);
+        }
+    }
+    public static class BatchedGroundLiquidShader extends Shader{
+        public BatchedGroundLiquidShader(){
+            super(tree.get("shaders/groundliquid.vert"),tree.get("shaders/groundliquid2.frag"));
+        }
+        @Override
+        public void apply(){
+
+            var control = Unity.groundFluidControl;
+            var renderer =  control.renderer;
+            var fbo = renderer.fluidFrameBuffer;
+            setUniformf("u_time", Time.time / Scl.scl(1f));
+            setUniformf("u_trans", Mathf.clamp(control.getTransition()));
+            setUniformf("u_resolution", fbo.getWidth(), fbo.getHeight());
+            setUniformf("u_chunksize", renderer.prevChunkW, renderer.prevChunkH);
+            setUniformf("u_offset", renderer.prevMinX, renderer.prevMinY);
+
+            renderer.fluidSprites.getTexture().bind(1);
+            renderer.fluidFrameBuffer.getTexture().bind(0);
+            setUniformi("u_sprites", 1);
+            setUniformi("u_sprites_width", control.renderer.fluidSpritesWidth);
         }
     }
 

@@ -2,6 +2,7 @@ package unity.ui;
 
 import arc.*;
 import arc.Graphics.Cursor.*;
+import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.input.*;
@@ -11,10 +12,15 @@ import arc.scene.*;
 import arc.scene.event.*;
 import arc.struct.*;
 import arc.util.*;
+import arc.util.pooling.*;
+import mindustry.entities.Effect.*;
 import mindustry.input.*;
+import mindustry.ui.*;
 import unity.parts.*;
+import unity.parts.ModularConstructBuilder.*;
 
 import static arc.Core.scene;
+import static mindustry.Vars.*;
 import static unity.graphics.UnityPal.*;
 
 public class PartsEditorElement extends Element{
@@ -27,6 +33,7 @@ public class PartsEditorElement extends Element{
 
     public ModularConstructBuilder builder;
     public ModularPartType selected = null;
+    public ModularPartStatMap statmap = null;
     public boolean erasing = false;
     public boolean mirror = true;
     //selection boxes?
@@ -36,8 +43,11 @@ public class PartsEditorElement extends Element{
 
     float mousex,mousey;
     float anchorx,anchory;
-    float scl = 1,targetscl = 1;
+    public float scl = 1;
+    float targetscl = 1;
     int dragTriggered = 0;
+
+    float minimiseScl = 0.5f;
 
 
     public PartsEditorElement(ModularConstructBuilder builder){
@@ -71,6 +81,9 @@ public class PartsEditorElement extends Element{
                 dragTriggered++;
                 mousex = x;
                 mousey = y;
+                if(mobile){
+                    /// set zoom?
+                }
             }
 
             @Override
@@ -83,12 +96,19 @@ public class PartsEditorElement extends Element{
                     Core.graphics.cursor(SystemCursor.hand);
                     return true;
                 }
-                if((selected!=null && builder.parts[g.x][g.y]!=null) ||
-                   (selected==null && builder.parts[g.x][g.y]==null) ){
+                int b = builder.index(g.x,g.y);
+                if((selected!=null && builder.parts[b]!=0) ||
+                   (selected==null && builder.parts[b]==0) ){
                     Core.graphics.cursor(SystemCursor.hand);
                 }else{
                     Core.graphics.cursor(SystemCursor.arrow);
                 }
+                return true;
+            }
+
+            @Override
+            public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY){
+                zoom(amountY * targetscl * -0.1f);
                 return true;
             }
 
@@ -107,16 +127,19 @@ public class PartsEditorElement extends Element{
         });
     }
 
+    public static float maxZoom = 1;
+    public static float minZoom = 0.2f;
+
     @Override
     public void act(float delta){
         super.act(delta);
-        targetscl += Core.input.axis(Binding.zoom) / 10f * targetscl;
-        targetscl = Mathf.clamp(targetscl,0.2f,5);
+        //targetscl += Core.input.axis(Binding.zoom) / 10f * targetscl;
+        //targetscl = Mathf.clamp(targetscl,minZoom,maxZoom);
     }
 
     public void zoom(float am){
-        targetscl *= am;
-        targetscl = Mathf.clamp(targetscl,0.2f,5);
+        targetscl += am;
+        targetscl = Mathf.clamp(targetscl,minZoom,maxZoom);
     }
 
     public void onClicked(InputEvent event, float x, float y, int pointer, KeyCode button){
@@ -128,13 +151,24 @@ public class PartsEditorElement extends Element{
         if(tileValid(g.x,g.y)){
             if(selected!=null){
                 boolean b = builder.placePart(selected, g.x, g.y);
+                placeEffectAt(g.x, g.y,selected.w,selected.h, Color.white);
                 if(b && mirror && mirrorX(g.x)!=g.x){
                     builder.placePart(selected, mirrorX(g.x,selected.w), g.y);
+                    placeEffectAt(mirrorX(g.x,selected.w), g.y,selected.w,selected.h, Color.white);
                 }
             }else{
-                builder.deletePartAt(g.x,g.y);
-                if(mirror && mirrorX(g.x)!=g.x){
-                    builder.deletePartAt(mirrorX(g.x), g.y);
+                var type = builder.partTypeAt(g.x, g.y);
+                if(type!=null){
+                    placeEffectAt(g.x, g.y, type.w, type.h, Color.red);
+                    builder.deletePartAt(g.x, g.y);
+
+                    if(mirror && mirrorX(g.x) != g.x){
+                        type = builder.partTypeAt(mirrorX(g.x), g.y);
+                        if(type!=null){
+                            placeEffectAt(mirrorX(g.x), g.y, type.w, type.h, Color.red);
+                            builder.deletePartAt(mirrorX(g.x), g.y);
+                        }
+                    }
                 }
             }
             onAction();
@@ -153,6 +187,8 @@ public class PartsEditorElement extends Element{
         //?
     }
     float gx = 0,gy = 0;
+    LongSeq partsToDraw = new LongSeq();
+    LongSeq[] bucketSort = new LongSeq[5];
     @Override
     public void draw(){
         float cx =   panx + width*0.0f; // cam center relative to gx
@@ -188,7 +224,7 @@ public class PartsEditorElement extends Element{
         rectCorner(0,0, builder.w*32, builder.h*32);
         Draw.color(blueprintColAccent);
         //draw border and center lines
-        Lines.stroke(5);
+        Lines.stroke(5 * scl);
         rectLine(0,0, builder.w*32, builder.h*32);
         int mid = builder.w/2;
         if(builder.w % 2 == 1){
@@ -216,7 +252,7 @@ public class PartsEditorElement extends Element{
         for(int i = minx;i<=maxx;i++){
             for(int j = miny; j <= maxy; j++){
                 if(i>0 && j>0){
-                    Fill.square(gx + i * 32 * scl, gy + j * 32 * scl, 3, 45);
+                    Fill.square(gx + i * 32 * scl, gy + j * 32 * scl, 3 * scl, 45);
                 }
             }
         }
@@ -229,57 +265,162 @@ public class PartsEditorElement extends Element{
             }
         }
 
-
+        partsToDraw.clear();
         //draw modules
-        for(int i = minx;i<=maxx;i++){
-            for(int j = miny;j<=maxy;j++){
-                var part = builder.parts[i][j];
-                if(part==null){
+        for(int j = maxy;j>=miny;j--){
+            for(int i = minx;i<=maxx;i++){
+                var partdata = builder.parts[builder.index(i,j)];
+                if(partdata==0){
                     continue;
                 }
-                if(!(Math.max(part.getX(),minx)==i && Math.max(part.getY(),miny)==j)){
+
+                int px = PartData.x(partdata);
+                int py = PartData.y(partdata);
+                if(!(Mathf.clamp(px,minx,maxx) == i && Mathf.clamp(py,miny,maxy) == j)){
                     continue;
                 }
-                Draw.color(bgCol);
-                rectCorner(part.getX()*32,part.getY()*32, part.type.w*32, part.type.h*32);
-                Draw.color(builder.valid[i][j]?Color.white:Color.red);
-                rectCorner(part.type.icon,part.getX()*32,part.getY()*32, part.type.w*32, part.type.h*32);
+                partsToDraw.add(partdata);
+            }
+        }
+        int px,py;
+        long partdata;
+        boolean valid;
+
+
+        if(scl>minimiseScl){
+            //sort
+            if(bucketSort[0]==null){
+                for(int i = 0; i < 5; i++){
+                    bucketSort[i] = new LongSeq();
+                }
+            }
+            for(int i = 0; i < 5; i++){
+                bucketSort[i].clear();
+            }
+            for(int i = 0; i < partsToDraw.size; i++){
+                partdata = partsToDraw.get(i);
+                bucketSort[PartData.Type(partdata).drawPriority].add(partdata);
+            }
+            int index = 0;
+            for(int i = 0; i < 5; i++){
+                System.arraycopy(bucketSort[i].items,0,partsToDraw.items,index,bucketSort[i].size);
+                index += bucketSort[i].size;
+            }
+
+            ///draw outline
+            for(int i = 0; i < partsToDraw.size; i++){
+                partdata = partsToDraw.get(i);
+                var type = PartData.Type(partdata);
+                px = PartData.x(partdata);
+                py = PartData.y(partdata);
+                Draw.color();
+                type.drawEditorOutline(this, px, py, builder.valid[builder.index(px, py)]);
             }
         }
 
+        for(int i = 0;i<partsToDraw.size;i++){
+            partdata = partsToDraw.get(i);
+            px = PartData.x(partdata);
+            py = PartData.y(partdata);
+            var type = PartData.Type(partdata);
+            valid = builder.valid[builder.index(px, py)];
+            if(scl<minimiseScl){ // temp
+                Draw.color(valid ? Color.white : Color.red);
+                type.drawEditorMinimised(this,px,py, valid);
+            }else{
+                Draw.color(valid ? Color.white : Color.red);
+                type.drawEditor(this,px,py, valid);
+            }
+        }
+
+        //top
+        if(scl>minimiseScl){
+            for(int i = 0; i < partsToDraw.size; i++){
+                partdata = partsToDraw.get(i);
+                var type = PartData.Type(partdata);
+                if(!type.drawsTop){
+                    continue;
+                }
+                px = PartData.x(partdata);
+                py = PartData.y(partdata);
+                Draw.color();
+                type.drawEditorTop(this, px, py, builder.valid[builder.index(px, py)]);
+            }
+        }
+        //overlay
+        for(int i = 0;i<partsToDraw.size;i++){
+            partdata = partsToDraw.get(i);
+            var type = PartData.Type(partdata);
+            if(!type.drawsOverlay){
+                continue;
+            }
+            px = PartData.x(partdata);
+            py = PartData.y(partdata);
+            type.drawEditorOverlay(this,px,py);
+        }
+
+
         if(selected!=null){
             Color highlight = Color.white;
-            if(!builder.canPlace(selected, cursor.x, cursor.y)){
+            var placeError = builder.canPlaceDebug(selected, cursor.x, cursor.y);
+            if(placeError != PlaceProblem.NO_PROBLEM){
                 highlight = Color.red;
+                var pos = gridToUi((cursor.x+0.5f)*32,(cursor.y+0.5f)*32);
+                Draw.color(highlight, 1f);
+                text(Fonts.outline, placeError.text, pos.x,pos.y-30);
             }
             Draw.color(bgCol, 0.5f);
             rectCorner(cursor.x*32,cursor.y*32, selected.w*32, selected.h*32);
-            Draw.color(highlight, 0.5f);
-            rectCorner(selected.icon,cursor.x*32,cursor.y*32, 32*selected.w, 32*selected.h);
+            selected.drawEditorSelect(this,cursor.x,cursor.y,false);
 
             if(mirror && mirrorX(cursor.x)!=cursor.x){
                 Draw.color(bgCol, 0.5f);
                 rectCorner(mirrorX(cursor.x,selected.w)*32,cursor.y*32, selected.w*32, selected.h*32);
-                Draw.color(highlight, 0.5f);
-                rectCorner(selected.icon,mirrorX(cursor.x,selected.w)*32,cursor.y*32, 32*selected.w, 32*selected.h);
+                selected.drawEditorSelect(this,mirrorX(cursor.x,selected.w),cursor.y,false);
             }
+        }
+
+        for(int i =0;i<fx.size;i++){
+            if(fx.get(i).startime + fx.get(i).effect.duration < Time.time){
+                fx.remove(i);
+                i--;
+                continue;
+            }
+            fx.get(i).draw();
+        }
+
+        if(statmap!=null){
+            statmap.drawEditor(this);
         }
 
         ScissorStack.pop();
 
     }
+
     public int mirrorX(int x, int w){
         return builder.w-x-w;
     }
     public int mirrorX(int x){
         return builder.w-x-1;
     }
-
+    public void rect(TextureRegion tr,float x,float y,float sclMul){
+        if(tr == null){
+            Draw.rect(Core.atlas.white(), gx + (x) * scl, gy + (y) * scl);
+        }else{
+            Draw.rect(tr, gx + (x) * scl, gy + (y) * scl, tr.width * scl * sclMul, tr.height * scl * sclMul);
+        }
+    }
+    public void rect(TextureRegion tr,float x,float y,float w,float h){
+        Draw.rect(tr,gx + (x)*scl,gy + (y)*scl,w*scl,h*scl);
+    }
     public void rectCorner(float x,float y,float w,float h){
         Fill.rect(gx + (x+w*0.5f)*scl,gy + (y+h*0.5f)*scl,w*scl,h*scl);
     }
     public void rectCorner(TextureRegion tr, float x,float y,float w,float h){
         Draw.rect(tr,gx + (x+w*0.5f)*scl,gy + (y+h*0.5f)*scl,w*scl,h*scl);
+    }
+    public void rectLine(float x,float y,float w,float h, float pad){
+        Lines.rect(gx+x*scl,gy+y*scl, w*scl, h*scl, pad*scl,pad*scl);
     }
     public void rectLine(float x,float y,float w,float h){
         Lines.rect(gx+x*scl,gy+y*scl, w*scl, h*scl);
@@ -298,6 +439,37 @@ public class PartsEditorElement extends Element{
     public Point2 uiToGrid(float x,float y){
         return new Point2(Mathf.floor((x-gx()+this.x)/(32f*scl)), Mathf.floor((y-gy()+this.y)/(32f*scl)));
     }
+    public Vec2 gridToUi(float x,float y){
+        return new Vec2(gx+x*scl,gy+y*scl);
+        }
+
+    public enum EditorTextAlign{
+        LEFT,CENTER,RIGHT
+    }
+    public void text(Font font, String str,float x,float y){
+        text(font,str,x,y,EditorTextAlign.CENTER);
+    }
+
+    public void text(Font font, String str,float x,float y, EditorTextAlign align){
+        GlyphLayout lay = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
+        lay.setText(font, str);
+
+        font.setColor(Draw.getColor());
+        font.getCache().clear();
+        switch(align){
+            case LEFT:
+                font.getCache().addText(str, x, y + lay.height / 2f + 1); break;
+            case CENTER:
+                font.getCache().addText(str, x - lay.width / 2f, y + lay.height / 2f + 1); break;
+            case RIGHT:
+                font.getCache().addText(str, x - lay.width, y + lay.height / 2f + 1); break;
+        }
+        font.getCache().draw(parentAlpha);
+
+        Pools.free(lay);
+    }
+
+
 
     @Override
     public float getPrefWidth(){
@@ -327,7 +499,7 @@ public class PartsEditorElement extends Element{
     }
 
     public void onAction(){
-        prev.add(builder.export());
+        prev.add(builder.exportFull());
         if(index!=prev.size-2){
             prev.removeRange(index+2,prev.size-1);
         }
@@ -339,7 +511,7 @@ public class PartsEditorElement extends Element{
             index = prev.size-1;
             return;
         }
-        builder.set(prev.get(index));
+        builder.paste(prev.get(index));
     }
     public void undo(){
         index--;
@@ -347,7 +519,58 @@ public class PartsEditorElement extends Element{
             index = -1;
             return;
         }
-        builder.set(prev.get(index));
+        builder.paste(prev.get(index));
+
+    }
+
+    public Seq<EditorEffectWrapper> fx = new Seq<>(false);
+
+    public static class EditorEffect{
+        float duration;
+        Cons2<EffectContainer,PartsEditorElement> run;
+
+        public EditorEffect(float duration, Cons2<EffectContainer,PartsEditorElement> run){
+            this.duration = duration;
+            this.run = run;
+        }
+
+        public void at(PartsEditorElement e,float x, float y, float rotation, Color c){
+            e.effectAt(this,x,y,rotation,c);
+        }
+    }
+
+    public class EditorEffectWrapper{
+        EffectContainer e;
+        EditorEffect effect;
+        float startime;
+        EditorEffectWrapper(EditorEffect eff, float x,float y,float rotation,Color c){
+            effect = eff;
+            e = new EffectContainer();
+            e.x = x;
+            e.y =y ;
+            e.rotation = rotation;
+            e.color = c;
+            e.lifetime = eff.duration;
+            startime = Time.time;
+        }
+
+        public void draw(){
+            e.time = Time.time - startime;
+            effect.run.get(e,PartsEditorElement.this);
+        }
+    }
+
+    public void effectAt(EditorEffect e, float x, float y, float rotation, Color c){
+        fx.add(new EditorEffectWrapper(e,x,y,rotation,c));
+    }
+
+    static EditorEffect placeEffect = new EditorEffect(30f,(e,draw) -> {
+        Lines.stroke(e.foutpow()*4*draw.scl,e.color);
+        draw.rectLine(e.x,e.y,(e.rotation%256)*32,(Mathf.floor(e.rotation/256))*32, e.finpow()*8);
+    });
+
+    void placeEffectAt(int x,int y,int w,int h, Color c){
+        placeEffect.at(this,x*32,y*32,w+h*256,c);
     }
 
 }

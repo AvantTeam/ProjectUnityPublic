@@ -184,15 +184,14 @@ public class UnityUnitType extends UnitType{
         DrawTransform dt = new DrawTransform(new Vec2(unit.x,unit.y),unit.rotation);
         var construct = unit.construct();
         if(construct!=null){
-            ModularWheelType.rollDistance = unit.driveDist();
             unit.doodadlist().each(d->{
                 d.drawOutline(dt);
             });
             construct.hasCustomDraw.each((p) -> {
-                p.type.drawOutline(dt, p);
+                p.type.drawOutline(dt, p, unit);
             });
             construct.hasCustomDraw.each((p) -> {
-                p.type.draw(dt, p);
+                p.type.draw(dt, p, unit);
             });
             unit.doodadlist().each(d->{
                 d.drawTop(dt);
@@ -202,7 +201,7 @@ public class UnityUnitType extends UnitType{
             });
         }else{
             if(unit.constructdata()!=null && unit.constructdata().length>0){
-                unit.construct(new ModularConstruct(unit.constructdata()));
+                unit.construct(ModularConstruct.get(unit.constructdata()));
                 UnitDoodadGenerator.initDoodads(unit.construct().parts.length, unit.doodadlist(), unit.construct());
             }
         }
@@ -214,7 +213,6 @@ public class UnityUnitType extends UnitType{
         DrawTransform dt = new DrawTransform(new Vec2(unit.x,unit.y),unit.rotation);
         var construct = unit.construct();
         if(construct!=null){
-            ModularWheelType.rollDistance = unit.driveDist();
             construct.hasCustomDraw.each((p) -> {
                 p.type.drawCell(dt, p);
             });
@@ -223,7 +221,7 @@ public class UnityUnitType extends UnitType{
     }
 
 
-    public Unit spawn(Team t, float x, float y, byte[] data){
+    public Unit spawn(Team t, float x, float y, ModularConstruct data){
         var unit = this.create(t);
         unit.set(x, y);
         ModularConstruct.cache.put(unit,data);

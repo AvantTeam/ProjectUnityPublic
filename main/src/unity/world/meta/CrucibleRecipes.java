@@ -44,6 +44,7 @@ public class CrucibleRecipes{
         addItem(id++,UnityItems.dirium,2500, 0.1f, 520);
         addItem(id++,UnityItems.uranium,1500, 0.1f, 80);
         addLiquid(id++,UnityLiquids.lava,1300,0.1f,3250,0.1f,300);
+        addLiquid(id++,Liquids.neoplasm,-10,0.1f,850,0.01f,100);
 
         recipes.add(new CrucibleRecipe(items.get(UnityItems.cupronickel),0.1f,HeatGraphNode.celsiusZero + 150,
             needs(Items.copper, 2,true),
