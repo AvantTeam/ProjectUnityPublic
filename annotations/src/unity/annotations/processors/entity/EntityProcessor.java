@@ -372,14 +372,16 @@ public class EntityProcessor extends BaseProcessor{
                     }
                 }
 
-                builder.addMethod(
-                    MethodSpec.methodBuilder("toString")
-                        .addAnnotation(cName(Override.class))
-                        .returns(String.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addStatement("return $S + $L", name + "#", "id")
-                    .build()
-                );
+                if(!methods.containsKey("toString()")){
+                    builder.addMethod(
+                        MethodSpec.methodBuilder("toString")
+                            .addAnnotation(cName(Override.class))
+                            .returns(String.class)
+                            .addModifiers(Modifier.PUBLIC)
+                            .addStatement("return $S + $L", name + "#", "id")
+                            .build()
+                    );
+                }
 
                 EntityIO io = new EntityIO(simpleName(def), builder, serializer);
                 boolean hasIO = ann.genio() && (defComps.contains(s -> simpleName(s).contains("Sync")) || ann.serialize());
