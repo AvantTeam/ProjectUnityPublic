@@ -181,7 +181,7 @@ public class ExpTurret extends Turret {
         if(rangeStart != rangeEnd) Drawf.dashCircle(x * tilesize + offset, y * tilesize + offset, rangeEnd, UnityPal.exp);
         Drawf.dashCircle(x * tilesize + offset, y * tilesize + offset, rangeStart, Pal.placing);
 
-        if(!valid && pregrade != null) drawPlaceText(Core.bundle.format("exp.pregrade", pregradeLevel, pregrade.localizedName), x, y, false);
+        if(!valid && checkPregrade()) drawPlaceText(Core.bundle.format("exp.pregrade", pregradeLevel, pregrade.localizedName), x, y, false);
     }
 
     @Override
@@ -194,17 +194,24 @@ public class ExpTurret extends Turret {
         if(tile == null) return false;
         if(pregrade == null) return super.canPlaceOn(tile, team, rotation);
 
+        //don't bother checking requirements in sandbox or editor
+        if(!checkPregrade()) return true;
+
         CoreBlock.CoreBuild core = team.core();
         //must have all requirements
-        if(core == null || (!state.rules.infiniteResources && !core.items.has(requirements, state.rules.buildCostMultiplier))) return false;
+        if(core == null || (!core.items.has(requirements, state.rules.buildCostMultiplier))) return false;
 
-        //check is there is ONLY a single pregrade block INSIDE all the tiles it will replace - by tracking SEQS. This protocol is also known as UWAGH standard.
+        //check is there is ONLY a single pregrade block INSIDE all the tiles it will replace - by tracking SEGGS. This protocol is also known as UWAGH standard.
         seqs.clear();
         tile.getLinkedTilesAs(this, inside -> {
             if(inside.build == null || seqs.contains(inside.build) || seqs.size > 1) return; //no point of checking if there are already two in seqs
             if(inside.block() == pregrade && ((ExpTurretBuild) inside.build).level() >= pregradeLevel) seqs.add(inside.build);
         });
         return seqs.size == 1; //no more, no less; a healthy monogamous relationship.
+    }
+
+    public boolean checkPregrade(){
+        return pregrade != null && !state.rules.infiniteResources && !state.isEditor();
     }
 
     @Override
