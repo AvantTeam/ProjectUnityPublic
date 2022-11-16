@@ -28,6 +28,7 @@ import unity.parts.*;
 import unity.ui.*;
 import unity.util.*;
 import unity.world.graph.*;
+import unity.world.systems.*;
 
 import static mindustry.Vars.*;
 
@@ -55,6 +56,9 @@ public class Unity extends Mod{
 
     /**UI**/
     public static UnityUI ui= new UnityUI();
+
+    /**manages the liquids**/
+    public static GroundFluidControl groundFluidControl;
 
     /** Default constructor for Mindustry mod loader to instantiate. */
     public Unity(){
@@ -152,6 +156,8 @@ public class Unity extends Mod{
             JSBridge.init();
             JSBridge.importDefaults(JSBridge.unityScope);
         });
+
+
     }
 
     @Override
@@ -160,6 +166,7 @@ public class Unity extends Mod{
         music.init();
         ui.init();
         UnityCalls.registerPackets();;
+        groundFluidControl = new GroundFluidControl();
     }
 
     @Override
@@ -180,7 +187,7 @@ public class Unity extends Mod{
         FactionMeta.init();
         UnityEntityMapping.init();
 
-
+        GroundFluidControl.initialiseContent();
         //logContent();
     }
 

@@ -7,19 +7,13 @@ import unity.util.*;
 
 public class ArmourStat extends AdditiveStat{
     public ArmourStat(float value){
-        super("armour", value);
+        super("armourPoints", value);
     }
 
     @Override
     public void mergePost(ModularPartStatMap id, ModularPart part){
-        ValueMap armor = id.getOrCreate("armour");
-        if(armor.has("realValue")){
-            return;
+        if(id instanceof ModularUnitStatMap unit){
+            unit.armour =  Mathf.log(2, unit.armourPoints);
         }
-        float a  = id.getValue("armour");
-        Log.info("armorVal:"+a);
-        a = Mathf.log(2, a);
-        Log.info("armor:"+a);
-        armor.put("realValue",a);
     }
 }

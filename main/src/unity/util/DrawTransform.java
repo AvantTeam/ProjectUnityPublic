@@ -50,7 +50,7 @@ public class DrawTransform{
 
     public void drawRect(TextureRegion t,float x,float y){
         transform(temp.set(x,y));
-        Draw.rect(t,temp.x,temp.y,rot-90);
+        Draw.rect(t,temp.x,temp.y,rot-90); //replace with the raw quad drawing.
     }
     public void drawRect(TextureRegion t,float x,float y,float w,float h){
        transform(temp.set(x,y));
@@ -59,6 +59,10 @@ public class DrawTransform{
     public void drawRectScl(TextureRegion t,float x,float y,float w,float h){
        transform(temp.set(x,y));
        Draw.rect(t,temp.x,temp.y,t.width*w*Draw.scl,t.height*h*Draw.scl,rot-90);
+    }
+    public void drawRect(TextureRegion t,float x,float y,float rotation){
+       transform(temp.set(x,y));
+       Draw.rect(t,temp.x,temp.y,rot-90 + rotation);
     }
 
 }

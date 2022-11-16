@@ -4,6 +4,7 @@ import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.util.*;
 import mindustry.entities.*;
 import mindustry.graphics.*;
 
@@ -37,7 +38,11 @@ public class OtherFx{
     }).layer(Layer.blockOver-1),
 
     weldspark = new Effect(12, e->{
-        Draw.color(Color.white, Pal.turretHeat, e.fin());
+        if(e.fin()<0.5){
+            Draw.color(Color.white, e.color, e.fin()*0.5f);
+        }else{
+            Draw.color(e.color, Tmp.c1.set(e.color).mul(0.5f), e.fin()*0.5f+0.5f);
+        }
         Lines.stroke(e.fout() * 0.6f + 0.6f);
 
         Angles.randLenVectors(e.id, 3, 15 * e.finpow(), e.rotation, 3, (x, y) -> {

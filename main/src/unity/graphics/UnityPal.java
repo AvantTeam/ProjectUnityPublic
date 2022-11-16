@@ -24,6 +24,7 @@ public final class UnityPal{
     blueprintCol = valueOf("649fb7"),
     blueprintColAccent = valueOf("a6cad9"),
     bgCol = valueOf("323232"),
+    bgColMid = valueOf("525252"),
 
     //koruh
     expLaser = valueOf("F9DBB1"),

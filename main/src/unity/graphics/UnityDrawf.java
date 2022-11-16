@@ -113,9 +113,9 @@ public final class UnityDrawf{
     static float getypos(float d,float r, float h){
         float c1 = Mathf.pi*r;
         if(d<c1){
-            return r*(1f-Mathf.sinDeg(180*d/c1));
-        }else if(d>c1+h-r){
-            return (h-r) + r*(Mathf.sinDeg(180*(d-(c1+h-r))/c1));
+            return r*(1f-Mathf.sinDeg(180f*d/c1));
+        }else if(d>c1+h-r*2){
+            return (h-r) + r*(Mathf.sinDeg(180*(d-(c1+h-r*2))/c1));
         }else{
             return d-c1+r;
         }
@@ -134,14 +134,14 @@ public final class UnityDrawf{
         if(d1<cut1){
             y1 =  - h*0.5f;
             nRegion.set(region);
-            nRegion.v = Mathf.map(cut1,d1,d2,nRegion.v,nRegion.v2);
+            nRegion.v2 = Mathf.map(cut1,d1,d2,nRegion.v2,nRegion.v);
             reg = nRegion;
         }
 
         if(d2>cut2){
             y2 = h*0.5f;
             nRegion.set(region);
-            nRegion.v2 = Mathf.map(cut2,d1,d2,nRegion.v,nRegion.v2);
+            nRegion.v = Mathf.map(cut2,d1,d2,nRegion.v2,nRegion.v);
             reg = nRegion;
         }
 
@@ -149,7 +149,7 @@ public final class UnityDrawf{
 
     }
 
-    public static void drawRotRect(TextureRegion region, float x, float y, float w, float h, float th, float rot, float ang1, float ang2){
+    public static void drawRotRect(TextureRegion region, float x, float y, float w, float rot_h, float true_h, float rot, float ang1, float ang2){
         if(region == null || !Core.settings.getBool("effects")) return;
         float amod1 = Mathf.mod(ang1, 360f);
         float amod2 = Mathf.mod(ang2, 360f);
@@ -159,7 +159,7 @@ public final class UnityDrawf{
         float uy1 = nRegion.v;
         float uy2 = nRegion.v2;
         float uCenter = (uy1 + uy2) / 2f;
-        float uSize = (uy2 - uy1) * h / th * 0.5f;
+        float uSize = (uy2 - uy1) * rot_h / true_h * 0.5f;
         uy1 = uCenter - uSize;
         uy2 = uCenter + uSize;
         nRegion.v = uy1;
@@ -174,8 +174,8 @@ public final class UnityDrawf{
             nRegion.v = Mathf.map(180f, amod1, amod2, uy2, uy1);
             s2 = 1f;
         }
-        s1 = Mathf.map(s1, -1f, 1f, y - h / 2f, y + h / 2f);
-        s2 = Mathf.map(s2, -1f, 1f, y - h / 2f, y + h / 2f);
+        s1 = Mathf.map(s1, -1f, 1f, y - rot_h / 2f, y + rot_h / 2f);
+        s2 = Mathf.map(s2, -1f, 1f, y - rot_h / 2f, y + rot_h / 2f);
         Draw.rect(nRegion, x, (s1 + s2) * 0.5f, w, s2 - s1, w * 0.5f, y - s1, rot);
     }
 
