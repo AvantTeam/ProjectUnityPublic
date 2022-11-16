@@ -10,6 +10,8 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.event.*;
+import arc.scene.ui.*;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
@@ -36,6 +38,11 @@ public class PartsEditorElement extends Element{
     public ModularPartStatMap statmap = null;
     public boolean erasing = false;
     public boolean mirror = true;
+    //ui
+    Table tooltip;
+    Cons3<Table,ModularConstructBuilder,Integer> tooltipContent = (table, builder, index) -> {
+
+    };
     //selection boxes?
 
     float panx=0,pany=0;
@@ -52,6 +59,14 @@ public class PartsEditorElement extends Element{
 
     public PartsEditorElement(ModularConstructBuilder builder){
         this.builder = builder;
+        this.tooltip = new Table() {
+            public void act(float delta) {
+               super.act(delta);
+               if (PartsEditorElement.this.getScene() == null) {
+                   this.remove();
+               }
+            }
+        };
 
         addListener(new InputListener(){
             @Override
@@ -156,7 +171,8 @@ public class PartsEditorElement extends Element{
                     builder.placePart(selected, mirrorX(g.x,selected.w), g.y);
                     placeEffectAt(mirrorX(g.x,selected.w), g.y,selected.w,selected.h, Color.white);
                 }
-            }else{
+                onAction();
+            }else if(erasing){
                 var type = builder.partTypeAt(g.x, g.y);
                 if(type!=null){
                     placeEffectAt(g.x, g.y, type.w, type.h, Color.red);
@@ -170,8 +186,11 @@ public class PartsEditorElement extends Element{
                         }
                     }
                 }
+                onAction();
+            }else{
+
             }
-            onAction();
+
         }
     }
 
@@ -361,6 +380,18 @@ public class PartsEditorElement extends Element{
 
 
         if(selected!=null){
+            //connections
+            for(int i = 0;i<partsToDraw.size;i++){
+                partdata = partsToDraw.get(i);
+                var type = PartData.Type(partdata);
+                px = PartData.x(partdata);
+                py = PartData.y(partdata);
+                Draw.color(builder.valid[builder.index(px, py)]? Color.white : Color.red);
+                type.drawEditorConnectors(this,px,py, PartData.rotation(partdata));
+            }
+            Draw.color();
+
+            //selected
             Color highlight = Color.white;
             var placeError = builder.canPlaceDebug(selected, cursor.x, cursor.y);
             if(placeError != PlaceProblem.NO_PROBLEM){
@@ -372,11 +403,13 @@ public class PartsEditorElement extends Element{
             Draw.color(bgCol, 0.5f);
             rectCorner(cursor.x*32,cursor.y*32, selected.w*32, selected.h*32);
             selected.drawEditorSelect(this,cursor.x,cursor.y,false);
+            selected.drawEditorConnectors(this,cursor.x,cursor.y, 0);
 
             if(mirror && mirrorX(cursor.x)!=cursor.x){
                 Draw.color(bgCol, 0.5f);
                 rectCorner(mirrorX(cursor.x,selected.w)*32,cursor.y*32, selected.w*32, selected.h*32);
                 selected.drawEditorSelect(this,mirrorX(cursor.x,selected.w),cursor.y,false);
+                selected.drawEditorConnectors(this,mirrorX(cursor.x,selected.w),cursor.y, 0);
             }
         }
 
@@ -403,12 +436,16 @@ public class PartsEditorElement extends Element{
     public int mirrorX(int x){
         return builder.w-x-1;
     }
+    //im starting to think this could be better achived by just changing the camera
     public void rect(TextureRegion tr,float x,float y,float sclMul){
         if(tr == null){
             Draw.rect(Core.atlas.white(), gx + (x) * scl, gy + (y) * scl);
         }else{
             Draw.rect(tr, gx + (x) * scl, gy + (y) * scl, tr.width * scl * sclMul, tr.height * scl * sclMul);
         }
+    }
+    public void rectRot(TextureRegion tr,float x,float y,float sclMul, float rot){
+        Draw.rect(tr, gx + (x) * scl, gy + (y) * scl, tr.width * scl * sclMul, tr.height * scl * sclMul, rot);
     }
     public void rect(TextureRegion tr,float x,float y,float w,float h){
         Draw.rect(tr,gx + (x)*scl,gy + (y)*scl,w*scl,h*scl);

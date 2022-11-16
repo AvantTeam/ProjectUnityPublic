@@ -245,7 +245,7 @@ public class GroundFluidControl implements CustomChunk{
         });
 
 
-        if(!net.server()){
+        if(!headless){
             Log.info("Activated Fluid Drawer");
 
             Events.run(Trigger.draw, () -> {

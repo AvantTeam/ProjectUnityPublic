@@ -156,6 +156,8 @@ public class ModularUnitAssembler extends PayloadBlock{
 
         @Override
         public void buildConfiguration(Table table){
+            int uw = unitModuleWidth;
+            int uh = unitModuleHeight;
             //ui lamdba soup time
             var configureButtonCell = table.button(Tex.whiteui, Styles.cleari, 50,
             (() -> {
@@ -164,7 +166,7 @@ public class ModularUnitAssembler extends PayloadBlock{
                     this.configure(data);
                 },
                 PartsEditorDialog.unitInfoViewer,
-                part->part.visible && part.w<=unitModuleWidth && part.h<=unitModuleHeight);
+                part->part.visible && part.fitsIntoGrid(blueprint.w,blueprint.h));
             }));
             configureButtonCell.size(50);
             configureButtonCell.get().getStyle().imageUp = Icon.pencil;

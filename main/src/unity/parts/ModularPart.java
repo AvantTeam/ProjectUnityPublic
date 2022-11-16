@@ -13,11 +13,8 @@ public class ModularPart{
     public int front = 0;
     //transient properties index
     public int prop_index = -1;
-
     //editor only fields
     boolean valid = false;
-
-
 
     public ModularPart(ModularPartType type, int x, int y){
         this.type = type;
@@ -29,7 +26,6 @@ public class ModularPart{
     public void setX(int x){
         this.x = x;
     }
-
     public void setY(int y){
         this.y = y;
     }

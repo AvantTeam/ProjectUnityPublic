@@ -175,7 +175,7 @@ public class YoungchaBlocks{
             health = 350;
             solid = true;
 
-            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.04f, 4f, b));
+            config.nodeConfig.put(TorqueGraph.class, b -> new TorqueGraphNode(0.02f, 4f, b));
             config.fixedConnection(TorqueGraph.class, 1, 1, 1, 1);
             envEnabled |= Env.scorching | UnityEnv.acidic;
             underBullets = true;

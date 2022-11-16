@@ -37,7 +37,7 @@ public class UnityParts{
         ///DO NOT CHANGE ORDER (will break saves)
         panel = new ModularPartType("panel"){{
             requirements(PartCategories.miscUnit, ItemStack.with(Items.copper, 5, UnityItems.nickel, 5));
-            health(40);
+            healthPerTile(40);
             mass(20);
             armor(2);
         }};
@@ -45,7 +45,7 @@ public class UnityParts{
             requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 20, Items.titanium, 50));
             w = 2;
             h = 2;
-            health(200);
+            healthPerTile(45);
             mass(120);
             armor(100);
         }};
@@ -53,13 +53,13 @@ public class UnityParts{
             requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 50, Items.titanium, 100, UnityItems.nickel, 50));
             w = 3;
             h = 3;
-            health(600);
+            healthPerTile(50);
             mass(200);
             armor(2000);
         }};
         smallRoot = new ModularPartType("root-small"){{
             requirements(PartCategories.miscUnit, ItemStack.with(UnityItems.nickel, 10));
-            health(100);
+            healthPerTile(50);
             mass(10);
             producesPower(15, 5);
             addsWeaponSlots(2);
@@ -72,7 +72,7 @@ public class UnityParts{
             requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 30, Items.graphite, 20, UnityItems.cupronickel, 45));
             w = 2;
             h = 2;
-            health(250);
+            healthPerTile(50);
             mass(40);
             producesPower(50, 5);
             addsWeaponSlots(4);
@@ -86,7 +86,7 @@ public class UnityParts{
             requirements(PartCategories.miscUnit, ItemStack.with(Items.silicon, 75, Items.titanium, 50, UnityItems.nickel, 30, UnityItems.superAlloy, 15));
             w = 3;
             h = 3;
-            health(900);
+            healthPerTile(50);
             armor(4000);
             mass(150);
             producesPower(100, 5);
@@ -98,6 +98,7 @@ public class UnityParts{
         }};
         gunBridge = new ModularPartType("gun-bridge"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.graphite, 10, UnityItems.nickel, 10));
+            healthPerTile(5);
             usesPower(20, 4, 4);
             mass(20);
             addsWeaponSlots(3);
@@ -105,7 +106,7 @@ public class UnityParts{
         }};
         gun = new ModularWeaponMountType("gun"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.graphite, 10));
-            health(10);
+            healthPerTile(5);
             mass(20);
             usesPower(5,3,6);
             weapon(1, new Weapon("unity-part-mount-gun"){{
@@ -120,7 +121,7 @@ public class UnityParts{
         }};
         cannon = new ModularWeaponMountType("cannon"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 40, Items.graphite, 20, UnityItems.nickel, 30));
-            health(40);
+            healthPerTile(5);
             mass(100);
             usesPower(20,2,4);
             w = 2;
@@ -146,7 +147,7 @@ public class UnityParts{
 
         howitzer = new ModularWeaponMountType("howitzer"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 80, Items.titanium, 120, Items.graphite, 80, UnityItems.nickel, 50));
-            health(75);
+            healthPerTile(5);
             mass(550);
             usesPower(80,1,2);
             w = 3;
@@ -186,7 +187,7 @@ public class UnityParts{
 
         flamethrower = new ModularWeaponMountType("flamethrower"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.coal, 10, Items.graphite, 30));
-            health(10);
+            healthPerTile(5);
             mass(60);
             usesPower(10,4,6);
             w = 1;
@@ -217,7 +218,7 @@ public class UnityParts{
 
         grenadeLauncher = new ModularWeaponMountType("grenade-launcher"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.metaglass, 20, UnityItems.nickel, 30, Items.graphite, 30));
-            health(20);
+            healthPerTile(5);
             mass(80);
             usesPower(20,2,6);
             w = 2;
@@ -251,7 +252,7 @@ public class UnityParts{
 
         smallEngine = new ModularEngineType("engine-small"){{
             requirements(PartCategories.movementUnit, ItemStack.with(Items.copper, 10, UnityItems.nickel, 5));
-            health(10);
+            healthPerTile(5);
             mass(15);
             producesPower(20, 3);
         }};
@@ -259,45 +260,57 @@ public class UnityParts{
             requirements(PartCategories.movementUnit, ItemStack.with(UnityItems.cupronickel, 90, Items.lead, 50, Items.silicon, 30));
             w = 3;
             h = 3;
-            health(90);
+            healthPerTile(5);
             mass(500);
             producesPower(400, 1.5f);
         }};
         smallWheel = new ModularWheelType("wheel-small"){{
             requirements(PartCategories.movementUnit, ItemStack.with(UnityItems.nickel, 5));
-            health(15);
+            healthPerTile(10);
             mass(15);
             wheel(1, 1,30, 1.5f);
             usesPower(7,4,12); // uses 7 power at speed 4 rps with a maxspeed of 12 (21 power)
+            setConnections(CONNECT_HYBRID,CONNECT_SOCKET,CONNECT_HYBRID,CONNECT_SOCKET);
             isWheel = true;
         }};
-
 
         mediumWheel = new ModularWheelType("wheel-medium"){{
             requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 50, Items.titanium, 25));
             w = 2;
             h = 4;
-            health(75);
+            healthPerTile(8);
             mass(90);
             wheel(2, 2,240, 1.3f);
             usesPower(50, 2,12);
+            setConnections(
+                /*right*/  0,CONNECT_HYBRID,CONNECT_HYBRID,0,
+                /*top*/    0,0
+                /*left*/,  0,CONNECT_HYBRID,CONNECT_HYBRID,0,
+                /*bottom*/ 0,0
+            );
             isWheel = true;
         }};
         largeWheel = new ModularWheelType("wheel-large"){{
             requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 400, Items.titanium, 150, Items.thorium, 90, UnityItems.cupronickel, 100));
             w = 3;
             h = 8;
-            health(150);
+            healthPerTile(6);
             mass(200);
             wheel(4, 3,700, 1f);
             usesPower(250,1,6);
+            setConnections(
+                /*right*/  0,0,0,CONNECT_HYBRID,CONNECT_HYBRID,0,0,0,
+                /*top*/    0,0,0
+                /*left*/,  0,0,0,CONNECT_HYBRID,CONNECT_HYBRID,0,0,0,
+                /*bottom*/ 0,0,0
+            );
             isWheel = true;
         }};
         pointDefense = new ModularWeaponMountType("point-defense"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 60, UnityItems.nickel, 30));
             w = 2;
             h = 3;
-            health(60);
+            healthPerTile(8);
             mass(60);
             usesPower(15,4,4);
             weapon(3, new PointDefenseWeapon("unity-part-point-defense"){{
@@ -321,18 +334,30 @@ public class UnityParts{
             requirements(PartCategories.movementUnit, ItemStack.with(Items.graphite, 10, UnityItems.cupronickel, 5));
             w = 3;
             h = 1;
-            health(10);
+            healthPerTile(5);
             mass(30);
             differentialSteer();
+            setConnections(
+                /*right*/  CONNECT_HYBRID,
+                /*top*/    0,0,0
+                /*left*/,  CONNECT_HYBRID,
+                /*bottom*/ 0,0,0
+            );
         }};
         smallTracks = new ModularWheelType("tracks-small"){{
             requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 15, UnityItems.nickel, 10));
             w = 1;
             h = 3;
-            health(60);
+            healthPerTile(10);
             mass(45);
             wheel(1, 5,180, 0.3f);
             usesPower(20, 1, 6);
+            setConnections(
+                /*right*/  CONNECT_HYBRID,CONNECT_HYBRID,CONNECT_HYBRID,
+                /*top*/    0,
+                /*left*/   CONNECT_HYBRID,CONNECT_HYBRID,CONNECT_HYBRID,
+                /*bottom*/ 0
+            );
         }};
 
         largeTracks = new ModularWheelType("tracks-large"){{
@@ -343,29 +368,41 @@ public class UnityParts{
             mass(200);
             wheel(2, 10,950, 0.1f);
             usesPower(60, 0.5f, 6);
+            setConnections(
+                /*right*/  0,0,CONNECT_HYBRID,CONNECT_HYBRID,CONNECT_HYBRID,CONNECT_HYBRID,CONNECT_HYBRID,0,0,
+                /*top*/    0,0,
+                /*left*/   0,0,CONNECT_HYBRID,CONNECT_HYBRID,CONNECT_HYBRID,CONNECT_HYBRID,CONNECT_HYBRID,0,0,
+                /*bottom*/ 0,0
+            );
         }};
         //are these necessary?
         tankTracks = new ModularWheelType("tank-tracks"){{
             requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 250, Items.titanium, 100, UnityItems.nickel, 100, UnityItems.cupronickel, 50));
             w = 3;
             h = 16;
-            health(210);
+            healthPerTile(8);
             mass(250);
             wheel(3, 30, 2000, 0.1f);
             usesPower(200, 0.25f, 6);
+            setConnections(
+                /*right*/  0,0,3,3,3,3,3,3,3,3,3,3,3,3,0,0,
+                /*top*/    0,0,0,
+                /*left*/   0,0,3,3,3,3,3,3,3,3,3,3,3,3,0,0,
+                /*bottom*/ 0,0,0
+            );
         }};
         tankTracksLarge = new ModularWheelType("tank-tracks-large"){{
             requirements(PartCategories.movementUnit, ItemStack.with(Items.silicon, 700, Items.titanium, 500, UnityItems.nickel, 300, UnityItems.cupronickel, 200, UnityItems.superAlloy, 100));
             w = 5;
             h = 30;
-            health(500);
+            healthPerTile(5);
             mass(500);
             wheel(5, 100,10000, 0.1f);
             usesPower(1200, 0.125f, 6);
         }};
         tankCannon = new ModularWeaponMountType("arbiter"){{
             requirements(PartCategories.weaponsUnit, ItemStack.with(Items.silicon, 500, Items.titanium, 500, UnityItems.superAlloy, 200, UnityItems.nickel, 300, UnityItems.cupronickel, 150));
-            health(750);
+            healthPerTile(5);
             mass(1800);
             usesPower(400, 0.25f, 0.40f);
             w = 9;
@@ -406,17 +443,17 @@ public class UnityParts{
             w = 2;
             h = 2;
             itemCapacity(20);
-            health(50);
+            healthPerTile(20);
             mass(150);
         }};
 
 
         pipebomb = new ModularUnitAbilityType("pipebomb"){{
             requirements(PartCategories.specialUnit, ItemStack.with(Items.coal, 20, Items.titanium, 10, Items.lead, 10));
-            health(20);
-            mass(80);
             w = 2;
             h = 1;
+            healthPerTile(20);
+            mass(80);
             ability(1, new SuicideExplosionAbility(){{
                 radius = 45f;
                 damage = 90f;

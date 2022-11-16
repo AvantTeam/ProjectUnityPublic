@@ -134,6 +134,9 @@ public class ModularConstructBuilder{
     public boolean isIn(int x, int y){
         return !(x < 0 || y < 0 || x >= w || y >= h);
     }
+    public boolean isIn(int index){
+           return !(index < 0 || index >= parts.length );
+       }
 
     public boolean canFit(ModularPart p, int ox, int oy){
         return isIn(p.x + ox, p.y + oy) && isIn(p.x + p.type.w - 1 + ox, p.y + p.type.h - 1 + oy);
@@ -155,33 +158,48 @@ public class ModularConstructBuilder{
     public void rebuildValid(){
         Arrays.fill(valid,false);
         if(rootIndex == -1){
+            Log.info("rootIndex doesnt exist");
             return;
         }
-
+        if(!isHere(parts[rootIndex],rootIndex)){
+            Log.info("rootIndex must be in the 'origin' of the root node, rebuild failed");
+            return;
+        }
         IntSeq front = new IntSeq();
+        LongSeq searched = new LongSeq();
         front.add(rootIndex);
-        valid[rootIndex] = true;
-        int ptx,pty;
+        searched.add(parts[rootIndex]);
+        int ptx,pty ,atx,aty, otx,oty ,aoff;
         while(!front.isEmpty()){
             var pt = front.pop();
             ptx = pt%w;
             pty = pt/w;
-            if(ptx > 0 && parts[pt-1] != 0 && !valid[pt-1]){ //left
-                valid[pt-1] = true;
-                front.add(pt-1);
-            }
-            if(pty > 0 && parts[pt-w] != 0 && !valid[pt-w]){ //up
-                valid[pt-w] = true;
-                front.add(pt-w);
-            }
-
-            if(ptx < w - 1 && parts[pt+1] != 0 && !valid[pt+1]){ //right
-                valid[pt+1] = true;
-                front.add(pt+1);
-            }
-            if(pty < h - 1 && parts[pt+w] != 0 && !valid[pt+w]){ //down
-                valid[pt+w] = true;
-                front.add(pt+w);
+            var type = PartData.Type(parts[pt]);
+            fillValid(true,ptx,pty,type.w,type.h);
+            int points = type.connectionPoints[0].length;
+            int rotation = PartData.rotation(parts[pt]);
+            for(int i = 0;i<points;i++){
+                // get side connection position of modular part
+                otx = type.connectionPoints[rotation][i].x;
+                oty = type.connectionPoints[rotation][i].y;
+                atx = otx + type.connectionDirections[rotation][i].x;
+                aty = oty + type.connectionDirections[rotation][i].y;
+                // check in bounds
+                if(isIn(ptx + atx,pty + aty)){
+                    // get indexed position of connection point destination
+                    aoff = offsetIndex(pt,atx,aty);
+                    if(parts[aoff] != 0 && !searched.contains(parts[aoff])){ // make sure its not nothing and hasnt been searched before
+                        var external_type = PartData.Type(parts[aoff]);
+                        if(external_type.isConnected(
+                            PartData.rotation(parts[aoff]),
+                            (ptx + otx)-PartData.x(parts[aoff]),
+                            (pty + oty)-PartData.y(parts[aoff]),
+                            type.connectionPointType[rotation][i])){
+                            front.add(indexOf(parts[aoff]));
+                            searched.add(parts[aoff]);
+                        }
+                    }
+                }
             }
         }
     }
@@ -382,7 +400,19 @@ public class ModularConstructBuilder{
             }
         }
     }
+    public void fillValid(boolean value, int x,int y, int w, int h){
+        int to;
+        for(int j = 0;j<h;j++){
+            to = index(x,y+j)+w;
+            for(int i = to-w;i<to;i++){
+                valid[i] = value;
+            }
+        }
+    }
 
+    public boolean isEmpty(int x,int y){
+        return !isIn(index(x,y)) || parts[index(x,y)] == 0;
+    }
     public boolean isEmpty(int x,int y, int w, int h){
         int to;
         for(int j = 0;j<h;j++){
@@ -453,6 +483,10 @@ public class ModularConstructBuilder{
         return PartData.Type(parts[ind]);
     }
 
+    public int offsetIndex(int index, int x,int y){
+        return index + x + y * w;
+    }
+
     ///todo: have the top decal be relatively light, the panel decal be made of a collage of different things pf various sizes seeded by the 1st 4 bits of the array.
 
     public static int getID(byte[] data, int s){
@@ -509,7 +543,16 @@ public class ModularConstructBuilder{
         return cons;
         //do other stuff to it if necessary
     }
+    public static final class ArmorData{
+        public static final int bitMaskShade =     0xFF00;
+        public static final int bitMaskID =        0x00FF;
 
+        public static int Id(short g){ return (int)((bitMaskID&g));}
+        public static short Id(short g,int id){ return (short)((g&~bitMaskID) | id);}
+
+        public static int ShadeData(short g){ return ((bitMaskShade&g)>>>8)& 0xFF;}
+        public static short ShadeData(short g,int shade){ return (short)((g&~bitMaskShade) | shade<<8);}
+    }
     public static final class PartData{
         public static final long bitMaskID =        0xFFFF000000000000L;
         public static final long bitMaskX =         0x0000FF0000000000L;
