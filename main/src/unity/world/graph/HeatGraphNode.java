@@ -10,6 +10,8 @@ import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
+import mindustry.world.meta.*;
+import unity.world.meta.*;
 
 import static unity.graphics.UnityPal.*;
 
@@ -168,11 +170,10 @@ public class HeatGraphNode extends GraphNode<HeatGraph>{
         }
 
     @Override
-    public void displayStats(Table table){
-        addBundleStatLevelLine(table,"stat.unity-emissiveness",emissiveness*60,new float[]{0.5f,1f,3f,10,20});
-        addBundleStatLine(table,"stat.unity-heatcapacity",heatcapacity);
-        addBundleStatLine(table,"stat.unity-heatconductivity",conductivity*60);
-        addBundleStatLine(table,"stat.unity-maxtemp",maxTemp-celsiusZero);
-        //
+    public void setStats(Stats stats){
+        addLevelStat(stats, UnityStat.emissivity, emissiveness * 60f, new float[]{0.5f, 1f, 3f, 10f, 20f});
+        addStat(stats, UnityStat.heatCapacity, heatcapacity);
+        addStat(stats, UnityStat.heatConductivity, conductivity);
+        stats.add(UnityStat.maxTemperature, maxTemp - celsiusZero, UnityStatUnit.celcius);
     }
 }
