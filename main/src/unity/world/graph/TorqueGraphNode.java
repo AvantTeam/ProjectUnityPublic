@@ -6,6 +6,8 @@ import arc.scene.ui.layout.*;
 import arc.util.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
+import mindustry.world.meta.*;
+import unity.world.meta.*;
 
 public class TorqueGraphNode extends GraphNode<TorqueGraph>{
     public float baseFriction, baseInertia, baseForce=0;
@@ -68,15 +70,10 @@ public class TorqueGraphNode extends GraphNode<TorqueGraph>{
     }
 
     @Override
-    public void displayStats(Table table){
-        addBundleStatLevelLine(table,"stat.unity-friction",baseFriction*(60.0f),new float[]{0.5f,1,2,5,10});
-        addBundleStatLine(table,"stat.unity-inertia",baseInertia);
-        if(maxSpeed > 0){
-            addBundleStatLine(table,"stat.unity-maxspeed",maxSpeed*10);
-        }
-        if(maxTorque > 0){
-            addBundleStatLine(table,"stat.unity-maxtorque",maxTorque);
-        }
-
+    public void setStats(Stats stats){
+        addLevelStat(stats, UnityStat.friction, baseFriction * 60f, new float[]{0.5f, 1f, 2f, 5f, 10});
+        stats.add(UnityStat.inertia, baseInertia);
+        if(maxSpeed > 0) stats.add(UnityStat.maxSpeed, maxSpeed * 10f, UnityStatUnit.rpm);
+        if(maxTorque > 0) stats.add(UnityStat.maxTorque, maxTorque, UnityStatUnit.torque);
     }
 }

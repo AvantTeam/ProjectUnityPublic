@@ -1,6 +1,5 @@
 package unity.world.graph;
 
-import arc.*;
 import arc.graphics.*;
 import arc.math.*;
 import arc.math.geom.*;
@@ -8,15 +7,12 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
-import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.world.meta.*;
 import unity.ui.*;
 import unity.world.graph.CrucibleGraph.*;
 import unity.world.meta.*;
 import unity.world.meta.CrucibleRecipes.*;
-
-import static mindustry.Vars.content;
 
 
 public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
@@ -43,22 +39,22 @@ public class CrucibleGraphNode extends GraphNode<CrucibleGraph>{
             baseSize = Mathf.sqr(build.getBuild().block.size);
         }
     }
+
     @Override
-    public void displayStats(Table table){
-        table.row();
-        table.table(bt -> {
-            bt.left().defaults().padRight(3).left();
-            bt.row();
-            addStatLine(bt,Stat.liquidCapacity.localized(),Core.bundle.format("stat.unity-cruciblecapacity",this.capacity));
-            if(doesCrafting){
-                for(var melt:CrucibleRecipes.items){
-                    bt.row();
-                    bt.add(new CrucibleMeltStatElement(melt.key));
-                }
-            }
-        }).padTop(-9).fillX().padLeft(0).left().get().background( Tex.underline);
-        //stats.add(Stat.abilities,);
+    public void setStats(Stats stats){
+        stats.add(UnityStat.crucibleCapacity, capacity, StatUnit.items);
+        if(doesCrafting){
+            stats.add(UnityStat.crucibleMeltingPoints, table -> {
+                table.table(t -> {
+                    for(var melt : CrucibleRecipes.items){
+                        t.row();
+                        t.add(new CrucibleMeltStatElement(melt.key));
+                    }
+                });
+            });
+        }
     }
+
     @Override
     public void displayBars(Table table){
         table.row();

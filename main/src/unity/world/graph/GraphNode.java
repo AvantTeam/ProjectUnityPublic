@@ -8,6 +8,7 @@ import arc.util.io.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 import mindustry.world.meta.*;
+import unity.world.meta.*;
 
 //orginally GraphModule
 public class GraphNode<T extends Graph>{
@@ -56,8 +57,9 @@ public class GraphNode<T extends Graph>{
         return null;
     }
 
+    public void setStats(Stats stats){}
+
     public void displayBars(Table table){}
-    public void displayStats(Table table){};
     private static String[] levelNames = {
         "stat.unity-negligible",
         "stat.unity-small",
@@ -74,21 +76,13 @@ public class GraphNode<T extends Graph>{
         }
         return levelNames[levelNames.length-1];
     }
-    public void addBundleStatLevelLine(Table table, String bundlename, float val, float level[]){
-        addStatLine(table, Core.bundle.get(bundlename+".name"),Core.bundle.format(getNamedLevel(val,level),Core.bundle.format(bundlename,val)));
-    }
-    public void addBundleStatLine(Table table, String bundlename, Object val){
-        addStatLine(table, Core.bundle.get(bundlename+".name"),Core.bundle.format(bundlename,val));
-    }
-    public void addStatLine(Table table, String name, String val){
-        table.row();
-        table.table(inset -> {
-            inset.left();
-            inset.add("[lightgray]" + name + ":[] ").left().top();
-            inset.add(val);
-            inset.add().size(10f);
 
-        }).fillX().padLeft(10);
+    public void addLevelStat(Stats stats, Stat stat, float val, float[] levels){
+        stats.add(stat, Core.bundle.format(getNamedLevel(val, levels), Core.bundle.format("stat." + stat.name + ".info", val)));
+    }
+
+    public void addStat(Stats stats, Stat stat, Object val){
+        stats.add(stat, Core.bundle.format("stat." + stat.name + ".info", val));
     }
 
     public void removeEdge(GraphNode g){
