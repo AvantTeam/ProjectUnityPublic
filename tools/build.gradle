@@ -1,0 +1,29 @@
+sourceSets.main.java.srcDirs = ['src/']
+
+dependencies{
+    implementation mindustry(':core')
+    implementation arc(':arc-core')
+    implementation arc(':natives-desktop')
+
+    implementation project(':mod')
+
+    annotationProcessor project(':downgrader')
+}
+
+task proc(dependsOn: [classes, configurations.runtimeClasspath]){
+    doFirst{
+        delete{delete spritesDir}
+        spritesDir.mkdirs()
+
+        copy{
+            from spritesRawDir
+            into spritesDir
+        }
+
+        javaexec{
+            workingDir = assetsDir
+            mainClass = 'unity.tools.Tools'
+            classpath = sourceSets.main.runtimeClasspath
+        }
+    }
+}

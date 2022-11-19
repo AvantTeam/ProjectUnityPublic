@@ -1,0 +1,18 @@
+if(JavaVersion.current().ordinal() < JavaVersion.VERSION_17.ordinal()){
+    throw new GradleException("JDK 17 is a required minimum version. Yours: ${System.getProperty('java.version')}")
+}
+
+include ':downgrader'
+include ':annotations'
+
+include ':common'
+include ':core'
+
+include ':factions'
+include ':factions:vanilla'
+
+include ':mod'
+include ':plugin'
+include ':tools'
+
+rootProject.name = modName

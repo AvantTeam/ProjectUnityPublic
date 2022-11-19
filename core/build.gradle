@@ -1,0 +1,9 @@
+sourceSets.main.java.srcDirs = ['src/']
+
+dependencies{
+    compileOnly mindustry(':core')
+    compileOnly arc(':arc-core')
+    api project(':common')
+
+    annotationProcessor project(':downgrader')
+}

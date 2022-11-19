@@ -1,0 +1,121 @@
+sourceSets.main.java.srcDirs = ['src/']
+
+import arc.files.*
+import arc.struct.*
+import arc.util.*
+
+import java.util.regex.*
+
+dependencies{
+    compileOnly mindustry(':core')
+    compileOnly arc(':arc-core')
+
+    api project(':factions:vanilla')
+
+    annotationProcessor project(':downgrader')
+}
+
+task list(dependsOn: [jar, configurations.runtimeClasspath]){
+    mustRunAfter ':tools:proc'
+    doFirst{
+        def forbid = Pattern.compile('\\$\\d+|.+Impl')
+
+        Seq<String> classes = new Seq<>(), packages = new Seq<>()
+        def procFile = {def self, String pack, Fi dir ->
+            for(Fi child : dir.list()){
+                if(child.isDirectory()){
+                    def name = child.name()
+                    if(!pack.startsWith('unity') && name != 'unity') continue
+
+                    def packName = pack.empty ? name : "$pack.$name"
+
+                    packages.add(packName)
+                    self(self, packName, child)
+                } else{
+                    def name = child.nameWithoutExtension()
+                    if(child.extEquals('class') && !forbid.matcher(name).find()){
+                        classes.add("$pack.$name")
+                    }
+                }
+            }
+        }
+
+        (configurations.runtimeClasspath.files + jar.archiveFile.get().asFile).forEach{
+            procFile(procFile, '', new ZipFi(new Fi(it)))
+        }
+
+        classes.distinct()
+        packages.distinct()
+
+        def output = file("$assetsDir/meta/classes.out")
+        output.parentFile.mkdirs()
+
+        output.text = 'Packages:\n'
+        for(def p : packages) output.text += "$p\n"
+
+        output.text += "Classes:\n"
+        for(def c : classes) output.text += "$c\n"
+
+        println "Successfully listed $packages.size packages and $classes.size classes."
+    }
+}
+
+task deploy(type: Jar, dependsOn: [list, configurations.runtimeClasspath]){
+    final def hasSprites = spritesDir.exists()
+
+    if(!hasSprites) dependsOn ':tools:proc'
+    mustRunAfter ':tools:proc'
+
+    archiveFileName = "${modName}Desktop.jar"
+
+    from files(sourceSets.main.output.classesDirs)
+    from files(sourceSets.main.output.resourcesDir)
+    from configurations.runtimeClasspath.collect{it.isDirectory() ? it : zipTree(it)}
+
+    from files(assetsDir){
+        exclude 'sprites/vanilla/**'
+    }
+
+    from(rootDir){
+        include 'mod.json'
+        include 'icon.png'
+    }
+
+    ready{TaskExecutionGraph graph ->
+        force(deploy, true)
+        if(!hasSprites && graph.hasTask(deploy) && graph.hasTask(':tools:proc')){
+            println 'Sprites folder not found; automatically generating sprites.'
+        }
+    }
+
+    doFirst{
+        println "Deploying ${devBuild ? 'developer' : 'user'} build."
+    }
+}
+
+task dex(type: Jar, dependsOn: deploy){
+    archiveFileName = "${modName}.jar"
+
+    final def desktopJar = deploy.archiveFile.get().asFile
+    final def dexJar = file("$dex.temporaryDir/Dexed.jar")
+    doFirst{
+        println 'Dexifying...'
+        def command = "d8 --min-api $sdkAPI --output $dexJar $desktopJar"
+
+        (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList()).forEach{
+            if(it.exists()) command += " --classpath $it.path"
+        }
+
+        command += " --lib ${file("$sdkRoot/platforms/android-$sdkVersion/android.jar")}"
+
+        if(OS.isWindows) command = 'cmd /c ' + command
+        command.execute(null, new File("$buildDir/libs")).waitForProcessOutput(System.out, System.err)
+    }
+
+    from zipTree(desktopJar)
+    from zipTree(dexJar)
+}
+
+tasks.withType(Jar){
+    if(!devBuild) exclude 'unity/DevBuildImpl*'
+}

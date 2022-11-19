@@ -1,0 +1,172 @@
+plugins{
+    id 'org.jetbrains.kotlin.jvm' version '1.7.0'
+    id 'org.jetbrains.kotlin.kapt' version '1.7.0'
+}
+
+import arc.files.*
+import arc.struct.*
+import arc.util.*
+import arc.util.serialization.*
+
+sourceSets.main.java.srcDirs = [
+    'src/',
+    "${compileJava.temporaryDir}/fetched/"
+]
+
+ext{
+    fetchPackage = 'unity/fetched'
+    fetchDir = file("${compileJava.temporaryDir}/fetched/$fetchPackage")
+    fetchTemp = file("${compileJava.temporaryDir}/fetch.txt")
+    fetchRevision = 0
+
+    final def fetchPackageDef = fetchPackage.replace('/', '.')
+    processComp = {String source ->
+        return source
+            .replace('mindustry.entities.comp', fetchPackageDef)
+            .replace('mindustry.annotations.Annotations.*', 'unity.annotations.Annotations.*')
+            .replaceAll('@Component\\((base = true|.)+\\)\n*', '@EntityComponent(base = true, vanilla = true)\n')
+            .replaceAll('@Component\n*', '@EntityComponent(vanilla = true)\n')
+            .replaceAll('@BaseComponent\n*', '@EntityBaseComponent\n')
+            .replaceAll('@CallSuper\n*', '')
+            .replaceAll('@Final\n*', '')
+            .replaceAll('@EntityDef\\(*.*\\)*\n*', '')
+    }
+}
+
+dependencies{
+    compileOnly mindustry(':core')
+    compileOnly arc(':arc-core')
+    compileOnly project(':annotations')
+
+    annotationProcessor project(':downgrader')
+    kapt project(':annotations')
+}
+
+sourceCompatibility = compilerVersion
+kotlin{
+    jvmToolchain{
+        languageVersion = JavaLanguageVersion.of(compilerVersion)
+    }
+}
+
+kapt{
+    keepJavacAnnotationProcessors = true
+    javacOptions{
+        option('-source', compilerVersion)
+        option('-target', '1.8')
+
+        option("-ArevisionDirectory=${project(':annotations').projectDir}/assets/revisions")
+    }
+}
+
+task procComps{
+    doFirst{
+        Fi dir = new Fi(fetchDir)
+        for(Fi fi : dir.list()){
+            if(!fi.extEquals("java")) continue
+            fi.writeString(processComp(fi.readString()))
+        }
+    }
+}
+
+task fetchComps{
+    doFirst{
+        delete{delete fetchDir}
+        fetchDir.mkdir()
+
+        def amount = 0
+
+        final ObjectSet<UnsafeRunnable> fetches = new ObjectSet<>()
+        Http.get("https://api.github.com/repos/Anuken/MindustryJitpack/contents/core/src/mindustry/entities/comp?ref=$mindustryVersion")
+            .timeout(0)
+            .error({final t -> throw new RuntimeException(t)})
+            .block({final res ->
+                final def list = Jval.read(res.getResultAsString()).asArray()
+                synchronized(fetches){
+                    amount = list.size
+                }
+
+                for(final Jval val : list){
+                    final def filename = val.get('name').asString()
+                    final def fileurl = val.get('download_url').asString()
+
+                    final UnsafeRunnable run = {
+                        Http.get(fileurl)
+                                .timeout(0)
+                                .error({final t -> throw new RuntimeException(t)})
+                                .block(
+                                        {final comp ->
+                                            final def fi = Fi.get("$fetchDir/$filename")
+                                            fi.writeString(processComp(comp.getResultAsString()), false)
+
+                                            synchronized(fetches){
+                                                amount--
+                                            }
+                                        }
+                                )
+                    }
+
+                    fetches.add(run)
+                }
+            })
+
+        Seq<Thread> threads = Seq.with(fetches).map({final UnsafeRunnable fetch ->
+            new Thread({
+                try{
+                    fetch.run()
+                }catch(Throwable t){
+                    Log.err(t)
+                }
+
+                synchronized(fetches){
+                    fetches.remove(fetch)
+                }
+            })
+        })
+
+        threads.each(Thread::start)
+        while(true){
+            if(!fetches.empty){
+                Thread.currentThread().yield()
+            }else{
+                threads.each(Thread::join)
+                break
+            }
+        }
+
+        if(amount != 0) throw new IllegalStateException("Couldn't write all components found: $amount unwritten.")
+        fetchTemp.text = "$mindustryVersion/$fetchRevision"
+    }
+}
+
+tasks.withType(JavaCompile){
+    if(!fetchDir.exists() || !fetchTemp.exists()){
+        dependsOn fetchComps
+        mustRunAfter fetchComps
+    } else{
+        String[] content = fetchTemp.text.split('/')
+        String ver = content[0].strip()
+        String rev = content[1].strip()
+
+        if(ver != "$mindustryVersion" as String || rev != Integer.toString(fetchRevision as int)){
+            dependsOn fetchComps
+            mustRunAfter fetchComps
+        }
+    }
+
+    sourceCompatibility = compilerVersion
+    options.release = 8
+}
+
+tasks.withType(Jar){
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    exclude 'unity/fetched/**'
+    exclude 'unity/gensrc/**'
+}
+
+ready{TaskExecutionGraph graph ->
+    force(tasks.kaptGenerateStubsKotlin, false)
+    force(tasks.compileKotlin, false)
+    force(tasks.inspectClassesForKotlinIC, false)
+}

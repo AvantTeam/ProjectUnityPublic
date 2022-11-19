@@ -1,0 +1,21 @@
+# Build settings
+bin/
+build/
+.gradle/
+.settings/
+.project
+.classpath
+
+# Project-specific
+local.properties
+mod/assets/meta
+mod/assets/sprites/
+
+# IDE-specific
+.idea/
+.vscode/
+.kateproject
+
+# Aseprite
+.ase
+.aseprite

@@ -1,0 +1,14 @@
+{
+    "name": "unity-plugin",
+    "displayName": "Project Unity Plugin",
+    "author": "Avant Team",
+    "description": "A Project Unity development server plugin for various testing supports.",
+    "version": "v0.0.1",
+    "minGameVersion": 140.4,
+    "main": "unity.ProjectUnityPlugin",
+    "java": true,
+    "hidden": true,
+    "dependencies": [
+        "unity"
+    ]
+}

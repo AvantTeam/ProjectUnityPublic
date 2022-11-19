@@ -1,0 +1,25 @@
+sourceSets.main{
+    java.srcDirs = ['src/']
+    resources.srcDirs = ['assets/']
+}
+
+dependencies{
+    compileOnly mindustry(':core')
+    compileOnly arc(':arc-core')
+
+    compileOnly project(':mod')
+
+    annotationProcessor project(':downgrader')
+}
+
+task deploy(type: Jar, dependsOn: configurations.runtimeClasspath){
+    archiveFileName = "${modName}Plugin.jar"
+
+    from files(sourceSets.main.output.classesDirs)
+    from files(sourceSets.main.output.resourcesDir)
+    from configurations.runtimeClasspath.collect{it.isDirectory() ? it : zipTree(it)}
+
+    ready{TaskExecutionGraph graph ->
+        force(deploy, true)
+    }
+}

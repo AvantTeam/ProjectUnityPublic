@@ -1,0 +1,151 @@
+buildscript{
+    dependencies{
+        classpath "com.github.Anuken.MindustryJitpack:core:$mindustryVersion"
+        classpath "com.github.Anuken.Arc:arc-core:$arcVersion"
+    }
+
+    repositories{
+        google()
+        mavenCentral()
+        maven{url 'https://oss.sonatype.org/content/repositories/snapshots/'}
+        maven{url 'https://oss.sonatype.org/content/repositories/releases/'}
+        maven{url 'https://jitpack.io'}
+    }
+}
+
+plugins{
+    id 'java-library'
+    id 'maven-publish'
+}
+
+import arc.util.io.*
+import arc.struct.*
+
+import java.util.regex.*
+
+file("$rootDir/local.properties").with{
+    if(it.exists()){
+        def map = new StringMap()
+        it.withReader{PropertiesUtils.load(map, it)}
+
+        configure(allprojects){
+            for(def e : map) ext."$e.key" = e.value
+        }
+    }
+}
+
+allprojects{
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+
+    group = 'com.github.GlennFolker'
+    version = modVersion
+
+    ext{
+        mindustry = {String submodule ->
+            return "com.github.Anuken.MindustryJitpack$submodule:$mindustryVersion"
+        }
+
+        arc = {String submodule ->
+            return "com.github.Anuken.Arc$submodule:$arcVersion"
+        }
+
+        force = {Task task, final boolean run ->
+            task.onlyIf{run}
+            task.outputs.upToDateWhen{!run}
+        }
+
+        ready = {Action<TaskExecutionGraph> graph ->
+            gradle.taskGraph.whenReady graph
+        }
+
+        sdkRoot = System.getenv('ANDROID_SDK_ROOT') ?: System.getenv('ANDROID_HOME')
+        compilerVersion = JavaVersion.current().ordinal() - JavaVersion.VERSION_17.ordinal() + 17
+
+        assetsDir = file("${project(':mod').projectDir}/assets")
+        assetsRawDir = file("${project(':mod').projectDir}/assets-raw")
+        spritesDir = file("$assetsDir/sprites")
+        spritesRawDir = file("$assetsRawDir/sprites")
+
+        // `-Pmod.dev` will initiate a developer build. Default is `false`.
+        devBuild = project.hasProperty('mod.dev') && Boolean.parseBoolean(project.property('mod.dev'))
+        // `-Pmod.deprecation` will log usages of deprecated API. Default is `false`.
+        showDeprecate = project.hasProperty('mod.deprecation') && Boolean.parseBoolean(project.property('mod.deprecation'))
+        // `-Pmod.listfiles` will log all files that are to be compiled. Default is `false`.
+        listFiles = project.hasProperty('mod.listfiles') && Boolean.parseBoolean(project.property('mod.listfiles'))
+    }
+
+    repositories{
+        mavenCentral()
+        maven{url 'https://oss.sonatype.org/content/repositories/snapshots/'}
+        maven{url 'https://oss.sonatype.org/content/repositories/releases/'}
+        maven{url 'https://jitpack.io'}
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes){
+        archiveClassifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts{
+        archives sourcesJar
+    }
+
+    java{
+        withJavadocJar()
+        withSourcesJar()
+
+        toolchain{
+            languageVersion = JavaLanguageVersion.of(compilerVersion)
+        }
+    }
+
+    publishing{
+        publications{
+            maven(MavenPublication){
+                from components.java
+            }
+        }
+    }
+
+    tasks.withType(JavaCompile){
+        options.incremental = true
+        options.encoding = 'UTF-8'
+
+        if(showDeprecate) options.deprecation = true
+        if(listFiles) options.listFiles = true
+    }
+
+    javadoc{
+        options.encoding = 'UTF-8'
+    }
+}
+
+configure([project(':annotations'), project(':downgrader')]){
+    sourceCompatibility = compilerVersion
+    tasks.withType(JavaCompile){
+        sourceCompatibility = compilerVersion
+        targetCompatibility = 8
+
+        doFirst{
+            sourceCompatibility = 8
+        }
+    }
+}
+
+configure([project(':core'), project(':mod'), project(':tools')] + project(':factions').subprojects){
+    sourceCompatibility = compilerVersion
+    tasks.withType(JavaCompile){
+        sourceCompatibility = compilerVersion
+        options.release = 8
+    }
+}
+
+ready{TaskExecutionGraph graph ->
+    [file("$rootDir/mod.json"), file("${project(':plugin').projectDir}/assets/mod.json")].forEach{File file ->
+        def str = file.text
+
+        def matcher = Pattern.compile('"version": "(.*)"').matcher(str)
+        if(matcher.find()) file.text = "${str.substring(0, matcher.start(1))}$modVersion${str.substring(matcher.end(1))}"
+    }
+}

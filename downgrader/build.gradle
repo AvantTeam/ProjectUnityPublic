@@ -1,0 +1,9 @@
+sourceSets.main{
+    java.srcDirs = ['src/']
+    resources.srcDirs = ['assets/']
+}
+
+dependencies{
+    implementation mindustry(':core')
+    implementation arc(':arc-core')
+}
