@@ -1,13 +1,11 @@
 package unity.world.graph;
 
-import arc.*;
 import arc.func.*;
 import arc.graphics.g2d.*;
 import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.entities.units.*;
-import mindustry.graphics.*;
 import mindustry.world.*;
 import mindustry.world.meta.*;
 import unity.world.graph.GraphConnector.*;
@@ -113,17 +111,10 @@ public class GraphBlockConfig{
     }
 
     public void setStats(Stats stats){
-        stats.add(Stat.abilities,table -> {
-            for(var gcnfig:nodeConfig){
-                table.row();
-                table.add(Core.bundle.get("ui.graph."+Graphs.graphInfo.get(gcnfig.key).name)).growX().left().color(Pal.accent);
-                table.row();
-                table.image().growX().pad(5).padLeft(0).padRight(0).height(3).color(Pal.accent);
-                GraphNode gn = gcnfig.value.get(null);
-                table.row();
-                table.table(gn::displayStats).growX();
-            }
-        });
+        for(var gcnfig : nodeConfig){
+            GraphNode<?> gn = gcnfig.value.get(null);
+            gn.setStats(stats);
+        }
     }
 
     public Block getBlock(){
