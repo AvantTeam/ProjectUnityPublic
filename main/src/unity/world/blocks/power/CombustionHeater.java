@@ -64,7 +64,7 @@ public class CombustionHeater extends GenericGraphBlock{
         @Override
         public void update(){
             super.update();
-            if(!canConsume()){
+            if(!canConsume() || !enabled){
                 productionEfficiency = 0f;
                 return;
             }

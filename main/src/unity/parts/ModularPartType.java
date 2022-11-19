@@ -456,7 +456,14 @@ public class ModularPartType implements Displayable{
             }
         }).growX().left().margin(3);
     }
-
+    public void displayTable(Table table, PartsEditorElement builder, int index){
+        table.row();
+        table.table(statTable -> {
+           stats.each(stat -> {
+               stat.displaySelected(table,builder,index);
+           });
+       }).left();
+    }
     public void displayTooltip(Table tip){
         tip.setBackground(Tex.button);
         tip.table(t -> {

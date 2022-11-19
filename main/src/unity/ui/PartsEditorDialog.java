@@ -60,6 +60,7 @@ public class PartsEditorDialog extends BaseDialog{
                             editorElement.deselect();
                         }else{
                             editorElement.select(part);
+                            editorElement.erasing = false;
                         }
                     }).pad(3).size(46f).name("part-" + part.name)
                     .tooltip(part::displayTooltip).get();
@@ -140,7 +141,7 @@ public class PartsEditorDialog extends BaseDialog{
         }).update(i->{i.setChecked(editorElement.mirror);}).tooltip("mirror").width(64);
         buttons.button(Icon.eraser,Styles.clearTogglei,()->{
             editorElement.erasing = !editorElement.erasing;
-        }).tooltip("clear").width(64);
+        }).tooltip("eraser").width(64);
         buttons.button(Icon.file,()->{
             builder.clear();
             editorElement.onAction();

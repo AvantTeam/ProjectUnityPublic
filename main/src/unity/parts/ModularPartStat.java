@@ -1,6 +1,7 @@
 package unity.parts;
 
 import arc.scene.ui.layout.*;
+import unity.ui.*;
 
 
 public abstract class ModularPartStat{
@@ -17,6 +18,8 @@ public abstract class ModularPartStat{
     public void mergePost(ModularPartStatMap id, ModularPart part){}
 
     public void display(Table e){}
+
+    public void displaySelected(Table table, PartsEditorElement builder, int index){}
 
 
     public static final class MergePriorities{

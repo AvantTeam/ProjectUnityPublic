@@ -34,6 +34,13 @@ public class ModularConstructBuilder{
         return x+y*w;
     }
 
+    public int indexX(int i){
+        return i%w;
+    }
+    public int indexY(int i){
+        return i/w;
+    }
+
     public void clear(){
         for(int i = 0; i < parts.length; i++){
             parts[i] = 0;
@@ -476,7 +483,10 @@ public class ModularConstructBuilder{
     }
 
     public ModularPartType partTypeAt(int x, int y){
-        int ind = index(x,y);
+        return partTypeAt(index(x,y));
+    }
+
+    public ModularPartType partTypeAt(int ind){
         if(parts[ind] == 0){
             return null;
         }
