@@ -81,5 +81,13 @@ public class ProjectUnity extends ProjectUnityCommon{
         Faction.init();
 
         PUStatusEffects.load();
+
+        MonolithItems.load();
+        MonolithStatusEffects.load();
+        MonolithFluids.load();
+        MonolithAttributes.load();
+        MonolithUnitTypes.load();
+        MonolithBlocks.load();
+        MonolithPlanets.load();
     }
 }

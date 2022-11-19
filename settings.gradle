@@ -10,6 +10,7 @@ include ':core'
 
 include ':factions'
 include ':factions:vanilla'
+include ':factions:monolith'
 
 include ':mod'
 include ':plugin'

@@ -12,8 +12,8 @@ import static mindustry.Vars.*;
 public enum Faction{
     vanilla("vanilla", Pal.accent),
     monolith("monolith", Palettes.monolith),
-    end("end", Palettes.end),
-    youngcha("youngcha", Palettes.youngcha);
+    youngcha("youngcha", Palettes.youngcha),
+    end("end", Palettes.end);
 
     public static final Faction[] all = values();
 
