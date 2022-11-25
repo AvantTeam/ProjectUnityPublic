@@ -10,6 +10,7 @@ import mindustry.world.meta.*;
 import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
 import unity.world.graph.connectors.GraphConnectorType.*;
+import unity.world.graph.connectors.GraphConnectorTypeI.*;
 
 public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeTypeI<T>{
     private static String[] levelNames = {
@@ -20,6 +21,21 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
         "stat.unity-major",
         "stat.unity-extreme"
     };
+
+    public String getNamedLevel(float val, float level[]){
+        for(int i = 0; i < level.length; i++){
+            if(val <= level[i]) return levelNames[i];
+        }
+        return levelNames[levelNames.length-1];
+    }
+
+    public void addLevelStat(Stats stats, Stat stat, float val, float[] levels){
+        stats.add(stat, Core.bundle.format(getNamedLevel(val, levels), Core.bundle.format("stat." + stat.name + ".info", val)));
+    }
+
+    public void addStat(Stats stats, Stat stat, Object val){
+        stats.add(stat, Core.bundle.format("stat." + stat.name + ".info", val));
+    }
 
     @Override
     public abstract <E extends Building & GraphBuild> GraphNode<T> create(E build);
@@ -79,20 +95,10 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
         public Seq<GraphConnector<T>> connectors(){
             return connectors;
         }
-        
-        public String getNamedLevel(float val, float level[]){
-            for(int i = 0; i < level.length; i++){
-                if(val <= level[i]) return levelNames[i];
-            }
-            return levelNames[levelNames.length-1];
-        }
 
-        public void addLevelStat(Stats stats, Stat stat, float val, float[] levels){
-            stats.add(stat, Core.bundle.format(getNamedLevel(val, levels), Core.bundle.format("stat." + stat.name + ".info", val)));
-        }
-
-        public void addStat(Stats stats, Stat stat, Object val){
-            stats.add(stat, Core.bundle.format("stat." + stat.name + ".info", val));
+        @Override
+        public void addConnector(GraphConnectorI<T> connector){
+            connectors.add((GraphConnector<T>)connector);
         }
 
         public void removeEdge(GraphNode<T> g){}

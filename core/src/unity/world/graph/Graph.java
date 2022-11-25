@@ -31,10 +31,6 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
 
     private long lastFrameUpdated;
 
-    protected Graph(GraphConnector<T> connector){
-        addVertex(connector);
-    }
-
     @Override
     public void update(){
         if(Core.graphics.getFrameId() == lastFrameUpdated) return;
@@ -62,7 +58,7 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
 
         Graph<T> g = edge.other(this).graph;
         if(g != this){
-            //Xelo: CONSUME THE INFERIOR GRAPH
+            // Xelo: CONSUME THE INFERIOR GRAPH
             if(g.vertices.size < vertices.size){
                 mergeGraph(g);
             }else{
@@ -137,7 +133,7 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
         edge.n2.removeEdge(edge);
     }
 
-    public void removeEdge(GraphEdge edge){
+    public void removeEdge(GraphEdge<T> edge){
         removeEdgeNonSplit(edge);
         onGraphChanged();
         if(!isConnected(edge.n1, edge.n2, floodTemp)){
@@ -148,7 +144,7 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
                 for(GraphConnector<T> other : floodTemp){
                     removeOnlyVertex(other);
                     ngraph.addVertex(other);
-                    for(GraphEdge ge : other.connections){
+                    for(GraphEdge<T> ge : other.connections){
                         if(ge != edge){
                             ngraph.edges.put(ge.id, ge);
                             edges.remove(ge.id);
@@ -161,7 +157,7 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
                 for(GraphConnector<T> other : vertices){
                     if(!floodTemp.contains(other)){
                         ngraph.addVertex(other);
-                        for(GraphEdge ge: other.connections){
+                        for(GraphEdge<T> ge: other.connections){
                             if(ge != edge){
                                 ngraph.edges.put(ge.id, ge);
                                 edges.remove(ge.id);
