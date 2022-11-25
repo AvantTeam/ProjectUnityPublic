@@ -3,11 +3,15 @@ package unity.annotations.processors.block;
 import arc.*;
 import arc.func.*;
 import arc.graphics.g2d.*;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import arc.util.io.*;
 import mindustry.*;
 import mindustry.entities.units.*;
+import mindustry.game.*;
 import mindustry.gen.*;
+import mindustry.world.*;
 import com.squareup.javapoet.*;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Symbol.*;
@@ -25,18 +29,21 @@ import static javax.lang.model.element.Modifier.*;
  */
 public class GraphProcessor extends BaseProcessor{
     public static final String packageName = packageRoot + ".graph";
+    public static final ClassName graphInfoCont = ClassName.get(packageName, "Graphs");
+    public static final ClassName graphInfo = ClassName.get(packageName, "Graphs", "GraphInfo");
 
     protected ClassSymbol graphBase, graphEntBase;
     protected ClassSymbol connectorBase;
     protected OrderedMap<String, GraphEntry> entries = new OrderedMap<>();
 
     /** (Modify as needed!) Fields that are present in implementations of GraphBlock. */
-    protected static final Seq<FieldSpec> blockFields = Seq.with();
+    protected final Seq<FieldSpec> blockFields = Seq.with();
 
     /** (Modify as needed!) Fields that are present in implementations of GraphBuild. */
-    protected static final Seq<FieldSpec> buildFields = Seq.with(
+    protected final Seq<FieldSpec> buildFields = Seq.with(
         FieldSpec.builder(TypeName.INT, "prevTileRotation").initializer("-1").build(),
-        FieldSpec.builder(TypeName.BOOLEAN, "placed").initializer("false").build()
+        FieldSpec.builder(TypeName.BOOLEAN, "placed").initializer("false").build(),
+        FieldSpec.builder(TypeName.BOOLEAN, "graphInitialized").initializer("false").build()
     );
 
     /**
@@ -44,8 +51,18 @@ public class GraphProcessor extends BaseProcessor{
      * of GraphBlock. These methods are only added to "root" graph blocks, as in graph block classes that do not
      * derive from other graph block classes.
      */
-    protected static final Seq<Implement> blockInjects = Seq.with(
-        
+    protected final Seq<Implement> blockInjects = Seq.with(
+        new Implement((method, callSuper, entries) -> {
+            callSuper.get(null, null);
+            method.addStatement("setGraphStats(stats)");
+        }, "setStats", TypeName.VOID, true),
+
+        new Implement((method, callSuper, entries) -> {
+            callSuper.get(null, null);
+            method.addStatement("drawConnectionPoints(req, list)");
+        }, "drawPlanRegion", TypeName.VOID, true,
+        spec(BuildPlan.class), "req",
+        paramSpec(spec(Eachable.class), spec(BuildPlan.class)), "list")
     );
 
     /**
@@ -53,24 +70,143 @@ public class GraphProcessor extends BaseProcessor{
      * of GraphBuild. These methods are only added to "root" graph builds, as in graph build classes that do not
      * derive from other graph build classes.
      */
-    protected static final Seq<Implement> buildInjects = Seq.with(
-        
+    protected final Seq<Implement> buildInjects = Seq.with(
+        new Implement((method, callSuper, entries) -> {
+            callSuper.get(null, "b");
+            method.addStatement("if(b instanceof $T build) build.initGraph()", graphEntBase);
+            method.addStatement("return b");
+        }, "create", spec(Building.class), true,
+        spec(Block.class), "block",
+        spec(Team.class), "team"),
+
+        new Implement((method, callSuper, entries) -> {
+            callSuper.get(null, null);
+            method.addStatement("initGraph()");
+        }, "created", TypeName.VOID, true),
+
+        new Implement((method, callSuper, entries) -> {
+            callSuper.get(null, null);
+            method
+                .beginControlFlow("if(!placed)")
+                    .addStatement("placed = true")
+                    .addStatement("connectToGraph()")
+                .endControlFlow();
+        }, "placed", TypeName.VOID, true),
+
+        new Implement((method, callSuper, entries) -> {
+            method
+                .addStatement("disconnectFromGraph()")
+                .addStatement("placed = false");
+
+            callSuper.get(null, null);
+        }, "pickedUp", TypeName.VOID, true),
+
+        new Implement((method, callSuper, entries) -> {
+            method.addStatement("disconnectFromGraph()");
+            callSuper.get(null, null);
+        }, "onRemoved", TypeName.VOID, true),
+
+        new Implement((method, callSuper, entries) -> {
+            method.addStatement("disconnectFromGraph()");
+            callSuper.get(null, null);
+        }, "onDestroyed", TypeName.VOID, true),
+
+        new Implement((method, callSuper, entries) -> {
+            method
+                .beginControlFlow("if(!placed)")
+                    .addStatement("placed = true")
+                    .addStatement("connectToGraph()")
+                .endControlFlow();
+
+            callSuper.get(null, null);
+
+            method.addStatement("updateGraphs()");
+        }, "updateTile", TypeName.VOID, true),
+
+        new Implement((method, callSuper, entries) -> {
+            method.addStatement("return prevTileRotation");
+        }, "prevRotation", TypeName.INT, true),
+
+        new Implement((method, callSuper, entries) -> {
+            method.addStatement("prevTileRotation = prevRotation");
+        }, "prevRotation", TypeName.VOID, true,
+        TypeName.INT, "prevRotation"),
+
+        new Implement((method, callSuper, entries) -> {
+            method.addStatement("return graphInitialized");
+        }, "graphInitialized", TypeName.BOOLEAN, true),
+
+        new Implement((method, callSuper, entries) -> {
+            callSuper.get(null, null);
+            method.addStatement("displayGraphBars(table)");
+        }, "displayBars", TypeName.VOID, true,
+        spec(Table.class), "table"),
+
+        new Implement((method, callSuper, entries) -> {
+            callSuper.get(null, null);
+            method.addStatement("writeGraphs(write)");
+        }, "write", TypeName.VOID, true,
+        spec(Writes.class), "write"),
+
+        new Implement((method, callSuper, entries) -> {
+            callSuper.get(null, null);
+            method.addStatement("readGraphs(read)");
+        }, "read", TypeName.VOID, true,
+        spec(Reads.class), "read",
+        TypeName.BYTE, "revision")
     );
 
     /**
-     * (Modify as needed!) Implementations for the non-default methods in the graph and related interfaces. These are
-     * present in every generated graph block composition. Super-calls aren't allowed.
+     * (Modify as needed!) Implementations for the non-default methods (except field getter/setters) in the graph and
+     * related interfaces. These are present in every generated graph block composition. Super-calls aren't allowed.
      */
-    protected static final Seq<Implement> blockImpls = Seq.with(
+    protected final Seq<Implement> blockImpls = Seq.with(
+        new Implement((method, callSuper, entries) -> {
+            for(var entry : entries){
+                entry = entry.toLowerCase();
+                method.addStatement("cons.get($T.$L, $LNodeConfig)", graphInfoCont, entry, entry);
+            }
+        }, "eachNodeType", TypeName.VOID, true,
+        paramSpec(ClassName.get("unity.func", "LongObjc"), paramSpec(ClassName.get("unity.world.graph.nodes", "GraphNodeTypeI"), subSpec(spec(Object.class)))), "cons"),
 
+        new Implement((method, callSuper, entries) -> {
+            for(var entry : entries){
+                entry = entry.toLowerCase();
+                method.addStatement("for(var conn : $LConnectorConfigs) drawConnectionPoint(conn, req, list)", entry);
+            }
+        }, "drawConnectionPoints", TypeName.VOID, true,
+        spec(BuildPlan.class), "req",
+        paramSpec(spec(Eachable.class), spec(BuildPlan.class)), "list")
     );
 
     /**
-     * (Modify as needed!) Implementations for the non-default methods in the graph and related interfaces. These are
-     * present in every generated graph build composition. Super-calls aren't allowed.
+     * (Modify as needed!) Implementations for the non-default methods (except field getter/setters) in the graph and
+     * related interfaces. These are present in every generated graph build composition. Super-calls aren't allowed.
      */
-    protected static final Seq<Implement> buildImpls = Seq.with(
+    protected final Seq<Implement> buildImpls = Seq.with(
+        new Implement((method, callSuper, entries) -> {
+            for(var entry : entries){
+                entry = entry.toLowerCase();
+                method.addStatement("cons.get($T.$L, $LNode)", graphInfoCont, entry, entry);
+            }
+        }, "eachNode", TypeName.VOID, true,
+        paramSpec(ClassName.get("unity.func", "LongObjc"), paramSpec(ClassName.get("unity.world.graph.nodes", "GraphNodeTypeI", "GraphNodeI"), subSpec(spec(Object.class)))), "cons"),
 
+        new Implement((method, callSuper, entries) -> {
+            method
+                .addStatement("if(graphInitialized) return")
+                .addStatement("graphInitialized = true")
+                .addStatement("prevTileRotation = rotation");
+
+            for(var entry : entries){
+                entry = entry.toLowerCase();
+                method
+                    .addStatement("$LNode = $LNodeConfig.create(this)", entry, entry)
+                    .addStatement("for(var conn : $LConnectorConfigs) $LNode.addConnector(conn.create($LNode))", entry, entry, entry);
+            }
+
+            method.addStatement("onGraphInit()");
+        }, "initGraph", TypeName.VOID, true)
     );
 
     {
@@ -131,7 +267,6 @@ public class GraphProcessor extends BaseProcessor{
             entries.put(gn, new GraphEntry(graph, node, nodeEnt));
         }
 
-        var graphInfo = ClassName.get(packageName, "Graphs", "GraphInfo");
         TypeSpec.Builder graphsBuilder = TypeSpec.classBuilder("Graphs")
             .addModifiers(PUBLIC, FINAL)
             .addField(
@@ -143,6 +278,16 @@ public class GraphProcessor extends BaseProcessor{
                 MethodSpec.constructorBuilder()
                     .addModifiers(PRIVATE)
                     .addStatement("throw new $T()", spec(AssertionError.class))
+                .build()
+            )
+            .addMethod(
+                MethodSpec.methodBuilder("info")
+                    .addModifiers(PUBLIC, STATIC)
+                    .returns(graphInfo)
+                    .addParameter(TypeName.LONG, "type")
+                    .addStatement("$T info = allInfo.get(type)", graphInfo)
+                    .addStatement("if(info == null) throw new $T($S + type)", spec(IllegalArgumentException.class), "Invalid type flag: ")
+                    .addStatement("return info")
                 .build()
             )
             .addType(
@@ -175,11 +320,6 @@ public class GraphProcessor extends BaseProcessor{
             .addModifiers(PUBLIC, STATIC)
             .returns(TypeName.VOID)
             .addStatement("if($T.headless) return", spec(Vars.class));
-        MethodSpec.Builder get = MethodSpec.methodBuilder("info")
-            .addModifiers(PUBLIC, STATIC)
-            .returns(graphInfo)
-            .addParameter(TypeName.LONG, "type")
-            .beginControlFlow("return switch(type)");
 
         var entryKeys = entries.orderedKeys();
         entryKeys.sort();
@@ -196,17 +336,11 @@ public class GraphProcessor extends BaseProcessor{
 
             init.addStatement("allInfo.put($L, $LInfo = new $T($L, $S))", name, name, graphInfo, name, name);
             load.addStatement("$LInfo.load()", name);
-            get.addStatement("case $L -> $LInfo", name, name);
         }
 
         write(packageName, graphsBuilder
             .addStaticBlock(init.build())
-            .addMethod(load.build())
-            .addMethod(get
-                .addStatement("default -> throw new $T($S + type)", spec(IllegalArgumentException.class), "Invalid flag: ")
-                .endControlFlow("")
-                .build()
-            ),
+            .addMethod(load.build()),
             null
         );
 
@@ -321,7 +455,7 @@ public class GraphProcessor extends BaseProcessor{
                 for(var arg : impl.args) methBuilder.addParameter(arg.type, arg.name);
                 impl.impl.get(
                     methBuilder,
-                    allowSuper ? str -> {
+                    allowSuper ? (type, str) -> {
                         StringBuilder stat = new StringBuilder("super.")
                             .append(impl.name)
                             .append('(');
@@ -334,8 +468,15 @@ public class GraphProcessor extends BaseProcessor{
                             }
                         }
 
-                        methBuilder.addStatement("$L", stat.append(')').toString());
-                    } : str -> { throw new IllegalStateException("Super-calling isn't allowed."); },
+                        stat.append(')');
+                        if(str == null){
+                            methBuilder.addStatement("$L", stat.toString());
+                        }else if(type == null){
+                            methBuilder.addStatement("var $L = $L", str, stat.toString());
+                        }else{
+                            methBuilder.addStatement("$T $L = $L", type, str, stat.toString());
+                        }
+                    } : (type, str) -> { throw new IllegalStateException("Super-calling isn't allowed."); },
                     props.orderedKeys()
                 );
 
@@ -392,13 +533,13 @@ public class GraphProcessor extends BaseProcessor{
     }
 
     protected static class Implement{
-        protected final Cons3<MethodSpec.Builder, Cons<String>, Seq<String>> impl;
+        protected final Cons3<MethodSpec.Builder, Cons2<TypeName, String>, Seq<String>> impl;
         protected final String name;
         protected final TypeName ret;
         protected final boolean isPublic;
         protected final Arg[] args;
 
-        protected Implement(Cons3<MethodSpec.Builder, Cons<String>, Seq<String>> impl, String name, TypeName ret, boolean isPublic, Object... args){
+        protected Implement(Cons3<MethodSpec.Builder, Cons2<TypeName, String>, Seq<String>> impl, String name, TypeName ret, boolean isPublic, Object... args){
             this.impl = impl;
             this.name = name;
             this.ret = ret;

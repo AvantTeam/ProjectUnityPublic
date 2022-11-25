@@ -12,7 +12,8 @@ import mindustry.world.meta.*;
 import unity.annotations.Annotations.*;
 import unity.func.*;
 import unity.gen.graph.*;
-import unity.world.graph.GraphConnectorTypeI.*;
+import unity.world.graph.connectors.*;
+import unity.world.graph.connectors.GraphConnectorTypeI.*;
 import unity.world.graph.nodes.*;
 import unity.world.graph.nodes.GraphNodeTypeI.*;
 
@@ -90,7 +91,7 @@ public interface GraphBlock{
 
         void initGraph();
         boolean graphInitialized();
-        default void onInitGraph(){}
+        default void onGraphInit(){}
 
         default void onConnectionChanged(GraphConnectorI<?> connector){}
 

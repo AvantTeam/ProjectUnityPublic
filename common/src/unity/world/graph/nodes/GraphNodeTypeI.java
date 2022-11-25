@@ -8,7 +8,7 @@ import mindustry.world.meta.*;
 import unity.annotations.Annotations.*;
 import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
-import unity.world.graph.GraphConnectorTypeI.*;
+import unity.world.graph.connectors.GraphConnectorTypeI.*;
 
 public interface GraphNodeTypeI<T extends GraphI>{
     <E extends Building & GraphBuild> GraphNodeI<T> create(E build);
@@ -29,6 +29,7 @@ public interface GraphNodeTypeI<T extends GraphI>{
         void displayBars(Table table);
 
         Seq<? extends GraphConnectorI<T>> connectors();
+        void addConnector(GraphConnectorI<T> connector);
 
         void write(Writes write);
         void read(Reads read);
