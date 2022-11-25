@@ -219,8 +219,8 @@ public abstract class BaseProcessor implements Processor{
 
     private static <T extends Annotation> T createAnno(Element e, Class<T> type){
         return AnnotationProxyMaker.generateAnnotation(Reflect.invoke(
-        AnnoConstruct.class, e, "getAttribute",
-        new Object[]{type}, Class.class
+            AnnoConstruct.class, e, "getAttribute",
+            new Object[]{type}, Class.class
         ), type);
     }
 

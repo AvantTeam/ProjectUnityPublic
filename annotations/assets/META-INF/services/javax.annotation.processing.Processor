@@ -1,1 +1,2 @@
 unity.annotations.processors.entity.EntityProcessor
+unity.annotations.processors.block.GraphProcessor

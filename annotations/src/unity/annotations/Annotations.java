@@ -1,6 +1,7 @@
 package unity.annotations;
 
 import arc.func.*;
+import mindustry.world.*;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Attribute.*;
 import com.sun.tools.javac.code.Scope.*;
@@ -187,6 +188,40 @@ public final class Annotations{
     @Retention(RetentionPolicy.CLASS)
     public @interface ExcludeGroups{
         /** @return The excluded group's element type. */
+        Class<?>[] value();
+    }
+
+    /** Marks the base of all graph blocks. Automatically implemented in graph block compositions. */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.CLASS)
+    public @interface GraphBase{}
+
+    /** Marks a graph class definition. */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.CLASS)
+    public @interface GraphDef{
+        /** @return The class representing the node of this graph, annotated with {@link GraphNodeDef}. */
+        Class<?> value();
+    }
+
+    /** Marks a graph node class definition. */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.CLASS)
+    public @interface GraphNodeDef{}
+
+    /** Marks the base of all connector subclasses. */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.CLASS)
+    public @interface GraphConnectorBase{}
+
+    /** Generates a graph block definition from given graph types. */
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.CLASS)
+    public @interface GraphCompose{
+        /** @return The non-generated parent (!) class. */
+        Class<?> parent() default Block.class;
+
+        /** @return The graph types the generated class will hold. */
         Class<?>[] value();
     }
 
