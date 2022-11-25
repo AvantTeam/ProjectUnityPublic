@@ -5,12 +5,12 @@ import unity.world.graph.*;
 import unity.world.graph.nodes.GraphNodeTypeI.*;
 
 @GraphConnectorBase
-public interface GraphConnectorTypeI<T extends GraphI>{
+public interface GraphConnectorTypeI<T extends GraphI<T>>{
     GraphConnectorI<T> create(GraphNodeI<T> node);
 
-    long graphType();
+    int graphType();
 
-    public interface GraphConnectorI<T extends GraphI>{
+    public interface GraphConnectorI<T extends GraphI<T>>{
         T graph();
     }
 }

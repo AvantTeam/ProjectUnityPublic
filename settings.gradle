@@ -11,6 +11,7 @@ include ':core'
 include ':factions'
 include ':factions:vanilla'
 include ':factions:monolith'
+include ':factions:youngcha'
 
 include ':mod'
 include ':plugin'

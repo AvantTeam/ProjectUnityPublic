@@ -264,8 +264,8 @@ public abstract class BaseProcessor implements Processor{
         return WildcardTypeName.supertypeOf(type);
     }
 
-    public static TypeVariableName tvSpec(String name){
-        return TypeVariableName.get(name);
+    public static TypeVariableName tvSpec(String name, TypeName... bounds){
+        return TypeVariableName.get(name, bounds);
     }
 
     public static String fName(Class<?> type){

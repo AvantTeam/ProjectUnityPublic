@@ -7,6 +7,7 @@ import mindustry.game.EventType.*;
 import unity.assets.list.*;
 import unity.content.*;
 import unity.gen.entities.*;
+import unity.gen.graph.*;
 import unity.graphics.*;
 import unity.io.*;
 import unity.mod.*;
@@ -60,7 +61,11 @@ public class ProjectUnity extends ProjectUnityCommon{
             }
         }));
 
-        Events.on(ContentInitEvent.class, e -> Core.app.post(Faction::load));
+        Events.on(ContentInitEvent.class, e -> Core.app.post(() -> {
+            Faction.load();
+            Graphs.load();
+        }));
+
         Core.app.post(() -> {
             dev.setup();
             JSBridge.setup();

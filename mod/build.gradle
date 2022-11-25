@@ -12,6 +12,7 @@ dependencies{
 
     api project(':factions:vanilla')
     api project(':factions:monolith')
+    api project(':factions:youngcha')
 
     annotationProcessor project(':downgrader')
 }

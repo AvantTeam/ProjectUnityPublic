@@ -10,12 +10,12 @@ import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
 import unity.world.graph.connectors.GraphConnectorTypeI.*;
 
-public interface GraphNodeTypeI<T extends GraphI>{
+public interface GraphNodeTypeI<T extends GraphI<T>>{
     <E extends Building & GraphBuild> GraphNodeI<T> create(E build);
 
     void setStats(Stats stats);
 
-    interface GraphNodeI<T extends GraphI>{
+    interface GraphNodeI<T extends GraphI<T>>{
         void update();
 
         void addSelf();

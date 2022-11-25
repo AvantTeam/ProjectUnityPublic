@@ -8,6 +8,7 @@ import arc.util.*;
 import arc.util.io.*;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
+import mindustry.world.*;
 import mindustry.world.meta.*;
 import unity.annotations.Annotations.*;
 import unity.func.*;
@@ -18,6 +19,7 @@ import unity.world.graph.nodes.*;
 import unity.world.graph.nodes.GraphNodeTypeI.*;
 
 import static arc.math.geom.Geometry.*;
+import static mindustry.Vars.*;
 
 /**
  * Common definition of the graph blocks. Automatically implemented in the graph annotation processor. Non-default methods must
@@ -27,7 +29,7 @@ import static arc.math.geom.Geometry.*;
  */
 @GraphBase
 public interface GraphBlock{
-    void eachNodeType(LongObjc<GraphNodeTypeI<?>> cons);
+    void eachNodeType(IntObjc<GraphNodeTypeI<?>> cons);
 
     default void setGraphStats(Stats stats){
         eachNodeType((flag, node) -> node.setStats(stats));
@@ -38,28 +40,27 @@ public interface GraphBlock{
         TextureRegion tr = Graphs.info(connector.graphType()).icon;
         if(!Core.atlas.isFound(tr)) return;
 
-        /*
-        if(c instanceof FixedConnectionConfig fcc){
-            for(int i = 0;i<fcc.connectionIndexes.length;i++){
-                if(fcc.connectionIndexes[i]!=0){
-                    Point2 p2 = getConnectSidePos(i,this.block.size,req.rotation);
-                    int cx = req.x+p2.x;
-                    int cy = req.y+p2.y;
+        if(connector instanceof FixedConnectorTypeI fixed){
+            int[] indices = fixed.connectionIndices();
+            for(int i = 0; i < indices.length; i++){
+                if(indices[i] != 0){
+                    Point2 p2 = getConnectSidePos(i, req.block.size, req.rotation);
+                    int cx = req.x + p2.x;
+                    int cy = req.y + p2.y;
                     boolean[] d = {false};
-                    list.each(b->{
-                        if(d[0]){return;}
-                        if(cx>=b.x && cy>=b.y && b.x+b.block.size>cx && b.y+b.block.size>cy){
+
+                    list.each(b -> {
+                        if(d[0]) return;
+                        if(cx >= b.x && cy >= b.y && b.x + b.block.size > cx && b.y + b.block.size > cy){
                             d[0] = true;
                         }
                     });
-                    if(d[0]){
-                        continue;
-                    }
-                    Draw.rect(tr,cx*tilesize,cy*tilesize);
+
+                    if(d[0]) continue;
+                    Draw.rect(tr, cx * tilesize, cy * tilesize);
                 }
             }
         }
-        */
     }
 
     static Point2 getConnectSidePos(int index, int size, int rotation){
@@ -95,7 +96,9 @@ public interface GraphBlock{
 
         default void onConnectionChanged(GraphConnectorI<?> connector){}
 
-        void eachNode(LongObjc<GraphNodeI<?>> cons);
+        void eachNode(IntObjc<GraphNodeI<?>> cons);
+
+        <T extends GraphI<T>> GraphNodeI<T> graphNode(int type);
 
         default void connectToGraph(){
             eachNode((flag, node) -> node.addSelf());

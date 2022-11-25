@@ -167,7 +167,7 @@ public class GraphProcessor extends BaseProcessor{
                 method.addStatement("cons.get($T.$L, $LNodeConfig)", graphInfoCont, entry, entry);
             }
         }, "eachNodeType", TypeName.VOID, true,
-        paramSpec(ClassName.get("unity.func", "LongObjc"), paramSpec(ClassName.get("unity.world.graph.nodes", "GraphNodeTypeI"), subSpec(spec(Object.class)))), "cons"),
+        paramSpec(ClassName.get("unity.func", "IntObjc"), paramSpec(ClassName.get("unity.world.graph.nodes", "GraphNodeTypeI"), subSpec(spec(Object.class)))), "cons"),
 
         new Implement((method, callSuper, entries) -> {
             for(var entry : entries){
@@ -190,7 +190,23 @@ public class GraphProcessor extends BaseProcessor{
                 method.addStatement("cons.get($T.$L, $LNode)", graphInfoCont, entry, entry);
             }
         }, "eachNode", TypeName.VOID, true,
-        paramSpec(ClassName.get("unity.func", "LongObjc"), paramSpec(ClassName.get("unity.world.graph.nodes", "GraphNodeTypeI", "GraphNodeI"), subSpec(spec(Object.class)))), "cons"),
+        paramSpec(ClassName.get("unity.func", "IntObjc"), paramSpec(ClassName.get("unity.world.graph.nodes", "GraphNodeTypeI", "GraphNodeI"), subSpec(spec(Object.class)))), "cons"),
+
+        new Implement((method, callSuper, entries) -> {
+            method
+                .addTypeVariable(tvSpec("T", paramSpec(ClassName.get("unity.world.graph", "GraphI"), tvSpec("T"))))
+                .beginControlFlow("switch(type)");
+
+            for(var entry : entries){
+                entry = entry.toLowerCase();
+                method.addStatement("case $T.$L: return $LNode", graphInfoCont, entry, entry);
+            }
+
+            method
+                .addStatement("default: return null")
+                .endControlFlow();
+        }, "graphNode", paramSpec(ClassName.get("unity.world.graph.nodes", "GraphNodeTypeI", "GraphNodeI"), tvSpec("T")), true,
+        TypeName.INT, "type"),
 
         new Implement((method, callSuper, entries) -> {
             method
@@ -270,8 +286,8 @@ public class GraphProcessor extends BaseProcessor{
         TypeSpec.Builder graphsBuilder = TypeSpec.classBuilder("Graphs")
             .addModifiers(PUBLIC, FINAL)
             .addField(
-                FieldSpec.builder(paramSpec(spec(LongMap.class), graphInfo), "allInfo", PUBLIC, STATIC, FINAL)
-                    .initializer("new $T<>()", spec(LongMap.class))
+                FieldSpec.builder(paramSpec(spec(IntMap.class), graphInfo), "allInfo", PUBLIC, STATIC, FINAL)
+                    .initializer("new $T<>()", spec(IntMap.class))
                 .build()
             )
             .addMethod(
@@ -280,26 +296,16 @@ public class GraphProcessor extends BaseProcessor{
                     .addStatement("throw new $T()", spec(AssertionError.class))
                 .build()
             )
-            .addMethod(
-                MethodSpec.methodBuilder("info")
-                    .addModifiers(PUBLIC, STATIC)
-                    .returns(graphInfo)
-                    .addParameter(TypeName.LONG, "type")
-                    .addStatement("$T info = allInfo.get(type)", graphInfo)
-                    .addStatement("if(info == null) throw new $T($S + type)", spec(IllegalArgumentException.class), "Invalid type flag: ")
-                    .addStatement("return info")
-                .build()
-            )
             .addType(
                 TypeSpec.classBuilder("GraphInfo")
                     .addModifiers(PUBLIC, STATIC, FINAL)
                     .addField(spec(TextureRegion.class), "icon", PUBLIC)
-                    .addField(TypeName.LONG, "type", PUBLIC, FINAL)
+                    .addField(TypeName.INT, "type", PUBLIC, FINAL)
                     .addField(spec(String.class), "name", PUBLIC, FINAL)
                     .addMethod(
                         MethodSpec.constructorBuilder()
                             .addModifiers(PROTECTED)
-                            .addParameter(TypeName.LONG, "type")
+                            .addParameter(TypeName.INT, "type")
                             .addParameter(spec(String.class), "name")
                             .addStatement("this.type = type")
                             .addStatement("this.name = name")
@@ -320,6 +326,11 @@ public class GraphProcessor extends BaseProcessor{
             .addModifiers(PUBLIC, STATIC)
             .returns(TypeName.VOID)
             .addStatement("if($T.headless) return", spec(Vars.class));
+        MethodSpec.Builder get = MethodSpec.methodBuilder("info")
+            .addModifiers(PUBLIC, STATIC)
+            .returns(graphInfo)
+            .addParameter(TypeName.INT, "type")
+            .beginControlFlow("switch(type)");
 
         var entryKeys = entries.orderedKeys();
         entryKeys.sort();
@@ -328,7 +339,7 @@ public class GraphProcessor extends BaseProcessor{
             graphsBuilder
                 .addOriginatingElement(entries.get(name).graph)
                 .addField(
-                    FieldSpec.builder(TypeName.LONG, (name = name.toLowerCase()), PUBLIC, STATIC, FINAL)
+                    FieldSpec.builder(TypeName.INT, (name = name.toLowerCase()), PUBLIC, STATIC, FINAL)
                         .initializer("1 << $L", i)
                     .build()
                 )
@@ -336,11 +347,17 @@ public class GraphProcessor extends BaseProcessor{
 
             init.addStatement("allInfo.put($L, $LInfo = new $T($L, $S))", name, name, graphInfo, name, name);
             load.addStatement("$LInfo.load()", name);
+            get.addStatement("case $L: return $LInfo", name, name);
         }
 
         write(packageName, graphsBuilder
             .addStaticBlock(init.build())
-            .addMethod(load.build()),
+            .addMethod(load.build())
+            .addMethod(get
+                .addStatement("default: throw new $T($S + type)", spec(IllegalArgumentException.class), "Invalid type: ")
+                .endControlFlow()
+                .build()
+            ),
             null
         );
 

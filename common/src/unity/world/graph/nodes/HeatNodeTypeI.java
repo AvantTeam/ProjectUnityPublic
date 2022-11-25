@@ -6,11 +6,11 @@ import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
 
 @GraphNodeDef
-public interface HeatNodeTypeI<T extends HeatGraphI> extends GraphNodeTypeI<T>{
+public interface HeatNodeTypeI<T extends HeatGraphI<T>> extends GraphNodeTypeI<T>{
     @Override
     <E extends Building & GraphBuild> HeatNodeI<T> create(E build);
 
-    public interface HeatNodeI<T extends HeatGraphI> extends GraphNodeI<T>{
+    public interface HeatNodeI<T extends HeatGraphI<T>> extends GraphNodeI<T>{
 
     }
 }
