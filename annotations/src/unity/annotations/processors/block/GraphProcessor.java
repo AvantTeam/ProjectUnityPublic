@@ -32,7 +32,9 @@ public class GraphProcessor extends BaseProcessor{
     public static final ClassName graphInfoCont = ClassName.get(packageName, "Graphs");
     public static final ClassName graphInfo = ClassName.get(packageName, "Graphs", "GraphInfo");
 
-    protected ClassSymbol graphBase, graphEntBase;
+    protected ClassSymbol graphBlockBase, graphEntBase;
+    protected ClassSymbol graphBase;
+    protected ClassSymbol nodeTypeBase, nodeBase;
     protected ClassSymbol connectorBase;
     protected OrderedMap<String, GraphEntry> entries = new OrderedMap<>();
 
@@ -51,189 +53,196 @@ public class GraphProcessor extends BaseProcessor{
      * of GraphBlock. These methods are only added to "root" graph blocks, as in graph block classes that do not
      * derive from other graph block classes.
      */
-    protected final Seq<Implement> blockInjects = Seq.with(
-        new Implement((method, callSuper, entries) -> {
-            callSuper.get(null, null);
-            method.addStatement("setGraphStats(stats)");
-        }, "setStats", TypeName.VOID, true),
-
-        new Implement((method, callSuper, entries) -> {
-            callSuper.get(null, null);
-            method.addStatement("drawConnectionPoints(req, list)");
-        }, "drawPlanRegion", TypeName.VOID, true,
-        spec(BuildPlan.class), "req",
-        paramSpec(spec(Eachable.class), spec(BuildPlan.class)), "list")
-    );
-
+    protected Seq<Implement> blockInjects;
     /**
      * (Modify as needed!) Boilerplate methods that are overriden to interop with the graph system in implementations
      * of GraphBuild. These methods are only added to "root" graph builds, as in graph build classes that do not
      * derive from other graph build classes.
      */
-    protected final Seq<Implement> buildInjects = Seq.with(
-        new Implement((method, callSuper, entries) -> {
-            callSuper.get(null, "b");
-            method.addStatement("if(b instanceof $T build) build.initGraph()", graphEntBase);
-            method.addStatement("return b");
-        }, "create", spec(Building.class), true,
-        spec(Block.class), "block",
-        spec(Team.class), "team"),
-
-        new Implement((method, callSuper, entries) -> {
-            callSuper.get(null, null);
-            method.addStatement("initGraph()");
-        }, "created", TypeName.VOID, true),
-
-        new Implement((method, callSuper, entries) -> {
-            callSuper.get(null, null);
-            method
-                .beginControlFlow("if(!placed)")
-                    .addStatement("placed = true")
-                    .addStatement("connectToGraph()")
-                .endControlFlow();
-        }, "placed", TypeName.VOID, true),
-
-        new Implement((method, callSuper, entries) -> {
-            method
-                .addStatement("disconnectFromGraph()")
-                .addStatement("placed = false");
-
-            callSuper.get(null, null);
-        }, "pickedUp", TypeName.VOID, true),
-
-        new Implement((method, callSuper, entries) -> {
-            method.addStatement("disconnectFromGraph()");
-            callSuper.get(null, null);
-        }, "onRemoved", TypeName.VOID, true),
-
-        new Implement((method, callSuper, entries) -> {
-            method.addStatement("disconnectFromGraph()");
-            callSuper.get(null, null);
-        }, "onDestroyed", TypeName.VOID, true),
-
-        new Implement((method, callSuper, entries) -> {
-            method
-                .beginControlFlow("if(!placed)")
-                    .addStatement("placed = true")
-                    .addStatement("connectToGraph()")
-                .endControlFlow();
-
-            callSuper.get(null, null);
-
-            method.addStatement("updateGraphs()");
-        }, "updateTile", TypeName.VOID, true),
-
-        new Implement((method, callSuper, entries) -> {
-            method.addStatement("return prevTileRotation");
-        }, "prevRotation", TypeName.INT, true),
-
-        new Implement((method, callSuper, entries) -> {
-            method.addStatement("prevTileRotation = prevRotation");
-        }, "prevRotation", TypeName.VOID, true,
-        TypeName.INT, "prevRotation"),
-
-        new Implement((method, callSuper, entries) -> {
-            method.addStatement("return graphInitialized");
-        }, "graphInitialized", TypeName.BOOLEAN, true),
-
-        new Implement((method, callSuper, entries) -> {
-            callSuper.get(null, null);
-            method.addStatement("displayGraphBars(table)");
-        }, "displayBars", TypeName.VOID, true,
-        spec(Table.class), "table"),
-
-        new Implement((method, callSuper, entries) -> {
-            callSuper.get(null, null);
-            method.addStatement("writeGraphs(write)");
-        }, "write", TypeName.VOID, true,
-        spec(Writes.class), "write"),
-
-        new Implement((method, callSuper, entries) -> {
-            callSuper.get(null, null);
-            method.addStatement("readGraphs(read)");
-        }, "read", TypeName.VOID, true,
-        spec(Reads.class), "read",
-        TypeName.BYTE, "revision")
-    );
-
+    protected Seq<Implement> buildInjects;
     /**
      * (Modify as needed!) Implementations for the non-default methods (except field getter/setters) in the graph and
      * related interfaces. These are present in every generated graph block composition. Super-calls aren't allowed.
      */
-    protected final Seq<Implement> blockImpls = Seq.with(
-        new Implement((method, callSuper, entries) -> {
-            for(var entry : entries){
-                entry = entry.toLowerCase();
-                method.addStatement("cons.get($T.$L, $LNodeConfig)", graphInfoCont, entry, entry);
-            }
-        }, "eachNodeType", TypeName.VOID, true,
-        paramSpec(ClassName.get("unity.func", "IntObjc"), paramSpec(ClassName.get("unity.world.graph.nodes", "GraphNodeTypeI"), subSpec(spec(Object.class)))), "cons"),
-
-        new Implement((method, callSuper, entries) -> {
-            for(var entry : entries){
-                entry = entry.toLowerCase();
-                method.addStatement("for(var conn : $LConnectorConfigs) drawConnectionPoint(conn, req, list)", entry);
-            }
-        }, "drawConnectionPoints", TypeName.VOID, true,
-        spec(BuildPlan.class), "req",
-        paramSpec(spec(Eachable.class), spec(BuildPlan.class)), "list")
-    );
-
+    protected Seq<Implement> blockImpls;
     /**
      * (Modify as needed!) Implementations for the non-default methods (except field getter/setters) in the graph and
      * related interfaces. These are present in every generated graph build composition. Super-calls aren't allowed.
      */
-    protected final Seq<Implement> buildImpls = Seq.with(
-        new Implement((method, callSuper, entries) -> {
-            for(var entry : entries){
-                entry = entry.toLowerCase();
-                method.addStatement("cons.get($T.$L, $LNode)", graphInfoCont, entry, entry);
-            }
-        }, "eachNode", TypeName.VOID, true,
-        paramSpec(ClassName.get("unity.func", "IntObjc"), paramSpec(ClassName.get("unity.world.graph.nodes", "GraphNodeTypeI", "GraphNodeI"), subSpec(spec(Object.class)))), "cons"),
-
-        new Implement((method, callSuper, entries) -> {
-            method
-                .addTypeVariable(tvSpec("T", paramSpec(ClassName.get("unity.world.graph", "GraphI"), tvSpec("T"))))
-                .beginControlFlow("switch(type)");
-
-            for(var entry : entries){
-                entry = entry.toLowerCase();
-                method.addStatement("case $T.$L: return $LNode", graphInfoCont, entry, entry);
-            }
-
-            method
-                .addStatement("default: return null")
-                .endControlFlow();
-        }, "graphNode", paramSpec(ClassName.get("unity.world.graph.nodes", "GraphNodeTypeI", "GraphNodeI"), tvSpec("T")), true,
-        TypeName.INT, "type"),
-
-        new Implement((method, callSuper, entries) -> {
-            method
-                .addStatement("if(graphInitialized) return")
-                .addStatement("graphInitialized = true")
-                .addStatement("prevTileRotation = rotation");
-
-            for(var entry : entries){
-                entry = entry.toLowerCase();
-                method
-                    .addStatement("$LNode = $LNodeConfig.create(this)", entry, entry)
-                    .addStatement("for(var conn : $LConnectorConfigs) $LNode.addConnector(conn.create($LNode))", entry, entry, entry);
-            }
-
-            method.addStatement("onGraphInit()");
-        }, "initGraph", TypeName.VOID, true)
-    );
+    protected Seq<Implement> buildImpls;
 
     {
         rounds = 1;
     }
 
+    protected void initImpls(){
+        blockInjects = Seq.with(
+            new Implement((method, callSuper, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("setGraphStats(stats)");
+            }, "setStats", TypeName.VOID, true),
+
+            new Implement((method, callSuper, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("drawConnectionPoints(req, list)");
+            }, "drawPlanRegion", TypeName.VOID, true,
+            spec(BuildPlan.class), "req",
+            paramSpec(spec(Eachable.class), spec(BuildPlan.class)), "list")
+        );
+
+        buildInjects = Seq.with(
+            new Implement((method, callSuper, entries) -> {
+                callSuper.get(null, "b");
+                method.addStatement("if(b instanceof $T build) build.initGraph()", graphEntBase);
+                method.addStatement("return b");
+            }, "create", spec(Building.class), true,
+            spec(Block.class), "block",
+            spec(Team.class), "team"),
+
+            new Implement((method, callSuper, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("initGraph()");
+            }, "created", TypeName.VOID, true),
+
+            new Implement((method, callSuper, entries) -> {
+                callSuper.get(null, null);
+                method
+                    .beginControlFlow("if(!placed)")
+                        .addStatement("placed = true")
+                        .addStatement("connectToGraph()")
+                    .endControlFlow();
+            }, "placed", TypeName.VOID, true),
+
+            new Implement((method, callSuper, entries) -> {
+                method
+                    .addStatement("disconnectFromGraph()")
+                    .addStatement("placed = false");
+
+                callSuper.get(null, null);
+            }, "pickedUp", TypeName.VOID, true),
+
+            new Implement((method, callSuper, entries) -> {
+                method.addStatement("disconnectFromGraph()");
+                callSuper.get(null, null);
+            }, "onRemoved", TypeName.VOID, true),
+
+            new Implement((method, callSuper, entries) -> {
+                method.addStatement("disconnectFromGraph()");
+                callSuper.get(null, null);
+            }, "onDestroyed", TypeName.VOID, true),
+
+            new Implement((method, callSuper, entries) -> {
+                method
+                    .beginControlFlow("if(!placed)")
+                        .addStatement("placed = true")
+                        .addStatement("connectToGraph()")
+                    .endControlFlow();
+
+                callSuper.get(null, null);
+
+                method.addStatement("updateGraphs()");
+            }, "updateTile", TypeName.VOID, true),
+
+            new Implement((method, callSuper, entries) -> {
+                method.addStatement("return prevTileRotation");
+            }, "prevRotation", TypeName.INT, true),
+
+            new Implement((method, callSuper, entries) -> {
+                method.addStatement("prevTileRotation = prevRotation");
+            }, "prevRotation", TypeName.VOID, true,
+            TypeName.INT, "prevRotation"),
+
+            new Implement((method, callSuper, entries) -> {
+                method.addStatement("return graphInitialized");
+            }, "graphInitialized", TypeName.BOOLEAN, true),
+
+            new Implement((method, callSuper, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("displayGraphBars(table)");
+            }, "displayBars", TypeName.VOID, true,
+            spec(Table.class), "table"),
+
+            new Implement((method, callSuper, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("writeGraphs(write)");
+            }, "write", TypeName.VOID, true,
+            spec(Writes.class), "write"),
+
+            new Implement((method, callSuper, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("readGraphs(read)");
+            }, "read", TypeName.VOID, true,
+            spec(Reads.class), "read",
+            TypeName.BYTE, "revision")
+        );
+
+        blockImpls = Seq.with(
+            new Implement((method, callSuper, entries) -> {
+                for(var entry : entries){
+                    entry = entry.toLowerCase();
+                    method.addStatement("cons.get($T.$L, $LNodeConfig)", graphInfoCont, entry, entry);
+                }
+            }, "eachNodeType", TypeName.VOID, true,
+            paramSpec(ClassName.get("unity.func", "IntObjc"), paramSpec(spec(nodeTypeBase), subSpec(spec(Object.class)))), "cons"),
+
+            new Implement((method, callSuper, entries) -> {
+                for(var entry : entries){
+                    entry = entry.toLowerCase();
+                    method.addStatement("for(var conn : $LConnectorConfigs) drawConnectionPoint(conn, req, list)", entry);
+                }
+            }, "drawConnectionPoints", TypeName.VOID, true,
+            spec(BuildPlan.class), "req",
+            paramSpec(spec(Eachable.class), spec(BuildPlan.class)), "list")
+        );
+
+        buildImpls = Seq.with(
+            new Implement((method, callSuper, entries) -> {
+                for(var entry : entries){
+                    entry = entry.toLowerCase();
+                    method.addStatement("cons.get($T.$L, $LNode)", graphInfoCont, entry, entry);
+                }
+            }, "eachNode", TypeName.VOID, true,
+            paramSpec(ClassName.get("unity.func", "IntObjc"), paramSpec(spec(nodeBase), subSpec(spec(Object.class)))), "cons"),
+
+            new Implement((method, callSuper, entries) -> {
+                method
+                    .addTypeVariable(tvSpec("T", paramSpec(spec(graphBase), tvSpec("T"))))
+                    .beginControlFlow("switch(type)");
+
+                for(var entry : entries){
+                    entry = entry.toLowerCase();
+                    method.addStatement("case $T.$L: return $LNode", graphInfoCont, entry, entry);
+                }
+
+                method
+                    .addStatement("default: return null")
+                    .endControlFlow();
+            }, "graphNode", paramSpec(spec(nodeBase), tvSpec("T")), true,
+            TypeName.INT, "type"),
+
+            new Implement((method, callSuper, entries) -> {
+                method
+                    .addStatement("if(graphInitialized) return")
+                    .addStatement("graphInitialized = true")
+                    .addStatement("prevTileRotation = rotation");
+
+                for(var entry : entries){
+                    entry = entry.toLowerCase();
+                    method
+                        .addStatement("$LNode = $LNodeConfig.create(this)", entry, entry)
+                        .addStatement("for(var conn : $LConnectorConfigs) $LNode.addConnector(conn.create($LNode))", entry, entry, entry);
+                }
+
+                method.addStatement("onGraphInit()");
+            }, "initGraph", TypeName.VOID, true)
+        );
+    }
+
     @Override
     protected void process() throws Exception{
-        for(var t : this.<ClassSymbol>with(GraphBase.class)){
-            if(graphBase == null){
-                graphBase = t;
+        for(var t : this.<ClassSymbol>with(GraphBlockBase.class)){
+            if(graphBlockBase == null){
+                graphBlockBase = t;
                 for(var s : t.getEnclosedElements()){
                     if(s.getKind() == INTERFACE && name(s).equals("GraphBuild")){
                         graphEntBase = (ClassSymbol)s;
@@ -241,9 +250,31 @@ public class GraphProcessor extends BaseProcessor{
                     }
                 } if(graphEntBase == null) throw new IllegalStateException("GraphBuild not found");
             }else{
+                throw new IllegalStateException("Only one type may be annotated with @GraphBlockBase");
+            }
+        } if(graphBlockBase == null) throw new IllegalStateException("There must be one type annotated with @GraphBlockBase");
+
+        for(var t : this.<ClassSymbol>with(GraphBase.class)){
+            if(graphBase == null){
+                graphBase = t;
+            }else{
                 throw new IllegalStateException("Only one type may be annotated with @GraphBase");
             }
         } if(graphBase == null) throw new IllegalStateException("There must be one type annotated with @GraphBase");
+
+        for(var t : this.<ClassSymbol>with(GraphNodeBase.class)){
+            if(nodeTypeBase == null){
+                nodeTypeBase = t;
+                for(var s : t.getEnclosedElements()){
+                    if(s.getKind() == INTERFACE && name(s).equals("GraphNodeI")){
+                        nodeBase = (ClassSymbol)s;
+                        break;
+                    }
+                } if(nodeBase == null) throw new IllegalStateException("GraphNodeI not found");
+            }else{
+                throw new IllegalStateException("Only one type may be annotated with @GraphNodeBase");
+            }
+        } if(nodeTypeBase == null) throw new IllegalStateException("There must be one type annotated with @GraphNodeBase");
 
         for(var t : this.<ClassSymbol>with(GraphConnectorBase.class)){
             if(connectorBase == null){
@@ -253,6 +284,7 @@ public class GraphProcessor extends BaseProcessor{
             }
         } if(connectorBase == null) throw new IllegalStateException("There must be one type annotated with @GraphConnectorBase");
 
+        initImpls();
         ObjectMap<String, ClassSymbol>
             graphs = new OrderedMap<>(),
             nodes = new ObjectMap<>();
@@ -424,7 +456,7 @@ public class GraphProcessor extends BaseProcessor{
 
             TypeSpec.Builder builder = TypeSpec.classBuilder(prefix + name(parent))
                 .superclass(spec(parent))
-                .addSuperinterface(spec(graphBase))
+                .addSuperinterface(spec(graphBlockBase))
                 .addModifiers(PUBLIC)
                 .addAnnotation(
                     AnnotationSpec.builder(SuppressWarnings.class)
@@ -530,10 +562,9 @@ public class GraphProcessor extends BaseProcessor{
     @Override
     public Set<String> getSupportedAnnotationTypes(){
         return Set.of(
-            fName(GraphBase.class),
-            fName(GraphDef.class),
-            fName(GraphNodeDef.class),
-            fName(GraphConnectorBase.class),
+            fName(GraphBlockBase.class),
+            fName(GraphBase.class), fName(GraphNodeBase.class), fName(GraphConnectorBase.class),
+            fName(GraphDef.class), fName(GraphNodeDef.class),
             fName(GraphCompose.class)
         );
     }

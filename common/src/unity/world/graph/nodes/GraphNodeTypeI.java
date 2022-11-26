@@ -10,6 +10,7 @@ import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
 import unity.world.graph.connectors.GraphConnectorTypeI.*;
 
+@GraphNodeBase
 public interface GraphNodeTypeI<T extends GraphI<T>>{
     <E extends Building & GraphBuild> GraphNodeI<T> create(E build);
 

@@ -194,6 +194,11 @@ public final class Annotations{
     /** Marks the base of all graph blocks. Automatically implemented in graph block compositions. */
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.CLASS)
+    public @interface GraphBlockBase{}
+
+    /** Marks the base of all graph type subclasses. */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.CLASS)
     public @interface GraphBase{}
 
     /** Marks a graph class definition. */
@@ -203,6 +208,11 @@ public final class Annotations{
         /** @return The class representing the node of this graph, annotated with {@link GraphNodeDef}. */
         Class<?> value();
     }
+
+    /** Marks the base of all graph node subclasses. */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.CLASS)
+    public @interface GraphNodeBase{}
 
     /** Marks a graph node class definition. */
     @Target(ElementType.TYPE)

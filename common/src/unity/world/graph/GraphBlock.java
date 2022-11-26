@@ -27,7 +27,7 @@ import static mindustry.Vars.*;
  * @author GlennFolker
  * @author Xelo
  */
-@GraphBase
+@GraphBlockBase
 public interface GraphBlock{
     void eachNodeType(IntObjc<GraphNodeTypeI<?>> cons);
 
