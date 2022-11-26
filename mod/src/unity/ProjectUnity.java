@@ -94,5 +94,7 @@ public class ProjectUnity extends ProjectUnityCommon{
         MonolithUnitTypes.load();
         MonolithBlocks.load();
         MonolithPlanets.load();
+
+        YoungchaBlocks.load();
     }
 }

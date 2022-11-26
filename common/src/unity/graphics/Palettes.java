@@ -2,7 +2,7 @@ package unity.graphics;
 
 import arc.graphics.*;
 
-import static mindustry.graphics.Pal.darkerMetal;
+import static mindustry.graphics.Pal.*;
 
 /**
  * Shared access for commonly used palettes. Specific palettes should be defined in the corresponding submodules, optionally
@@ -17,7 +17,10 @@ public final class Palettes{
 
     outline = darkerMetal,
     darkOutline = new Color(0x38383dff),
-    darkerOutline = new Color(0x2e3142ff);
+    darkerOutline = new Color(0x2e3142ff),
+
+    coldColor = new Color(0x6bc7ffff),
+    heatColor =  turretHeat.cpy();
 
     private Palettes(){
         throw new AssertionError();

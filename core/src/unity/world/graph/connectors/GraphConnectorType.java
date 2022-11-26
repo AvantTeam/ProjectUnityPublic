@@ -5,11 +5,13 @@ import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
+import mindustry.gen.*;
 import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
 import unity.world.graph.nodes.GraphNodeType.*;
 import unity.world.graph.nodes.GraphNodeTypeI.*;
 
+@SuppressWarnings("unchecked")
 public abstract class GraphConnectorType<T extends Graph<T>> implements GraphConnectorTypeI<T>{
     public final Prov<T> newGraph;
     public final int graphType;
@@ -60,7 +62,8 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
         public abstract boolean canConnect(Point2 pt, GraphConnector<T> conn);
         public abstract GraphEdge<T> tryConnect(Point2 pt, GraphConnector<T> conn);
 
-        public boolean isConnected(GraphConnector<T> t){
+        @Override
+        public boolean isConnected(GraphConnectorI<T> t){
             for(GraphEdge<T> edge : connections){
                 if(edge.other(this) == t) return true;
             }
@@ -68,13 +71,8 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
             return false;
         }
 
-        public void eachConnected(Cons<GraphConnector<T>> cons){
-            for(GraphEdge<T> edge : connections){
-                cons.get(edge.other(this));
-            }
-        }
-
-        public boolean isConnected(GraphBuild t){
+        @Override
+        public <E extends Building & GraphBuild> boolean isConnected(E t){
             for(GraphEdge<T> edge : connections){
                 if(edge.other(this).node.build == t){
                     return true;
@@ -83,6 +81,14 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
             return false;
         }
 
+        @Override
+        public <E extends GraphConnectorI<T>> void eachConnected(Cons<E> cons){
+            for(GraphEdge<T> edge : connections){
+                cons.get((E)edge.other(this));
+            }
+        }
+
+        @Override
         public void disconnect(){
             graph.removeVertex(this);
             if(connections.size > 0){

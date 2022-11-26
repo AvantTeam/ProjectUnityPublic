@@ -71,6 +71,8 @@ allprojects{
         devBuild = project.hasProperty('mod.dev') && Boolean.parseBoolean(project.property('mod.dev'))
         // `-Pmod.deprecation` will log usages of deprecated API. Default is `false`.
         showDeprecate = project.hasProperty('mod.deprecation') && Boolean.parseBoolean(project.property('mod.deprecation'))
+        // `-Pmod.unchecked` will log usages of unchecked operations. Default is `false`.
+        showUnchecked = project.hasProperty('mod.unchecked') && Boolean.parseBoolean(project.property('mod.unchecked'))
         // `-Pmod.listfiles` will log all files that are to be compiled. Default is `false`.
         listFiles = project.hasProperty('mod.listfiles') && Boolean.parseBoolean(project.property('mod.listfiles'))
     }
@@ -113,6 +115,7 @@ allprojects{
         options.encoding = 'UTF-8'
 
         if(showDeprecate) options.deprecation = true
+        if(showUnchecked) options.compilerArgs += '-Xlint:unchecked'
         if(listFiles) options.listFiles = true
     }
 

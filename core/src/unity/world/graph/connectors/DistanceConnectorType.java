@@ -13,6 +13,7 @@ import unity.world.graph.nodes.*;
 import unity.world.graph.nodes.GraphNodeType.*;
 import unity.world.graph.nodes.GraphNodeTypeI.*;
 
+@SuppressWarnings("unchecked")
 public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorType<T>{
     public int connections;
 

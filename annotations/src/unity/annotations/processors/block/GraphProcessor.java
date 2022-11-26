@@ -455,7 +455,7 @@ public class GraphProcessor extends BaseProcessor{
                 builder
                     .addField(spec(node), name + "NodeConfig", PUBLIC)
                     .addField(
-                        FieldSpec.builder(paramSpec(spec(Seq.class), subSpec(spec(connectorBase))), name + "ConnectorConfigs", PUBLIC)
+                        FieldSpec.builder(paramSpec(spec(Seq.class), paramSpec(spec(connectorBase), subSpec(paramSpec(spec(graph), subSpec(spec(Object.class)))))), name + "ConnectorConfigs", PUBLIC)
                             .initializer("new $T<>()", spec(Seq.class))
                         .build()
                     );

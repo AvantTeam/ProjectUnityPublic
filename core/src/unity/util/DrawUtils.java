@@ -7,6 +7,7 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
 import mindustry.graphics.*;
+import unity.graphics.*;
 
 import static arc.Core.atlas;
 import static arc.math.geom.Mat3D.*;
@@ -23,7 +24,7 @@ public final class DrawUtils{
     }};
 
     private final static TextureRegion tr1 = new TextureRegion(), tr2 = new TextureRegion();
-    private static final Color col1 = new Color();
+    private static final Color col1 = new Color(), col2 = new Color();
     private static final Vec2 vec1 = new Vec2(), vec2 = new Vec2(), vec3 = new Vec2(), vec4 = new Vec2();
     private static final Vec2
     a = new Vec2(),
@@ -450,5 +451,65 @@ public final class DrawUtils{
         }
 
         Draw.reset();
+    }
+
+    /**
+     * Gets multiple regions inside a {@link TextureRegion}. The size for each region has to be 32.
+     * @param w The amount of regions horizontally.
+     * @param h The amount of regions vertically.
+     */
+    public static TextureRegion[] getRegions(TextureRegion region, int w, int h, int tilesize){
+        int size = w * h;
+        TextureRegion[] regions = new TextureRegion[size];
+
+        float tileW = (region.u2 - region.u) / w;
+        float tileH = (region.v2 - region.v) / h;
+
+        for(int i = 0; i < size; i++){
+            float tileX = ((float)(i % w)) / w;
+            float tileY = ((float)(i / w)) / h;
+            TextureRegion reg = new TextureRegion(region);
+
+            //start coordinate
+            reg.u = Mathf.map(tileX, 0f, 1f, reg.u, reg.u2) + tileW * 0.01f;
+            reg.v = Mathf.map(tileY, 0f, 1f, reg.v, reg.v2) + tileH * 0.01f;
+            //end coordinate
+            reg.u2 = reg.u + tileW * 0.98f;
+            reg.v2 = reg.v + tileH * 0.98f;
+
+            reg.width = reg.height = tilesize;
+            regions[i] = reg;
+        }
+        
+        return regions;
+    }
+
+    public static TextureRegion[] getRegions(TextureRegion region, int w, int h){
+        return getRegions(region, w, h, 32);
+    }
+
+    public static void drawHeat(TextureRegion reg, float x, float y, float rot, float temperature){
+        float a;
+        if(temperature > 273.15f){
+            a = Math.max(0f, (temperature - 498f) * 0.001f);
+            if(a < 0.01f) return;
+            if(a > 1f){
+                Color fCol = col2.set(Palettes.heatColor).add(0, 0, 0.01f * a);
+                fCol.mul(a);
+                Draw.color(fCol, a);
+            }else{
+                Draw.color(Palettes.heatColor, a);
+            }
+        }else{
+            a = 1f - Mathf.clamp(temperature / 273.15f);
+            if(a < 0.01f) return;
+
+            Draw.color(Palettes.coldColor, a);
+        }
+
+        Draw.blend(Blending.additive);
+        Draw.rect(reg, x, y, rot);
+        Draw.blend();
+        Draw.color();
     }
 }

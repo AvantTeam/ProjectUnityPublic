@@ -14,10 +14,11 @@ import unity.world.graph.nodes.GraphNodeTypeI.*;
 
 import static arc.math.geom.Geometry.*;
 
+@SuppressWarnings("unchecked")
 public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T> implements FixedConnectorTypeI<T>{
     public int[] connectionIndices;
 
-    public FixedConnectorType(Prov<T> newGraph, int[] connectionIndices){
+    public FixedConnectorType(Prov<T> newGraph, int... connectionIndices){
         super(newGraph);
         this.connectionIndices = connectionIndices;
     }

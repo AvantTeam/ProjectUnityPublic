@@ -8,7 +8,7 @@ import unity.mod.*;
 import unity.world.blocks.environment.*;
 
 import static unity.content.MonolithAttributes.*;
-import static unity.mod.FactionRegistry.register;
+import static unity.mod.FactionRegistry.*;
 
 /**
  * Defines all {@linkplain Faction#monolith monolith} block types.

@@ -10,8 +10,8 @@ import unity.mod.*;
  */
 public final class YoungchaPal{
     public static final Color
-    coldColor = new Color(0x6bc7ffff),
-    heatColor =  Pal.turretHeat.cpy();
+    coldColor = Palettes.coldColor,
+    heatColor = Palettes.heatColor;
 
     private YoungchaPal(){
         throw new AssertionError();

@@ -41,6 +41,28 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
         return new HeatNode(build, emissiveness, conductivity, heatCapacity, maxTemp, targetTemp, prodEfficency);
     }
 
+    public static void heatColor(float t,Color input){
+        float a = 0;
+        if(t > celsiusZero){
+            a = Math.max(0, (t - 498) * 0.001f);
+            if(a < 0.01){
+                input.set(Color.clear);
+                return;
+            }
+            input.set(heatColor.r, heatColor.g, heatColor.b, a);
+            if(a > 1){
+                input.add(0, 0, 0.01f * a);
+                input.mul(a);
+            }
+        }else{
+            a = 1.0f - Mathf.clamp(t / celsiusZero);
+            if(a < 0.01){
+                input.set(Color.clear);
+            }
+            input.set(coldColor.r, coldColor.g, coldColor.b, a);
+        }
+    }
+
     public static class HeatNode extends GraphNode<HeatGraph> implements HeatNodeI<HeatGraph>{
         public float flux = 0;
         public float heatEnergy = 1f;
@@ -92,36 +114,16 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
             }
         }
 
+        @Override
         public Color heatColor(){
             Color c = new Color();
             heatColor(c);
             return c;
         }
 
+        @Override
         public void heatColor(Color input){
-            heatColor(getTemp(),input);
-        }
-
-        public static void heatColor(float t,Color input){
-            float a = 0;
-            if(t > celsiusZero){
-                a = Math.max(0, (t - 498) * 0.001f);
-                if(a < 0.01){
-                    input.set(Color.clear);
-                    return;
-                }
-                input.set(heatColor.r, heatColor.g, heatColor.b, a);
-                if(a > 1){
-                    input.add(0, 0, 0.01f * a);
-                    input.mul(a);
-                }
-            }else{
-                a = 1.0f - Mathf.clamp(t / celsiusZero);
-                if(a < 0.01){
-                    input.set(Color.clear);
-                }
-                input.set(coldColor.r, coldColor.g, coldColor.b, a);
-            }
+            HeatNodeType.heatColor(getTemp(), input);
         }
 
         @Override
@@ -134,20 +136,30 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
             write.f(this.heatEnergy );
         }
 
+        @Override
         public float generateHeat(float targetTemp, float eff){
             float gen = (targetTemp-getTemp())*eff;
             heatEnergy += gen;
             return gen;
         }
+
+        @Override
         public void generateHeat(){
-            lastEnergyInput = Math.max(minGenerate,(targetTemp-getTemp())*efficency*prodEfficency);
-            heatEnergy += lastEnergyInput*Time.delta;
+            lastEnergyInput = Math.max(minGenerate, (targetTemp - getTemp()) * efficency * prodEfficency);
+            heatEnergy += lastEnergyInput * Time.delta;
         }
 
+        @Override
         public float getTemp(){
             return heatEnergy / heatCapacity;
         }
 
+        @Override
+        public void setTemp(float temp){
+            heatEnergy = temp * heatCapacity;
+        }
+
+        @Override
         public void affectUnit(Unit unit, float intensityScl){
             float temp = getTemp();
             if(temp > celsiusZero + Math.max(400 - intensityScl * 100f, 150)){
@@ -168,10 +180,6 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
 
                 unit.damage(intensity * 50f * intensityScl);
             }
-        }
-
-        public void setTemp(float temp){
-            heatEnergy = temp * heatCapacity;
         }
 
         public void addheatEnergy(float e){
