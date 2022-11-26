@@ -40,7 +40,7 @@ public class HeatSource extends HeatBlock{
         @Override
         public void updateTile(){
             super.updateTile();
-            heatNode.setTemp(targetTemp);
+            heatNode.temperature(targetTemp);
         }
 
         @Override
@@ -57,7 +57,7 @@ public class HeatSource extends HeatBlock{
         @Override
         public void draw(){
             Draw.rect(baseRegion, x, y);
-            DrawUtils.drawHeat(heatRegion, x, y, rotdeg(), heatNode.getTemp());
+            DrawUtils.drawHeat(heatRegion, x, y, rotdeg(), heatNode.temperature());
 
             drawTeamTop();
         }

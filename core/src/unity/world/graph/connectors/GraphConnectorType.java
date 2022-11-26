@@ -11,6 +11,7 @@ import unity.world.graph.GraphBlock.*;
 import unity.world.graph.nodes.GraphNodeType.*;
 import unity.world.graph.nodes.GraphNodeTypeI.*;
 
+/** @author Xelo */
 @SuppressWarnings("unchecked")
 public abstract class GraphConnectorType<T extends Graph<T>> implements GraphConnectorTypeI<T>{
     public final Prov<T> newGraph;
@@ -49,8 +50,18 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
         }
 
         @Override
+        public int id(){
+            return id;
+        }
+
+        @Override
         public T graph(){
             return graph;
+        }
+
+        @Override
+        public <E extends GraphNodeI<T>> E node(){
+            return node.as();
         }
 
         public void update(){}
@@ -74,17 +85,18 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
         @Override
         public <E extends Building & GraphBuild> boolean isConnected(E t){
             for(GraphEdge<T> edge : connections){
-                if(edge.other(this).node.build == t){
+                if(edge.other(this).node().build() == t){
                     return true;
                 }
             }
+
             return false;
         }
 
         @Override
         public <E extends GraphConnectorI<T>> void eachConnected(Cons<E> cons){
             for(GraphEdge<T> edge : connections){
-                cons.get((E)edge.other(this));
+                cons.get(edge.other(this));
             }
         }
 
@@ -96,6 +108,7 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
             }
         }
 
+        @Override
         public void removeEdge(GraphEdge<T> ge){
             if(connections.remove(ge)){
                 ge.valid = false;
@@ -134,14 +147,6 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
             "id=" + id +
             ", node=" + node.build().block +
             '}';
-        }
-
-        public T getGraph(){
-            return graph;
-        }
-
-        public GraphNode<T> getNode(){
-            return node;
         }
     }
 }

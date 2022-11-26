@@ -96,21 +96,21 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
             table.row();
             table.add(new Bar(
                 () -> Core.bundle.format("bar.unity-temp",
-                Strings.fixed(getTemp() - celsiusZero, 1)),
-                () -> (getTemp() < maxTemp ? heatColor() : (Time.time % 30 > 15 ? Color.scarlet : Color.black)),
-                () -> Mathf.clamp(Math.abs(getTemp() / maxTemp))
+                Strings.fixed(temperature() - celsiusZero, 1)),
+                () -> (temperature() < maxTemp ? heatColor() : (Time.time % 30 > 15 ? Color.scarlet : Color.black)),
+                () -> Mathf.clamp(Math.abs(temperature() / maxTemp))
             ));
         }
 
         @Override
         public void update(){
             // Xelo: graph handles all heat transmission.
-            heatEnergy += (ambientTemp - getTemp()) * emissiveness * Time.delta / 60f;
+            heatEnergy += (ambientTemp - temperature()) * emissiveness * Time.delta / 60f;
             if(heatProducer) generateHeat();
 
-            if(getTemp() > maxTemp){
+            if(temperature() > maxTemp){
                 Puddles.deposit(build().tile, Liquids.slag, 9);
-                build().damage(((getTemp()-maxTemp)/maxTemp)*Time.delta*10f);
+                build().damage(((temperature()-maxTemp)/maxTemp)*Time.delta*10f);
             }
         }
 
@@ -123,7 +123,7 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
 
         @Override
         public void heatColor(Color input){
-            HeatNodeType.heatColor(getTemp(), input);
+            HeatNodeType.heatColor(temperature(), input);
         }
 
         @Override
@@ -138,30 +138,35 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
 
         @Override
         public float generateHeat(float targetTemp, float eff){
-            float gen = (targetTemp-getTemp())*eff;
+            float gen = (targetTemp-temperature())*eff;
             heatEnergy += gen;
             return gen;
         }
 
         @Override
         public void generateHeat(){
-            lastEnergyInput = Math.max(minGenerate, (targetTemp - getTemp()) * efficency * prodEfficency);
+            lastEnergyInput = Math.max(minGenerate, (targetTemp - temperature()) * efficency * prodEfficency);
             heatEnergy += lastEnergyInput * Time.delta;
         }
 
         @Override
-        public float getTemp(){
+        public float temperature(){
             return heatEnergy / heatCapacity;
         }
 
         @Override
-        public void setTemp(float temp){
+        public void temperature(float temp){
             heatEnergy = temp * heatCapacity;
         }
 
         @Override
+        public void addheatEnergy(float e){
+            heatEnergy += e;
+        }
+
+        @Override
         public void affectUnit(Unit unit, float intensityScl){
-            float temp = getTemp();
+            float temp = temperature();
             if(temp > celsiusZero + Math.max(400 - intensityScl * 100f, 150)){
                 float intensity = Mathf.clamp(Mathf.map(temp, celsiusZero + 400, celsiusZero + 2000f, 0f, 1f));
                 unit.apply(StatusEffects.burning, (intensity * 40f + 7f) * intensityScl);
@@ -169,10 +174,11 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
                 if(unit.isImmune(StatusEffects.melting)) intensity *= 0.2;
 
                 unit.damage(intensity * 50f * intensityScl);
-            }else if(temp < celsiusZero-Math.max(100-intensityScl*50f,30)){
+            }else if(temp < celsiusZero - Math.max(100-intensityScl * 50f, 30)){
                 float intensity = Mathf.clamp(Mathf.map(temp, celsiusZero - 100, 0, 0f, 1f));
                 unit.apply(StatusEffects.freezing, (intensity * 40f + 7f) * intensityScl);
-                if(unit.isImmune(StatusEffects.freezing)) intensity*=0.2;
+
+                if(unit.isImmune(StatusEffects.freezing)) intensity *= 0.2;
                 if(unit.hasEffect(StatusEffects.wet)){
                     intensity*=2;
                     unit.apply(StatusEffects.slow, (intensity * 20f + 7f) * intensityScl);
@@ -180,10 +186,6 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
 
                 unit.damage(intensity * 50f * intensityScl);
             }
-        }
-
-        public void addheatEnergy(float e){
-            heatEnergy += e;
         }
     }
 }

@@ -6,6 +6,10 @@ import unity.annotations.Annotations.*;
 import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
 
+/**
+ * Define public methods for heat graph nodes here.
+ * @author GlennFolker
+ */
 @GraphNodeDef
 public interface HeatNodeTypeI<T extends HeatGraphI<T>> extends GraphNodeTypeI<T>{
     @Override
@@ -18,8 +22,10 @@ public interface HeatNodeTypeI<T extends HeatGraphI<T>> extends GraphNodeTypeI<T
         float generateHeat(float targetTemp, float eff);
         void generateHeat();
 
-        float getTemp();
-        void setTemp(float temp);
+        float temperature();
+        void temperature(float temp);
+
+        void addheatEnergy(float e);
 
         void affectUnit(Unit unit, float intensityScl);
     }

@@ -40,41 +40,40 @@ public class HeatGraph extends Graph<HeatGraph> implements HeatGraphI<HeatGraph>
         float e = 0;
         float cond = 0;
         float b = 0;
-        HeatNode hgn;
-        HeatNode hgno;
+        HeatNode hgn, hgno;
 
         for(GraphConnector<HeatGraph> v : vertices){
-            ((HeatNode)v.getNode()).flux=0;
+            v.node.<HeatNode>as().flux = 0f;
         }
 
         int iter = 3; // convergence iterations
         for(int i = 0;i<iter;i++){
             for(GraphConnector<HeatGraph> v : vertices){
-                hgno = ((HeatNode)v.node);
+                hgno = v.node();
                 k = 0;
                 e = hgno.heatEnergy;
                 cond = hgno.conductivity;
                 // Xelo: my brain hurt
                 //       but essentially the energy only GS equality is eₙ = (e꜀ + kTₛ)/(1+k/c) as T꜀ is e꜀/c
                 for(GraphEdge<HeatGraph> ge : v.connections){
-                    hgn = ((HeatNode)ge.other(v).node);
+                    hgn = ge.other(v).node();
                     b =  (hgn.conductivity + cond) * Time.delta;
                     k += b;
-                    e += b * hgn.getTemp();
+                    e += b * hgn.temperature();
                 }
 
                 hgno.energyBuffer = e / (1f + k / hgno.heatCapacity);
             }
 
             for(GraphConnector<HeatGraph> v : vertices){
-                hgno = ((HeatNode)v.node);
+                hgno = v.node();
                 hgno.flux += hgno.energyBuffer-hgno.heatEnergy;
                 hgno.heatEnergy = hgno.energyBuffer;
             }
         }
     }
 
-    @Override //more like disconnect vertex
+    @Override // Xelo: more like disconnect vertex
     public void removeVertex(GraphConnector<HeatGraph> vertex){
         int s = vertex.connections.size;
         for(int i = 0; i < s; i++) removeEdge(vertex.connections.first());
@@ -88,7 +87,7 @@ public class HeatGraph extends Graph<HeatGraph> implements HeatGraphI<HeatGraph>
     @Override
     public void removeEdge(GraphEdge<HeatGraph> edge){
         removeEdgeNonSplit(edge);
-        //no graph splitting.
+        // Xelo: no graph splitting.
     }
 
     @Override

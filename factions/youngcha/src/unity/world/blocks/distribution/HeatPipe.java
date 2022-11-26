@@ -72,7 +72,7 @@ public class HeatPipe extends HeatBlock{
 
         @Override
         public void unitOn(Unit unit){
-            float temp = heatNode.getTemp();
+            float temp = heatNode.temperature();
             if(timer(timerDump, dumpTime)){
                 heatNode.affectUnit(unit, damageMul);
             }
@@ -80,7 +80,7 @@ public class HeatPipe extends HeatBlock{
 
         @Override
         public void draw(){
-            float temp = heatNode.getTemp();
+            float temp = heatNode.temperature();
             Draw.rect(regions[spriteIndex], x, y);
             if(temp < HeatNodeType.celsiusZero || temp > HeatNodeType.celsiusZero + 150f){
                 heatNode.heatColor(tempCol);

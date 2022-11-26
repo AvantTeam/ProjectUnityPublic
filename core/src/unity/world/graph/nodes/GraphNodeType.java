@@ -101,8 +101,10 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
             connectors.add((GraphConnector<T>)connector);
         }
 
-        public void removeEdge(GraphNode<T> g){}
+        @Override
+        public void removeEdge(GraphNodeI<T> g){}
 
+        @Override
         public void write(Writes write){
             connectors.each(con -> {
                 if(con.graph().isRoot(con)){
@@ -116,6 +118,7 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
             });
         }
 
+        @Override
         public void read(Reads read){
             connectors.each(con -> {
                 if(read.bool()) con.graph.read(read);
@@ -123,14 +126,17 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
             });
         }
 
+        @Override
         public Block block(){
             return build.block();
         }
 
-        public Building build(){
+        @Override
+        public <E extends Building & GraphBuild> E build(){
             return build.as();
         }
 
+        @Override
         public T graph(){
             return connectors.first().graph;
         }

@@ -31,6 +31,8 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
 
     private long lastFrameUpdated;
 
+    public abstract int type();
+
     @Override
     public void update(){
         if(Core.graphics.getFrameId() == lastFrameUpdated) return;
@@ -56,7 +58,7 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
     public void addEdge(GraphEdge<T> edge){
         edges.put(edge.id, edge);
 
-        Graph<T> g = edge.other(this).graph;
+        Graph<T> g = edge.other(this).graph();
         if(g != this){
             // Xelo: CONSUME THE INFERIOR GRAPH
             if(g.vertices.size < vertices.size){
@@ -136,7 +138,7 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
     public void removeEdge(GraphEdge<T> edge){
         removeEdgeNonSplit(edge);
         onGraphChanged();
-        if(!isConnected(edge.n1, edge.n2, floodTemp)){
+        if(!isConnected(edge.n1.as(), edge.n2.as(), floodTemp)){
             // Xelo: OHNO
             if(floodTemp.size <= vertices.size - floodTemp.size){
                 // Xelo: new graph will be the flooded area
@@ -185,7 +187,7 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
         while(front.any()){
             var current = front.pop();
             for(GraphEdge<T> ge : current.connections){
-                var next = ge.other(current);
+                GraphConnector<T> next = ge.other(current);
                 if(flood.contains(next)) continue;
 
                 front.add(next);
