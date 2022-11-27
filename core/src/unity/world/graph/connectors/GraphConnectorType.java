@@ -1,7 +1,6 @@
 package unity.world.graph.connectors;
 
 import arc.func.*;
-import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
@@ -40,13 +39,11 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
 
         public boolean disconnectWhenRotate = true;
 
-        {
-            id = lastId++;
-        }
-
         protected GraphConnector(GraphNode<T> node, T graph){
             this.node = node;
             graph.addVertex(this);
+
+            id = lastId++;
         }
 
         @Override
@@ -63,15 +60,6 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
         public <E extends GraphNodeI<T>> E node(){
             return node.as();
         }
-
-        public void update(){}
-        public void onProximityUpdate(){}
-
-        public abstract void recalcPorts();
-        public abstract void recalcNeighbours();
-
-        public abstract boolean canConnect(Point2 pt, GraphConnector<T> conn);
-        public abstract GraphEdge<T> tryConnect(Point2 pt, GraphConnector<T> conn);
 
         @Override
         public boolean isConnected(GraphConnectorI<T> t){
@@ -109,37 +97,38 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
         }
 
         @Override
-        public void removeEdge(GraphEdge<T> ge){
-            if(connections.remove(ge)){
-                ge.valid = false;
-                triggerConnectionChanged();
+        public GraphEdge<T> addEdge(GraphConnectorI<T> ext){
+            long edgeId = GraphEdge.getId(this, ext);
+            if(graph.edges.containsKey(edgeId)){
+                var edge = graph.edges.get(edgeId);
+                if(!connections.contains(edge)){
+                    connections.add(edge);
+                    edge.valid = true; // Xelo: in case.
+                }
+
+                return edge;
             }
-        }
 
-        public void triggerConnectionChanged(){
-            this.node.build.onConnectionChanged(this);
-        }
-
-        public void write(Writes write){}
-        public void read(Reads read){}
-
-        public GraphEdge<T> addEdge(GraphConnector extconn){
-            long edgeid = GraphEdge.getId(this, extconn);
-            if(graph.edges.containsKey(edgeid)){
-               if(!connections.contains((GraphEdge<T>)graph.edges.get(edgeid))){
-                   var edge = (GraphEdge<T>)graph.edges.get(edgeid);
-                   connections.add(edge);
-                   edge.valid = true; // in case.
-               }
-               return (GraphEdge<T>)graph.edges.get(edgeid);
-            }
-            GraphEdge<T> edge = new GraphEdge<>(this, extconn);
+            GraphEdge<T> edge = new GraphEdge<>(this, ext);
             graph.addEdge(edge);
             connections.add(edge);
-            triggerConnectionChanged();
+
+            connectionChanged();
             return edge;
         }
 
+        @Override
+        public void removeEdge(GraphEdge<T> ge){
+            if(connections.remove(ge)){
+                ge.valid = false;
+                connectionChanged();
+            }
+        }
+
+        @Override
+        public void connectionChanged(){
+            node.build.onConnectionChanged(this);
+        }
 
         @Override
         public String toString(){

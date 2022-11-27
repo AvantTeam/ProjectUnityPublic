@@ -13,6 +13,7 @@ import mindustry.world.meta.*;
 import unity.annotations.Annotations.*;
 import unity.func.*;
 import unity.gen.graph.*;
+import unity.world.graph.GraphBlock.*;
 import unity.world.graph.connectors.*;
 import unity.world.graph.connectors.GraphConnectorTypeI.*;
 import unity.world.graph.nodes.*;
@@ -24,43 +25,31 @@ import static mindustry.Vars.*;
 /**
  * Common definition of the graph blocks. Automatically implemented in the graph annotation processor. Non-default methods must
  * define their statements in the annotation processor.
+ * 
+ * If you want to extend a generated graph block class and add your own graph binding, override these and add-on to your
+ * specific graph fields:
+ * <ul>
+ *     <li>{@link GraphBlock#eachNodeType(IntObjc<GraphNodeTypeI<?>>)}</li>
+ *     <li>{@link GraphBlock#eachConnectorType(IntObjc<GraphConnectorTypeI<?>>)}</li>
+ * 
+ *     <li>{@link GraphBuild#initGraphNodes()}</li>
+ *     <li>{@link GraphBuild#eachNode(IntObjc<GraphNodeI<?>>)}</li>
+ *     <li>{@link GraphBuild#graphNode(int)}</li>
+ * </ul>
  * @author GlennFolker
  * @author Xelo
  */
 @GraphBlockBase
 public interface GraphBlock{
     void eachNodeType(IntObjc<GraphNodeTypeI<?>> cons);
+    void eachConnectorType(IntObjc<GraphConnectorTypeI<?>> cons);
 
     default void setGraphStats(Stats stats){
         eachNodeType((flag, node) -> node.setStats(stats));
     }
 
-    void drawConnectionPoints(BuildPlan req, Eachable<BuildPlan> list);
-    default void drawConnectionPoint(GraphConnectorTypeI<?> connector, BuildPlan req, Eachable<BuildPlan> list){
-        TextureRegion tr = Graphs.info(connector.graphType()).icon;
-        if(!Core.atlas.isFound(tr)) return;
-
-        if(connector instanceof FixedConnectorTypeI fixed){
-            int[] indices = fixed.connectionIndices();
-            for(int i = 0; i < indices.length; i++){
-                if(indices[i] != 0){
-                    Point2 p2 = getConnectSidePos(i, req.block.size, req.rotation);
-                    int cx = req.x + p2.x;
-                    int cy = req.y + p2.y;
-                    boolean[] d = {false};
-
-                    list.each(b -> {
-                        if(d[0]) return;
-                        if(cx >= b.x && cy >= b.y && b.x + b.block.size > cx && b.y + b.block.size > cy){
-                            d[0] = true;
-                        }
-                    });
-
-                    if(d[0]) continue;
-                    Draw.rect(tr, cx * tilesize, cy * tilesize);
-                }
-            }
-        }
+    default void drawConnectionPoints(BuildPlan req, Eachable<BuildPlan> list){
+        eachConnectorType((flag, conn) -> conn.drawConnectionPoint(req, list));
     }
 
     static Point2 getConnectSidePos(int index, int size, int rotation){
@@ -91,8 +80,10 @@ public interface GraphBlock{
         void prevRotation(int prevRotation);
 
         void initGraph();
-        boolean graphInitialized();
+        void initGraphNodes();
         default void onGraphInit(){}
+
+        boolean graphInitialized();
 
         default void onConnectionChanged(GraphConnectorI<?> connector){}
 

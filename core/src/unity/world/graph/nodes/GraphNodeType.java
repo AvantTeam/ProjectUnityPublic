@@ -68,7 +68,7 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
         @Override
         public void onConnect(){
             for(GraphConnector<T> gc : connectors){
-                gc.recalcNeighbours();
+                gc.recalcNeighbors();
             }
         }
 
@@ -83,7 +83,7 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
                 if(gc.disconnectWhenRotate){
                     gc.disconnect();
                     gc.recalcPorts();
-                    gc.recalcNeighbours();
+                    gc.recalcNeighbors();
                 }
             }
         }
@@ -98,7 +98,7 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
 
         @Override
         public void addConnector(GraphConnectorI<T> connector){
-            connectors.add((GraphConnector<T>)connector);
+            connectors.add(connector.<GraphConnector<T>>as());
         }
 
         @Override

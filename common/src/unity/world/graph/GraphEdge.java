@@ -3,6 +3,7 @@ package unity.world.graph;
 import arc.util.*;
 import unity.world.graph.connectors.GraphConnectorTypeI.*;
 
+/** @author Xelo */
 public class GraphEdge<T extends GraphI<T>>{
     public GraphConnectorI<T> n1, n2;
     public long id;
@@ -14,7 +15,7 @@ public class GraphEdge<T extends GraphI<T>>{
         this.n2 = n2;
         id = getId(n1,n2);
 
-        if(n1 == n2) throw new IllegalStateException("vertexes cant self connect");
+        if(n1 == n2) throw new IllegalStateException("Vertices cant self-connect.");
         valid = true;
     }
 

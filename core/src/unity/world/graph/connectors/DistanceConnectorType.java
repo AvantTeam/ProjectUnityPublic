@@ -24,7 +24,7 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
 
     @Override
     public DistanceConnector<T> create(GraphNodeI<T> node){
-        return new DistanceConnector<>((GraphNode<T>)node, newGraph.get());
+        return new DistanceConnector<>(node.as(), newGraph.get());
     }
 
     public static class DistanceConnector<T extends Graph<T>> extends GraphConnector<T>{
@@ -91,7 +91,7 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
             if(build == null) return;
 
             if(build instanceof GraphBuild graphBuild){
-                var extnode = (GraphNode<T>)graphBuild.graphNode(graph.type());
+                GraphNode<T> extnode = graphBuild.<T>graphNode(graph.type()).as();
                 if(extnode == null) return;
 
                 for(GraphConnector<T> extconnector : extnode.connectors){
@@ -112,7 +112,7 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
         }
 
         @Override
-        public void recalcNeighbours(){
+        public void recalcNeighbors(){
             connections.clear();
             for(Point2 p2 : connection){
                 if(p2 == null || (p2.x == 0 && p2.y == 0)) continue;
@@ -164,7 +164,7 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
         public void disconnect(){
             Log.info("disconnecting.");
 
-            while(!connections.isEmpty()) disconnectTo((DistanceConnector<T>)connections.first().other(this));
+            while(!connections.isEmpty()) disconnectTo(connections.first().other(this));
             super.disconnect();
         }
 
@@ -184,13 +184,13 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
         }
 
         @Override
-        public boolean canConnect(Point2 pt, GraphConnector<T> conn){
+        public boolean canConnect(Point2 pt, GraphConnectorI<T> conn){
             return false;
         }
 
         @Override
-        public GraphEdge<T> tryConnect(Point2 pt, GraphConnector<T> extconn){
-            if(addConnection((DistanceConnector<T>)extconn)) return addEdge(extconn);
+        public GraphEdge<T> tryConnect(Point2 pt, GraphConnectorI<T> extconn){
+            if(addConnection(extconn.as())) return addEdge(extconn);
             return null;
         }
 

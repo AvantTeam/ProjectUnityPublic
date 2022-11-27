@@ -1,21 +1,25 @@
 package unity.world.graph.connectors;
 
+import arc.*;
 import arc.func.*;
+import arc.graphics.g2d.*;
 import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
-import mindustry.*;
+import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.world.*;
+import unity.gen.graph.*;
 import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
 import unity.world.graph.nodes.GraphNodeType.*;
 import unity.world.graph.nodes.GraphNodeTypeI.*;
 
 import static arc.math.geom.Geometry.*;
+import static mindustry.Vars.*;
 
 @SuppressWarnings("unchecked")
-public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T> implements FixedConnectorTypeI<T>{
+public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T>{
     public int[] connectionIndices;
 
     public FixedConnectorType(Prov<T> newGraph, int... connectionIndices){
@@ -25,15 +29,35 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
 
     @Override
     public FixedConnector<T> create(GraphNodeI<T> node){
-        return new FixedConnector<>((GraphNode<T>)node, newGraph.get(), connectionIndices);
+        return new FixedConnector<>(node.as(), newGraph.get(), connectionIndices);
     }
 
     @Override
-    public int[] connectionIndices(){
-        return connectionIndices;
+    public void drawConnectionPoint(BuildPlan req, Eachable<BuildPlan> list){
+        TextureRegion tr = Graphs.info(graphType).icon;
+        if(!Core.atlas.isFound(tr)) return;
+
+        for(int i = 0; i < connectionIndices.length; i++){
+            if(connectionIndices[i] == 0) continue;
+
+            Point2 p2 = GraphBlock.getConnectSidePos(i, req.block.size, req.rotation);
+            int cx = req.x + p2.x;
+            int cy = req.y + p2.y;
+            boolean[] d = {false};
+
+            list.each(b -> {
+                if(d[0]) return;
+                if(cx >= b.x && cy >= b.y && b.x + b.block.size > cx && b.y + b.block.size > cy){
+                    d[0] = true;
+                }
+            });
+
+            if(d[0]) continue;
+            Draw.rect(tr, cx * tilesize, cy * tilesize);
+        }
     }
 
-    public static class FixedConnector<T extends Graph<T>> extends GraphConnector<T> implements FixedConnectorI<T>{
+    public static class FixedConnector<T extends Graph<T>> extends GraphConnector<T>{
         int[] connectionIndices;
         public ConnectionPort<T>[] connectionPoints;
         public Boolf2<ConnectionPort<T>, ConnectionPort<T>> portCompatibility;
@@ -44,18 +68,13 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
         }
 
         @Override
-        public int[] connectionIndices(){
-            return connectionIndices;
-        }
-
-        @Override
         public void recalcPorts(){
             if(connections.size > 0) throw new IllegalStateException("graph connector must have no connections before port recalc");
             connectionPoints = surfaceConnectionsOf(this, connectionIndices);
         }
 
         @Override
-        public void recalcNeighbours(){
+        public void recalcNeighbors(){
             if(connectionPoints == null) recalcPorts();
 
             // Xelo: disconnect?
@@ -76,13 +95,13 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
             for(ConnectionPort<T> port : connectionPoints){
                 //for each connection point get the relevant tile it connects to. If its a connection point, then attempt a connection.
                 temp.set(intrl.x, intrl.y).add(port.relpos).add(port.dir);
-                Building building = Vars.world.build(temp.x, temp.y);
+                Building building = world.build(temp.x, temp.y);
                 if(building != null && building instanceof GraphBuild igraph){
-                    var extnode = (GraphNode<T>)igraph.graphNode(graph.type());
+                    GraphNode<T> extnode = igraph.<T>graphNode(graph.type()).as();
                     if(extnode == null) continue;
                     for(var extconnector : extnode.connectors){
                         if(!(extconnector instanceof FixedConnector fixed)) continue;
-                        var edge = fixed.tryConnect(port.relpos.cpy().add(port.dir), (GraphConnector<T>)this);
+                        var edge = fixed.tryConnect(port.relpos.cpy().add(port.dir), this);
                         if(edge != null){
                             port.edge = edge;
                             if(!connections.contains(edge)) connections.add(edge);
@@ -94,7 +113,7 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
                 if(port.edge != null && !port.edge.valid) port.edge = null;
             }
 
-            triggerConnectionChanged();
+            connectionChanged();
         }
 
         public ConnectionPort<T>[] surfaceConnectionsOf(GraphConnector<T> gc, int[] connectids){
@@ -168,11 +187,27 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
             return null;
         }
 
-        public boolean canConnect(Point2 pt, GraphConnector<T> conn){
+        @Override
+        public boolean canConnect(Point2 pt, GraphConnectorI<T> conn){
             // Xelo: Point2 pt =(external.relpos.cpy()).add(external.dir);
-            Tile ext = conn.node.build().tile;
+            Building b = conn.node().build();
+            Tile ext = b.tile;
+
             pt.add(ext.x, ext.y);
-            return areConnectionPortsConnectedTo(pt, conn.node.build()) != null;
+            return areConnectionPortsConnectedTo(pt, b) != null;
+        }
+
+        @Override
+        public GraphEdge<T> tryConnect(Point2 pt, GraphConnectorI<T> extconn){
+            Tile ext = extconn.node().build().tile;
+            pt.add(ext.x, ext.y);
+            var port = areConnectionPortsConnectedTo(pt, extconn.node().build());
+            if(port == null) return null;
+
+            GraphEdge<T> edge = addEdge(extconn);
+            if(edge != null) port.edge = edge;
+
+            return edge;
         }
 
         public GraphEdge<T> tryConnectPorts(ConnectionPort<T> port, GraphConnector<T> extconn){
@@ -183,19 +218,6 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
 
             GraphEdge<T> edge = addEdge(extconn);
             if(edge != null) extport.edge = edge;
-
-            return edge;
-        }
-
-        @Override
-        public GraphEdge<T> tryConnect(Point2 pt, GraphConnector<T> extconn){
-            Tile ext = extconn.node.build().tile;
-            pt.add(ext.x, ext.y);
-            var port = areConnectionPortsConnectedTo(pt, extconn.node.build());
-            if(port == null) return null;
-
-            GraphEdge<T> edge = addEdge(extconn);
-            if(edge != null) port.edge = edge;
 
             return edge;
         }
@@ -249,7 +271,7 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
             }
 
             public Tile connectedToTile(){
-                return Vars.world.tile(connector.node.build().tile.x + relpos.x + dir.x, connector.node.build().tile.y + relpos.y + dir.y);
+                return world.tile(connector.node.build().tile.x + relpos.x + dir.x, connector.node.build().tile.y + relpos.y + dir.y);
             }
 
             public int getOrdinal(){
