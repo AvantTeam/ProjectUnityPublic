@@ -3,8 +3,8 @@ package unity.content;
 import mindustry.world.meta.*;
 import unity.mod.*;
 
-import static mindustry.world.meta.Attribute.add;
-import static unity.mod.FactionRegistry.register;
+import static mindustry.world.meta.Attribute.*;
+import static unity.mod.FactionRegistry.*;
 
 /**
  * Defines all {@linkplain Faction#monolith monolith} environmental block attributes.

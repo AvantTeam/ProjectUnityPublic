@@ -18,12 +18,12 @@ import unity.graphics.MultiTrail.*;
 import unity.mod.*;
 import unity.util.*;
 
-import static arc.Core.atlas;
+import static arc.Core.*;
 import static arc.graphics.g2d.Draw.*;
 import static arc.graphics.g2d.Lines.*;
-import static arc.math.Angles.randLenVectors;
+import static arc.math.Angles.*;
 import static arc.math.Interp.*;
-import static mindustry.Vars.state;
+import static mindustry.Vars.*;
 import static unity.graphics.MonolithPal.*;
 
 /**

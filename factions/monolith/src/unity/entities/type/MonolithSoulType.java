@@ -19,7 +19,7 @@ import unity.gen.entities.*;
 import unity.graphics.*;
 import unity.util.*;
 
-import static mindustry.Vars.headless;
+import static mindustry.Vars.*;
 import static unity.graphics.MonolithPal.*;
 
 /**
@@ -150,9 +150,10 @@ public class MonolithSoulType extends PUUnitType{
             float off = (360f / wreckRegions.length) * i;
             float fin = soul.formProgress, fout = 1f - fin;
 
-            Tmp.v1.trns(soul.rotation + off, fout * 24f)
-            .add(Tmp.v2.trns((Time.time + off) * 4f, fout * 3f))
-            .add(soul);
+            Tmp.v1
+                .trns(soul.rotation + off, fout * 24f)
+                .add(Tmp.v2.trns((Time.time + off) * 4f, fout * 3f))
+                .add(soul);
 
             Draw.alpha(fin);
             Draw.rect(reg, Tmp.v1.x, Tmp.v1.y, soul.rotation - 90f);
@@ -168,11 +169,11 @@ public class MonolithSoulType extends PUUnitType{
 
     public static void draw(float x, float y, float rotation, float offSideX, float offSideY, float offFront, float offCenter, float offBack){
         Vec2
-        right = Tmp.v1.trns(rotation - 90f, offSideX, offSideY),
-        left = Tmp.v2.trns(rotation - 90f, -offSideX, offSideY),
-        front = Tmp.v3.trns(rotation, offFront).add(x, y),
-        center = Tmp.v4.trns(rotation, offCenter).add(x, y),
-        back = Tmp.v5.trns(rotation, offBack).add(x, y);
+            right = Tmp.v1.trns(rotation - 90f, offSideX, offSideY),
+            left = Tmp.v2.trns(rotation - 90f, -offSideX, offSideY),
+            front = Tmp.v3.trns(rotation, offFront).add(x, y),
+            center = Tmp.v4.trns(rotation, offCenter).add(x, y),
+            back = Tmp.v5.trns(rotation, offBack).add(x, y);
 
         Draw.color(monolithMid, monolithLight, 1f - MathUtils.shade(rotation - 45f));
         Fill.tri(center.x, center.y, front.x, front.y, x + right.x, y + right.y);

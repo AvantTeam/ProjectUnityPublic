@@ -37,10 +37,8 @@ public class ProjectUnityPlugin extends Plugin{
     @Override
     public void registerClientCommands(CommandHandler handler){
         if(!depLoaded()) return;
-
         handler.<Player>register("js", "<script...>", "Executes arbitrary JS codes in the server.", (args, player) -> {
-            String script = args[0].replace("##self", "(Groups.player.find(p => p.id == \"" + player.id + "\"))");
-
+            String script = args[0].replace("##self", "(Groups.player.getByID(" + player.id + "))");
             Call.sendMessage(player.name + " ran: " + script);
             Call.sendMessage("Result: " + mods.getScripts().runConsole(script));
         });

@@ -768,7 +768,12 @@ public class EntityProcessor extends BaseProcessor{
                             .addParameter(spec(String.class), "name")
                             .addParameter(paramSpec(spec(Class.class), tvSpec("E")), "type")
                             .addParameter(paramSpec(spec(Func.class), spec(String.class), subSpec(tvSpec("T"))), "create")
-                            .addStatement("$T.nameMap.put($S + name, get(type))", spec(EntityMapping.class), "unity-")
+                            .beginControlFlow("if(type.getName().startsWith($S))", "mindustry.gen.")
+                                .addStatement("var prov = $T.find($T.idMap, p -> p.get().getClass().equals(type))", spec(Structs.class), spec(EntityMapping.class))
+                                .addStatement("$T.nameMap.put($S + name, prov)", spec(EntityMapping.class), "unity-")
+                            .nextControlFlow("else")
+                                .addStatement("$T.nameMap.put($S + name, get(type))", spec(EntityMapping.class), "unity-")
+                            .endControlFlow()
                             .addStatement("return create.get(name)")
                         .build()
                     );

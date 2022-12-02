@@ -4,8 +4,8 @@ import mindustry.type.*;
 import unity.content.type.*;
 import unity.mod.*;
 
-import static unity.graphics.MonolithPal.monolithLighter;
-import static unity.mod.FactionRegistry.register;
+import static unity.graphics.MonolithPal.*;
+import static unity.mod.FactionRegistry.*;
 
 /**
  * Defines all {@linkplain Faction#monolith monolith} status effect types.
