@@ -91,7 +91,7 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
             if(build == null) return;
 
             if(build instanceof GraphBuild graphBuild){
-                GraphNode<T> extnode = graphBuild.<T>graphNode(graph.type()).as();
+                GraphNode<T> extnode = graphBuild.graphNode(graph.type());
                 if(extnode == null) return;
 
                 for(GraphConnector<T> extconnector : extnode.connectors){

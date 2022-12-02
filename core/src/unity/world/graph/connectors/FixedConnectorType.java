@@ -97,7 +97,7 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
                 temp.set(intrl.x, intrl.y).add(port.relpos).add(port.dir);
                 Building building = world.build(temp.x, temp.y);
                 if(building != null && building instanceof GraphBuild igraph){
-                    GraphNode<T> extnode = igraph.<T>graphNode(graph.type()).as();
+                    GraphNode<T> extnode = igraph.graphNode(graph.type());
                     if(extnode == null) continue;
                     for(var extconnector : extnode.connectors){
                         if(!(extconnector instanceof FixedConnector fixed)) continue;

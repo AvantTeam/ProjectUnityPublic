@@ -89,7 +89,7 @@ public interface GraphBlock{
 
         void eachNode(IntObjc<GraphNodeI<?>> cons);
 
-        <T extends GraphI<T>> GraphNodeI<T> graphNode(int type);
+        <N extends GraphNodeI<? extends GraphI<?>>> N graphNode(int type);
 
         default void connectToGraph(){
             eachNode((flag, node) -> node.addSelf());

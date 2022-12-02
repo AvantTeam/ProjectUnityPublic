@@ -25,7 +25,7 @@ public interface GraphConnectorTypeI<T extends GraphI<T>>{
 
     default void drawConnectionPoint(BuildPlan req, Eachable<BuildPlan> list){}
 
-    default <E extends GraphConnectorTypeI<T>> E as(){
+    default <E extends GraphConnectorTypeI<? extends T>> E as(){
         return (E)this;
     }
 
@@ -58,7 +58,7 @@ public interface GraphConnectorTypeI<T extends GraphI<T>>{
         default void write(Writes write){}
         default void read(Reads read){}
 
-        default <E extends GraphConnectorI<T>> E as(){
+        default <E extends GraphConnectorI<? extends T>> E as(){
             return (E)this;
         }
     }

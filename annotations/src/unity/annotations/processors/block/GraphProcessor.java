@@ -191,18 +191,19 @@ public class GraphProcessor extends BaseProcessor{
 
             new Implement((method, callSuper, entries) -> {
                 method
-                    .addTypeVariable(tvSpec("T", paramSpec(spec(graphBase), tvSpec("T"))))
+                    //.addTypeVariable(tvSpec("T", paramSpec(spec(graphBase), tvSpec("T"))))
+                    .addTypeVariable(tvSpec("N", paramSpec(spec(nodeBase), subSpec(paramSpec(spec(graphBase), subSpec(spec(Object.class)))))))
                     .beginControlFlow("switch(type)");
 
                 for(var entry : entries){
                     entry = entry.toLowerCase();
-                    method.addStatement("case $T.$L: return $LNode", graphInfoCont, entry, entry);
+                    method.addStatement("case $T.$L: return (N)$LNode", graphInfoCont, entry, entry);
                 }
 
                 method
                     .addStatement("default: return null")
                     .endControlFlow();
-            }, "graphNode", paramSpec(spec(nodeBase), tvSpec("T")), true,
+            }, "graphNode", tvSpec("N"), true,
             TypeName.INT, "type"),
 
             new Implement((method, callSuper, entries) -> method
@@ -443,7 +444,7 @@ public class GraphProcessor extends BaseProcessor{
 
                 String name = nodeName(node).toLowerCase();
                 builder
-                    .addField(spec(node), name + "NodeConfig", PUBLIC)
+                    .addField(paramSpec(spec(node), subSpec(paramSpec(spec(graph), subSpec(spec(Object.class))))), name + "NodeConfig", PUBLIC)
                     .addField(
                         FieldSpec.builder(paramSpec(spec(Seq.class), paramSpec(spec(connectorTypeBase), subSpec(paramSpec(spec(graph), subSpec(spec(Object.class)))))), name + "ConnectorConfigs", PUBLIC)
                             .initializer("new $T<>()", spec(Seq.class))

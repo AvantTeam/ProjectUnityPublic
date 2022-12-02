@@ -22,7 +22,7 @@ public interface GraphNodeTypeI<T extends GraphI<T>>{
 
     void setStats(Stats stats);
 
-    default <N extends GraphNodeTypeI<T>> N as(){
+    default <N extends GraphNodeTypeI<? extends T>> N as(){
         return (N)this;
     }
 
@@ -51,7 +51,7 @@ public interface GraphNodeTypeI<T extends GraphI<T>>{
         <E extends Building & GraphBuild> E build();
         T graph();
 
-        default <N extends GraphNodeI<T>> N as(){
+        default <N extends GraphNodeI<? extends T>> N as(){
             return (N)this;
         }
     }
