@@ -4,7 +4,7 @@ import arc.util.*;
 
 import java.lang.reflect.*;
 
-import static mindustry.Vars.mods;
+import static mindustry.Vars.*;
 
 /**
  * Shared utility access for reflective operations, without throwing any checked exceptions.

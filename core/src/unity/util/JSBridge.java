@@ -4,8 +4,8 @@ import arc.*;
 import arc.func.*;
 import rhino.*;
 
-import static mindustry.Vars.mods;
-import static unity.ProjectUnityCommon.packages;
+import static mindustry.Vars.*;
+import static unity.ProjectUnityI.*;
 
 /**
  * Utility class for transition between Java and JS scripts, as well as providing a custom top level scope for the sake of

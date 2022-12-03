@@ -9,14 +9,14 @@ import mindustry.graphics.*;
 import unity.graphics.*;
 import unity.util.*;
 
-import static mindustry.Vars.headless;
+import static mindustry.Vars.*;
 
 /**
- * Base implementation of {@link PUUnitTypeCommon}.
+ * Base implementation of {@link PUUnitTypeI}.
  * @author GlennFolker
  */
 @SuppressWarnings("unchecked")
-public class PUUnitType extends PUUnitTypeCommon{
+public class PUUnitType extends PUUnitTypeI{
     /** The common properties of this unit type, mapped by its class. */
     public final OrderedMap<Class<? extends Props>, Props> properties = new OrderedMap<>();
 

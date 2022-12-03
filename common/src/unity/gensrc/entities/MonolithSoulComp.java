@@ -59,7 +59,7 @@ abstract class MonolithSoulComp implements Unitc, Factionc{
 
     @Override
     public void setType(UnitType type){
-        if(type instanceof PUUnitTypeCommon def) props = def.propReq(MonolithSoulProps.class);
+        if(type instanceof PUUnitTypeI def) props = def.propReq(MonolithSoulProps.class);
     }
 
     void checkInteraction(Cons<Tile> form, Cons<Healthc> join){

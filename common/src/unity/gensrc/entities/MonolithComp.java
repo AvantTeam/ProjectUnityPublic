@@ -27,7 +27,7 @@ abstract class MonolithComp implements Unitc, Factionc, SoulHolder{
     @Override
     public void setType(UnitType type){
         // Units spawned by core can't have souls.
-        if(!spawnedByCore && type instanceof PUUnitTypeCommon def) props = def.propReq(MonolithProps.class);
+        if(!spawnedByCore && type instanceof PUUnitTypeI def) props = def.propReq(MonolithProps.class);
     }
 
     @Override

@@ -8,8 +8,8 @@ import mindustry.type.*;
  * Common form of {@link UnitType}s. Stores composable properties.
  * @author GlennFolker
  */
-public abstract class PUUnitTypeCommon extends UnitType{
-    public PUUnitTypeCommon(String name){
+public abstract class PUUnitTypeI extends UnitType{
+    public PUUnitTypeI(String name){
         super(name);
     }
 

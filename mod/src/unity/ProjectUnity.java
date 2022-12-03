@@ -3,7 +3,10 @@ package unity;
 import arc.*;
 import arc.struct.*;
 import arc.util.*;
+import arc.util.io.*;
 import mindustry.game.EventType.*;
+import mindustry.io.*;
+import mindustry.io.SaveFileReader.*;
 import unity.assets.list.*;
 import unity.content.*;
 import unity.gen.entities.*;
@@ -12,12 +15,13 @@ import unity.graphics.*;
 import unity.io.*;
 import unity.mod.*;
 import unity.util.*;
+import unity.world.*;
 
 import java.io.*;
 
 import static mindustry.Vars.*;
 
-public class ProjectUnity extends ProjectUnityCommon{
+public class ProjectUnity extends ProjectUnityI{
     public ProjectUnity(){
         try{
             Class<DevBuildImpl> type = ReflectUtils.findc("unity.DevBuildImpl");
@@ -71,6 +75,24 @@ public class ProjectUnity extends ProjectUnityCommon{
             JSBridge.setup();
 
             PUPackets.register();
+        });
+
+        worldState = new WorldState();
+        SaveVersion.addCustomChunk("unity-io-world-state", new CustomChunk(){
+            final Writes write = new Writes(null);
+            final Reads read = new Reads(null);
+
+            @Override
+            public void write(DataOutput stream) throws IOException{
+                write.output = stream;
+                worldState.write(write);
+            }
+
+            @Override
+            public void read(DataInput stream) throws IOException{
+                read.input = stream;
+                worldState.read(read);
+            }
         });
     }
 

@@ -2,7 +2,7 @@ package unity.entities.prop;
 
 import mindustry.content.*;
 import mindustry.type.*;
-import unity.entities.type.PUUnitTypeCommon.*;
+import unity.entities.type.PUUnitTypeI.*;
 import unity.mod.*;
 
 /**

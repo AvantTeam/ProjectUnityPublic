@@ -4,7 +4,7 @@ import arc.audio.*;
 import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.gen.*;
-import unity.entities.type.PUUnitTypeCommon.*;
+import unity.entities.type.PUUnitTypeI.*;
 import unity.mod.*;
 
 /**
