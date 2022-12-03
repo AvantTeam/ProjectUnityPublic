@@ -42,6 +42,7 @@ public class MonolithSoulType extends PUUnitType{
         flying = true;
         omniMovement = false;
         playerControllable = false;
+        outlines = false;
 
         prop(props);
     }
@@ -164,7 +165,7 @@ public class MonolithSoulType extends PUUnitType{
 
     @Override
     public MonolithSoul create(Team team){
-        return (MonolithSoul)super.create(team);
+        return super.create(team).as();
     }
 
     public static void draw(float x, float y, float rotation, float offSideX, float offSideY, float offFront, float offCenter, float offBack){
