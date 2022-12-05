@@ -174,10 +174,12 @@ public abstract class GraphConnector<T extends Graph>{
                 return;
             }
             if(build instanceof GraphBuild graphBuild){
+                /// does the building have the relevant system?
                 var extnode = graphBuild.getGraphNode(graph.getClass());
                 if(extnode == null){
                     return;
                 }
+                //get all the connectors of said system.
                 for(GraphConnector extconnector: extnode.connector){
                     if(!(extconnector instanceof GraphConnector.DistanceGraphConnector)){
                         continue;

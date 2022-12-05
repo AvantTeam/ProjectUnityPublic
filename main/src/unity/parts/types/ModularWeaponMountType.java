@@ -3,6 +3,8 @@ package unity.parts.types;
 import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
+import arc.util.*;
+import mindustry.entities.part.DrawPart.*;
 import mindustry.type.*;
 import unity.parts.*;
 import unity.parts.stat.*;
@@ -47,7 +49,25 @@ public class ModularWeaponMountType extends ModularPartType{
     @Override
     public void drawEditorTop(PartsEditorElement editor, int x, int y, boolean valid){
 
-        editor.rect(weapon.region,(x+w*0.5f)*32 ,(y+h*0.5f)*32, 2);
+
+        PartParams p = new PartParams();
+        p.x = (x+w*0.5f)*32;
+        p.y = (y+h*0.5f)*32;
+        p.rotation = 0;
+        p.life = Time.time * (editor.statmap != null? ((ModularUnitStatMap)editor.statmap).rps :0);
+        for(var part : weapon.parts){
+            if(part.under)
+                part.draw(p);
+        }
+        if(weapon instanceof EditorDrawable ed){
+            ed.drawEditor(editor,x,y,w,h,valid);
+        }else{
+            editor.rect(weapon.region, (x + w * 0.5f) * 32, (y + h * 0.5f) * 32, 2);
+        }
+        for(var part : weapon.parts){
+            if(!part.under)
+                part.draw(p);
+        }
         Lines.stroke(2 * editor.scl, new Color(1,1,1,0.7f));
     }
 

@@ -251,10 +251,14 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
         if(construct != null && elevation<0.01){
             steerAngle *= 0.98;
         }
-        moving = false;
+
         if(maxHealth!=statHp){
             maxHealth=statHp;
         }
+        if(!moving){
+            rotateVel*=0.8;
+        }
+        moving = false;
     }
 
     @Replace
@@ -302,12 +306,12 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
     private float steerAngle(float from, float to){
         from = Mathf.mod(from, 360.0F);
         to = Mathf.mod(to, 360.0F);
-        float b = Angles.backwardDistance(from, to);
-        float f = Angles.forwardDistance(from, to);
-        if (from > to == b > f) {
-            return - b;
+        float b = Mathf.mod(from-to, 360.0F);
+        float f = Mathf.mod(to-from, 360.0F);
+        if (b < f) {
+            return  - b;
         }else{
-            return f;
+            return  f;
         }
     }
 
@@ -331,7 +335,6 @@ abstract class ModularUnitComp implements Unitc, ElevationMovec{
             }
         }
         if(isZero){
-            rotateVel*=0.8;
             steerAngle*=0.8;
         }else{
             steerAngle =  steerAngle(rotation,vecangle);

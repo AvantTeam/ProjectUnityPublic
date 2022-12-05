@@ -38,14 +38,13 @@ public class ThermalHeater extends GenericGraphBlock{
         @Override
         public void updateTile(){
             super.updateTile();
-            heatNode().efficency = sum + attri.env(); /// <---------------
+            heatNode().efficency = sum + attri.env();
         }
 
         @Override
         public void draw(){
             Draw.rect(regions[rotation], x, y);
-            UnityDrawf.drawHeat(heatRegion, x, y, rotdeg(), heatNode().getTemp()); /// <---------------
-
+            UnityDrawf.drawHeat(heatRegion, x, y, rotdeg(), heatNode().getTemp());
             drawTeamTop();
         }
 

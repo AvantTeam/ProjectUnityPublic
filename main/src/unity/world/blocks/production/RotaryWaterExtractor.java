@@ -14,21 +14,15 @@ import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
+import unity.annotations.Annotations.*;
+import unity.gen.*;
+import unity.world.blocks.*;
 import unity.world.graph.*;
 
 import static arc.Core.*;
 
-public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
-    ////interface
-    public GraphBlockConfig config = new GraphBlockConfig(this);
-    @Override public Block getBuild(){
-                return this;
-            }
-    @Override public GraphBlockConfig getConfig(){
-            return config;
-        }
-    ////
-
+@Dupe(base = GenericGraphBlock.class, parent = SolidPump.class, name = "GraphPump")
+public class RotaryWaterExtractor extends GraphPump{
     public final TextureRegion[] topRegions = new TextureRegion[4], bottomRegions = new TextureRegion[2], liquidRegions = new TextureRegion[2];
     public TextureRegion rotorRegion;
 
@@ -70,35 +64,8 @@ public class RotaryWaterExtractor extends SolidPump implements GraphBlock{
         return new TextureRegion[]{region};
     }
 
-    public class RotaryWaterExtractorBuild extends SolidPumpBuild implements GraphBuild{
+    public class RotaryWaterExtractorBuild extends GraphPump.GraphPumpBuild{
         float flowRate;
-
-        ///////////
-        OrderedMap<Class<? extends Graph>,GraphNode> graphNodes = new OrderedMap<>();
-        int prevTileRotation = -1;
-        boolean placed = false;
-        @Override public Building create(Block block, Team team){ var b = super.create(block, team); if(b instanceof GraphBuild gb){gb.initGraph();} return b;}
-        @Override public void created(){ if(!placed){ initGraph(); } }
-
-        @Override
-        public void placed(){
-            super.placed();
-            placed = true;
-            connectToGraph();
-        }
-
-        @Override public void onRemoved(){ disconnectFromGraph();super.onRemoved(); }
-        @Override public void onDestroyed(){ disconnectFromGraph(); super.onDestroyed(); }
-        @Override public void pickedUp(){ disconnectFromGraph(); placed = false; super.pickedUp(); }
-
-        @Override public OrderedMap<Class<? extends Graph>, GraphNode> getNodes(){ return graphNodes; }
-        @Override public Building getBuild(){ return this; }
-        @Override public int getPrevRotation(){ return prevTileRotation; }
-        @Override public void setPrevRotation(int t){ prevTileRotation = t; }
-        @Override public void displayBars(Table table){ super.displayBars(table); displayGraphBars(table); }
-        @Override public void write(Writes write){ super.write(write);writeGraphs(write); }
-        @Override public void read(Reads read, byte revision){ super.read(read, revision); readGraphs(read); }
-        ////////
 
         @Override
         public void drawSelect(){

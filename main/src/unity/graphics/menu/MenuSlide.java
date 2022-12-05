@@ -91,6 +91,7 @@ public class MenuSlide implements Disposable{
         // draw shadows
         Draw.proj().setOrtho(0, 0, shadows.getWidth(), shadows.getHeight());
         shadows.begin(Color.clear);
+
         Draw.color(Color.black);
 
         for(Tile tile : world.tiles){

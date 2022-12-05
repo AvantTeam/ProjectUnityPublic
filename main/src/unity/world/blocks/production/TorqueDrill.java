@@ -12,13 +12,19 @@ import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
+import unity.annotations.Annotations.*;
+import unity.gen.*;
+import unity.gen.GraphDrill.*;
 import unity.graphics.*;
+import unity.world.blocks.*;
+import unity.world.blocks.defense.*;
+import unity.world.blocks.exp.*;
 import unity.world.graph.*;
 
 import static arc.Core.atlas;
 
-public class TorqueDrill extends Drill implements GraphBlock{
-    public GraphBlockConfig config = new GraphBlockConfig(this);
+@Dupe(base = GenericGraphBlock.class, parent = Drill.class, name = "GraphDrill")
+public class TorqueDrill extends GraphDrill{
     public float maxEfficiency = 3.0f;
 
     public final TextureRegion[] bottomRegions = new TextureRegion[2], topRegions = new TextureRegion[2], oreRegions = new TextureRegion[2];
@@ -54,22 +60,6 @@ public class TorqueDrill extends Drill implements GraphBlock{
         }
     }
 
-
-    @Override public void setStats(){ super.setStats(); config.setStats(stats); }
-    @Override
-    public void drawPlace(int x, int y, int rotation, boolean valid){
-        super.drawPlace(x, y, rotation, valid);
-    }
-    @Override public void drawPlanRegion(BuildPlan req, Eachable<BuildPlan> list){
-         super.drawPlanRegion(req,list);
-         config.drawConnectionPoints(req,list); }
-    @Override public Block getBuild(){
-            return this;
-        }
-    @Override public GraphBlockConfig getConfig(){
-        return config;
-    }
-
     @Override public boolean outputsItems(){
         return true;
     }
@@ -79,38 +69,7 @@ public class TorqueDrill extends Drill implements GraphBlock{
     }
 
 
-    public class TorqueDrillBuild extends DrillBuild implements GraphBuild{
-        OrderedMap<Class<? extends Graph>,GraphNode> graphNodes = new OrderedMap<>();
-        int prevTileRotation = -1;
-        boolean placed = false;
-        @Override public Building create(Block block, Team team){ var b = super.create(block, team); if(b instanceof GraphBuild gb){gb.initGraph();} return b;}
-        @Override public void created(){ if(!placed){ initGraph(); } }
-        @Override public void displayBars(Table table){ super.displayBars(table); displayGraphBars(table); }
-        @Override public void write(Writes write){ super.write(write);writeGraphs(write); }
-        @Override public void read(Reads read, byte revision){ super.read(read, revision); readGraphs(read); }
-        @Override public void pickedUp(){ disconnectFromGraph(); placed = false; super.pickedUp(); }
-        @Override
-        public void placed(){
-            super.placed();
-            placed = true;
-            connectToGraph();
-        }
-
-        @Override
-        public void onRemoved(){
-            disconnectFromGraph();
-            super.onRemoved();
-        }
-
-        @Override
-        public void updateTile(){
-            if(!placed){
-                placed = true;
-                connectToGraph();
-            }
-            super.updateTile();
-            updateGraphs();
-        }
+    public class TorqueDrillBuild extends GraphDrillBuild{
 
         @Override
         public void updateConsumption(){
@@ -162,19 +121,5 @@ public class TorqueDrill extends Drill implements GraphBlock{
             drawTeamTop();
         }
 
-        @Override public OrderedMap<Class<? extends Graph>, GraphNode> getNodes(){
-                    return graphNodes;
-                }
-
-        @Override public Building getBuild(){
-            return this;
-        }
-        @Override public int getPrevRotation(){
-            return prevTileRotation;
-        }
-
-        @Override public void setPrevRotation(int t){
-            prevTileRotation = t;
-        }
     }
 }

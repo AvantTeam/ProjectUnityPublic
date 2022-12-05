@@ -141,7 +141,7 @@ public class PartsEditorDialog extends BaseDialog{
         }).update(i->{i.setChecked(editorElement.mirror);}).tooltip("mirror").width(64);
         buttons.button(Icon.eraser,Styles.clearTogglei,()->{
             editorElement.erasing = !editorElement.erasing;
-        }).tooltip("eraser").width(64);
+        }).tooltip("eraser").width(64).update(i->{i.setChecked(editorElement.erasing);});
         buttons.button(Icon.file,()->{
             builder.clear();
             editorElement.onAction();

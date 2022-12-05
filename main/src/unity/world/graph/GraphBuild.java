@@ -1,6 +1,7 @@
 package unity.world.graph;
 
 import arc.func.*;
+import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;

@@ -10,9 +10,11 @@ import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
+import unity.parts.*;
+import unity.ui.*;
 
 /** @author EyeOfDarkness */
-public class MultiBarrelWeapon extends Weapon{
+public class MultiBarrelWeapon extends Weapon implements EditorDrawable{
     public int barrels = 2;
     public float barrelSpacing = 6f;
     public float barrelOffset = 0f;
@@ -20,10 +22,12 @@ public class MultiBarrelWeapon extends Weapon{
     public boolean mirrorBarrels = false;
     public TextureRegion barrelRegion, barrelOutlineRegion;
     private final static Vec2 tv = new Vec2();
+    MultiBarrelMount blankMount;
 
     public MultiBarrelWeapon(String name){
         super(name);
         mountType = MultiBarrelMount::new;
+        blankMount = new MultiBarrelMount(this);
     }
 
     @Override
@@ -81,15 +85,22 @@ public class MultiBarrelWeapon extends Weapon{
     }
 
     @Override
+    public void drawEditor(PartsEditorElement editor, int x, int y,int w, int h, boolean valid){
+        Vec2 offset = editor.gridToUi((x+w*0.5f)*32,(y+h*0.5f)*32);
+        draw(offset.x,offset.y,0,0,0,blankMount);
+    }
+    @Override
     public void draw(Unit unit, WeaponMount mount){
-        MultiBarrelMount mMount = ((MultiBarrelMount)mount);
+        draw(unit.x,unit.y,unit.rotation,mount.rotation,mount.reload,(MultiBarrelMount)mount);
+    }
 
-        float
-        rotation = unit.rotation - 90,
-        weaponRotation  = rotation + (rotate ? mount.rotation : 0),
-        recoil = -((mount.reload) / reload * this.recoil),
-        wx = unit.x + Angles.trnsx(rotation, x, y) + Angles.trnsx(weaponRotation, 0, recoil),
-        wy = unit.y + Angles.trnsy(rotation, x, y) + Angles.trnsy(weaponRotation, 0, recoil);
+    public void draw(float x, float y, float urotation,float mrotation, float ureload, MultiBarrelMount mMount){
+
+        float rotation = urotation - 90,
+        weaponRotation  = rotation + (rotate ?mrotation : 0),
+        recoil = -((ureload) / reload * this.recoil),
+        wx = x + Angles.trnsx(rotation, x, y) + Angles.trnsx(weaponRotation, 0, recoil),
+        wy = y + Angles.trnsy(rotation, x, y) + Angles.trnsy(weaponRotation, 0, recoil);
 
         int barrels = mMount.recoils.length;
 
@@ -154,6 +165,8 @@ public class MultiBarrelWeapon extends Weapon{
         mMount.inUse += Mathf.sign(flipSprite);
         mMount.inUse %= mMount.recoils.length;
     }
+
+
 
     public static class MultiBarrelMount extends WeaponMount{
         int inUse = 0;
