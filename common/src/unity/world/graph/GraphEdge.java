@@ -13,7 +13,7 @@ public class GraphEdge<T extends GraphI<T>>{
     public GraphEdge(GraphConnectorI<T> n1, GraphConnectorI<T> n2){
         this.n1 = n1;
         this.n2 = n2;
-        id = getId(n1,n2);
+        id = getId(n1, n2);
 
         if(n1 == n2) throw new IllegalStateException("Vertices cant self-connect.");
         valid = true;

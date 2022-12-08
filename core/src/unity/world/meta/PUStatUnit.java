@@ -8,5 +8,8 @@ public class PUStatUnit{
     rpm = new StatUnit("unity-rpm"),
     torque = new StatUnit("unity-torque"),
 
+    soulUnit = new StatUnit("unity-soul-unit"),
+    soulSecond = new StatUnit("unity-soul-second"),
+
     celcius = new StatUnit("unity-celcius", false);
 }

@@ -7,5 +7,6 @@ public class PUStatCat{
 
     torque = new StatCat("unity-torque"),
     heat = new StatCat("unity-heat"),
-    crucible = new StatCat("unity-crucible");
+    crucible = new StatCat("unity-crucible"),
+    soul = new StatCat("unity-soul");
 }

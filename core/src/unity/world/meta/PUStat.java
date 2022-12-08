@@ -16,5 +16,13 @@ public class PUStat{
     maxTemperature = new Stat("unity-maxtemp", PUStatCat.heat),
 
     crucibleCapacity = new Stat("unity-cruciblecapacity", PUStatCat.crucible),
-    crucibleMeltingPoints = new Stat("unity-cruciblemelts", PUStatCat.crucible);
+    crucibleMeltingPoints = new Stat("unity-cruciblemelts", PUStatCat.crucible),
+
+    soulProduction = new Stat("unity-soul-production", PUStatCat.soul),
+    soulResistance = new Stat("unity-soul-resistance", PUStatCat.soul),
+    soulSafeLimit = new Stat("unity-soul-safe-limit", PUStatCat.soul),
+    soulAbsLimit = new Stat("unity-soul-abs-limit", PUStatCat.soul),
+    soulCritLimit = new Stat("unity-soul-crit-limit", PUStatCat.soul),
+    soulOverDump = new Stat("unity-soul-over-dump", PUStatCat.soul),
+    soulOverScale = new Stat("unity-soul-over-scale", PUStatCat.soul);
 }

@@ -40,6 +40,7 @@ import static mindustry.Vars.*;
  * @author Xelo
  */
 @GraphBlockBase
+@SuppressWarnings("unchecked")
 public interface GraphBlock{
     void eachNodeType(IntObjc<GraphNodeTypeI<?>> cons);
     void eachConnectorType(IntObjc<GraphConnectorTypeI<?>> cons);
@@ -90,6 +91,11 @@ public interface GraphBlock{
         void eachNode(IntObjc<GraphNodeI<?>> cons);
 
         <N extends GraphNodeI<? extends GraphI<?>>> N graphNode(int type);
+
+        default <C extends GraphConnectorI<? extends GraphI<?>>> C graphConnector(int type, Class<? super C> connType){
+            var node = graphNode(type);
+            return node == null ? null : (C)node.connectors().find(c -> connType.isInstance(c));
+        }
 
         default void connectToGraph(){
             eachNode((flag, node) -> node.addSelf());

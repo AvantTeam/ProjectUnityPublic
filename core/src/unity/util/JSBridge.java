@@ -33,14 +33,22 @@ public final class JSBridge{
 
             unityScope = new ImporterTopLevel(context);
             context.evaluateString(unityScope, Core.files.internal("scripts/global.js").readString(), "global.js", 1);
-            context.evaluateString(unityScope, """
+
+            String add = """
             function apply(map, object){
                 for(let key in object){
                     map.put(key, object[key]);
                 }
             }
-            """, "apply.js", 1
-            );
+
+            function buildCursor(){
+                let pos = Core.input.mouseWorld();
+                return Vars.world.buildWorld(pos.x, pos.y);
+            }
+            """;
+
+            context.evaluateString(unityScope, add, "apply.js", 1);
+            if(dev.isDev()) context.evaluateString(defaultScope, add, "apply.js", 1);
 
             supported = true;
         }catch(Throwable t){

@@ -20,7 +20,7 @@ import unity.world.graph.connectors.GraphConnectorTypeI.*;
 public interface GraphNodeTypeI<T extends GraphI<T>>{
     <E extends Building & GraphBuild> GraphNodeI<T> create(E build);
 
-    void setStats(Stats stats);
+    default void setStats(Stats stats){}
 
     default <N extends GraphNodeTypeI<? extends T>> N as(){
         return (N)this;
@@ -37,7 +37,7 @@ public interface GraphNodeTypeI<T extends GraphI<T>>{
 
         void onRotate();
 
-        void displayBars(Table table);
+        default void displayBars(Table table){}
 
         Seq<? extends GraphConnectorI<T>> connectors();
         void addConnector(GraphConnectorI<T> connector);

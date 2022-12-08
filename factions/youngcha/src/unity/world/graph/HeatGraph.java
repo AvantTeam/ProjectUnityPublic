@@ -21,12 +21,6 @@ public class HeatGraph extends Graph<HeatGraph> implements HeatGraphI<HeatGraph>
     }
 
     @Override
-    public void onMergeBegin(HeatGraph g){}
-
-    @Override
-    public void authoritativeOverride(HeatGraph g){}
-
-    @Override
     public void onUpdate(){
         HeatNodeType.ambientTemp = HeatNodeType.celsiusZero + 20f;
         if((Vars.state.rules.env & Env.scorching) != 0){
@@ -43,7 +37,7 @@ public class HeatGraph extends Graph<HeatGraph> implements HeatGraphI<HeatGraph>
         HeatNode hgn, hgno;
 
         for(GraphConnector<HeatGraph> v : vertices){
-            v.node.<HeatNode>as().flux = 0f;
+            v.<HeatNode>node().flux = 0f;
         }
 
         int iter = 3; // convergence iterations

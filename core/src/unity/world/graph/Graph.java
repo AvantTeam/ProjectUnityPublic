@@ -52,8 +52,8 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
         return (G)c;
     }
 
-    public abstract void onMergeBegin(T g);
-    public abstract void authoritativeOverride(T g);
+    public void onMergeBegin(T g){}
+    public void authoritativeOverride(T g){}
 
     public void addEdge(GraphEdge<T> edge){
         edges.put(edge.id, edge);

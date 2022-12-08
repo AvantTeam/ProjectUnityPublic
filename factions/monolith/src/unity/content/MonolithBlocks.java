@@ -1,12 +1,19 @@
 package unity.content;
 
+import mindustry.content.*;
+import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.environment.*;
 import mindustry.world.meta.*;
 import unity.graphics.*;
 import unity.mod.*;
 import unity.world.blocks.environment.*;
+import unity.world.blocks.power.*;
+import unity.world.graph.*;
+import unity.world.graph.connectors.*;
+import unity.world.graph.nodes.*;
 
+import static mindustry.type.ItemStack.*;
 import static unity.content.MonolithAttributes.*;
 import static unity.mod.FactionRegistry.*;
 
@@ -25,7 +32,9 @@ public final class MonolithBlocks{
 
     oreEneraphyteCrystal,
 
-    erodedSlateWall, infusedErodedSlateWall, archaicErodedSlateWall, sharpSlateWall, infusedSharpSlateWall, archaicSharpSlateWall;
+    erodedSlateWall, infusedErodedSlateWall, archaicErodedSlateWall, sharpSlateWall, infusedSharpSlateWall, archaicSharpSlateWall,
+
+    soulTransmitter;
 
     private MonolithBlocks(){
         throw new AssertionError();
@@ -131,6 +140,26 @@ public final class MonolithBlocks{
         archaicSharpSlateWall = register(Faction.monolith, new StaticWall("archaic-sharp-slate-wall"){{
             attributes.set(eneraphyteInfusion, 1f);
             archaicSharpSlate.asFloor().wall = this;
+        }});
+
+        soulTransmitter = register(Faction.monolith, new SoulTransmitter("soul-transmitter"){{
+            requirements(Category.power, with(Items.copper, 1));
+
+            solid = true;
+
+            soulNodeConfig = new SoulNodeType(){{
+                production = 0f;
+                resistance = 0.1f;
+
+                safeLimit = 30f;
+                absoluteLimit = 42f;
+                criticalLimit = 48f;
+
+                overloadDump = 6f;
+                overloadScale = 0.75f;
+            }};
+
+            soulConnectorConfigs.add(new DistanceConnectorType<>(SoulGraph::new, 8));
         }});
     }
 }

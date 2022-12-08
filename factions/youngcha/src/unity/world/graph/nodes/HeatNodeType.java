@@ -79,7 +79,7 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
         public float lastEnergyInput = 0;
         public float efficency = 0;
 
-        public HeatNode(GraphBuild build, float emissiveness, float conductivity, float heatCapacity, float maxTemp, float targetTemp , float prodEfficency){
+        public <E extends Building & GraphBuild> HeatNode(E build, float emissiveness, float conductivity, float heatCapacity, float maxTemp, float targetTemp , float prodEfficency){
             super(build);
             this.emissiveness = emissiveness;
             this.conductivity = conductivity;

@@ -427,7 +427,8 @@ public class GraphProcessor extends BaseProcessor{
             MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
                 .addModifiers(PUBLIC)
                 .addParameter(spec(String.class), "name")
-                .addStatement("super(name)");
+                .addStatement("super(name)")
+                .addStatement("update = true");
 
             builder.addMethod(constructor.build());
 

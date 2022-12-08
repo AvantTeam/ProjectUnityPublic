@@ -46,7 +46,7 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
         public final int id = idAccum++;
         private static int idAccum = 0;
 
-        protected GraphNode(GraphBuild build){
+        protected <E extends Building & GraphBuild> GraphNode(E build){
             this.build = build;
         }
 
@@ -87,9 +87,6 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
                 }
             }
         }
-
-        @Override
-        public void displayBars(Table table){}
 
         @Override
         public Seq<GraphConnector<T>> connectors(){
