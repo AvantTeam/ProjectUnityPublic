@@ -21,6 +21,14 @@ public class ConsumeSoul extends Consume{
         if(!(build instanceof GraphBuild b)) return 0f;
 
         SoulNode node = b.graphNode(Graphs.soul);
-        return node == null ? 0f : Mathf.clamp(node.amount / amount);
+        return node == null ? 0f : Mathf.clamp(node.amount / (amount * build.edelta() * build.efficiencyScale()));
+    }
+
+    @Override
+    public void update(Building build){
+        SoulNode node;
+        if(!(build instanceof GraphBuild b) || (node = b.graphNode(Graphs.soul)) == null) return;
+
+        node.amount = Math.max(0f, node.amount - amount * b.edelta());
     }
 }

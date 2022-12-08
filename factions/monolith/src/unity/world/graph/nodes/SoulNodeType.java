@@ -1,8 +1,15 @@
 package unity.world.graph.nodes;
 
+import arc.*;
+import arc.scene.ui.layout.*;
+import arc.struct.*;
 import arc.util.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.world.meta.*;
+import unity.graphics.*;
+import unity.ui.*;
+import unity.ui.SegmentBar.*;
 import unity.world.consumers.*;
 import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
@@ -11,24 +18,24 @@ import unity.world.meta.*;
 /** @author GlennFolker */
 public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTypeI<SoulGraph>{
     public float production = 0f;
-    public float resistance = 0.1f;
+    public float resistance = 0.04f;
 
     public float safeLimit = 30f;
     public float absoluteLimit = 42f;
     public float criticalLimit = 48f;
     
-    public float overloadDump = 6f;
-    public float overloadScale = 0.75f;
+    public float overloadDump = 0.8f;
+    public float overloadScale = 0.4f;
 
     @Override
     public void setStats(Stats stats){
-        if(production > 0f) stats.add(PUStat.soulProduction, production, PUStatUnit.soulSecond);
-        stats.add(PUStat.soulResistance, resistance, PUStatUnit.soulSecond);
+        if(production > 0f) stats.add(PUStat.soulProduction, production * 60f, PUStatUnit.soulSecond);
+        stats.add(PUStat.soulResistance, resistance * 60f, PUStatUnit.soulSecond);
         stats.add(PUStat.soulSafeLimit, safeLimit, PUStatUnit.soulUnit);
         stats.add(PUStat.soulAbsLimit, absoluteLimit, PUStatUnit.soulUnit);
         stats.add(PUStat.soulCritLimit, criticalLimit, PUStatUnit.soulUnit);
-        stats.add(PUStat.soulOverDump, overloadDump, PUStatUnit.soulSecond);
-        stats.add(PUStat.soulOverScale, overloadScale, PUStatUnit.soulSecond);
+        stats.add(PUStat.soulOverDump, overloadDump * 60f, PUStatUnit.soulSecond);
+        stats.add(PUStat.soulOverScale, overloadScale, PUStatUnit.soulPer);
     }
 
     @Override
@@ -69,6 +76,27 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         @Override
         public float consumption(){
             return cons == null ? 0f : cons.amount;
+        }
+
+        @Override
+        public void displayBars(Table table){
+            Seq<Segment> segments = Seq.with(
+                new Segment(() -> MonolithPal.monolithLighter, 0f),
+                new Segment(() -> Pal.redLight, (consumption() + safeLimit) / criticalLimit),
+                new Segment(() -> Pal.removeBack, (consumption() + absoluteLimit) / criticalLimit)
+            );
+
+            if(consumption() > 0f) segments.insert(1, new Segment(
+                () -> MonolithPal.monolithLight,
+                consumption() / criticalLimit
+            ));
+
+            table.row();
+            table.add(new SegmentBar(
+                () -> Core.bundle.get("category.unity-soul"),
+                () -> amount / criticalLimit,
+                segments.toArray(Segment.class)
+            ));
         }
 
         @Override

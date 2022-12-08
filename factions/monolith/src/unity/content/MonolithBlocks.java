@@ -149,14 +149,14 @@ public final class MonolithBlocks{
 
             soulNodeConfig = new SoulNodeType(){{
                 production = 0f;
-                resistance = 0.1f;
+                resistance = 0.04f;
 
                 safeLimit = 30f;
                 absoluteLimit = 42f;
                 criticalLimit = 48f;
 
-                overloadDump = 6f;
-                overloadScale = 0.75f;
+                overloadDump = 0.8f;
+                overloadScale = 0.4f;
             }};
 
             soulConnectorConfigs.add(new DistanceConnectorType<>(SoulGraph::new, 8));

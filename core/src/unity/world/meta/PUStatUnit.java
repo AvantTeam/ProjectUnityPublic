@@ -10,6 +10,7 @@ public class PUStatUnit{
 
     soulUnit = new StatUnit("unity-soul-unit"),
     soulSecond = new StatUnit("unity-soul-second"),
+    soulPer = new StatUnit("unity-soul-per", false),
 
     celcius = new StatUnit("unity-celcius", false);
 }
