@@ -11,6 +11,7 @@ import mindustry.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.io.TypeIO;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.blocks.payloads.*;
@@ -19,7 +20,6 @@ import unity.content.*;
 import unity.gen.*;
 import unity.parts.*;
 import unity.parts.PanelDoodadType.*;
-import unity.parts.types.*;
 import unity.type.*;
 import unity.ui.*;
 import unity.util.*;
@@ -38,7 +38,7 @@ public class ModularUnitAssembler extends PayloadBlock{
     public ModularUnitAssembler(String name){
         super(name);
         solid = false;
-        configurable = true;
+        configurable = commandable = true;
         config(byte[].class, (ModularUnitAssemblerBuild build, byte[] data) -> {
             build.blueprint.paste(data);
             build.doodads.clear();
@@ -68,7 +68,7 @@ public class ModularUnitAssembler extends PayloadBlock{
         boolean modulePlaced = false;
         public int takenby = -1;
 
-        //moduleblock?
+        //module block?
         ModuleConstructing(ModularPart mp){
             this.x = (short)mp.getX();
             this.y = (short)mp.getY();
@@ -86,15 +86,15 @@ public class ModularUnitAssembler extends PayloadBlock{
             write.s(type.id);
             write.s(remaining.length); //amount of items
 
-            for(int i = 0; i < remaining.length; i++){
-                write.s(remaining[i].item.id); //item ID
-                write.i(remaining[i].amount); //item amount
+            for (ItemStack itemStack : remaining) {
+                write.s(itemStack.item.id); //item ID
+                write.i(itemStack.amount); //item amount
             }
             write.bool(modulePlaced);
             write.i(takenby);
         }
 
-        public ModuleConstructing(Reads read, byte revision){
+        public ModuleConstructing(Reads read){
             x = read.s();
             y = read.s();
             type = ModularPartType.getPartFromId(read.s());
@@ -107,8 +107,8 @@ public class ModularUnitAssembler extends PayloadBlock{
         }
         public int total(){
             int t = 0;
-            for(int i = 0; i < remaining.length; i++){
-                t+=remaining[i].amount;
+            for (ItemStack itemStack : remaining) {
+                t += itemStack.amount;
             }
             return t;
         }
@@ -125,9 +125,9 @@ public class ModularUnitAssembler extends PayloadBlock{
             return false;
         }
         public Item any(){
-            for(int i = 0; i < remaining.length; i++){
-                if(remaining[i].amount>0){
-                    return remaining[i].item;
+            for (ItemStack itemStack : remaining) {
+                if (itemStack.amount > 0) {
+                    return itemStack.item;
                 }
             }
             return null;
@@ -142,11 +142,22 @@ public class ModularUnitAssembler extends PayloadBlock{
     }
 
     public class ModularUnitAssemblerBuild extends PayloadBlockBuild<UnitPayload>{
+        public @Nullable Vec2 commandPos;
         public ModularConstructBuilder blueprint;
         public Seq<ModuleConstructing> currentlyConstructing;
         public Seq<PanelDoodad> doodads;
         IntSet built = new IntSet();
         public ModularConstruct construct;
+
+        @Override
+        public Vec2 getCommandPosition(){
+            return commandPos;
+        }
+
+        @Override
+        public void onCommand(Vec2 target){
+            commandPos = target;
+        }
 
         public ModularUnitAssemblerBuild(){
             blueprint = new ModularConstructBuilder(unitModuleWidth,unitModuleHeight);
@@ -162,9 +173,7 @@ public class ModularUnitAssembler extends PayloadBlock{
             var configureButtonCell = table.button(Tex.whiteui, Styles.cleari, 50,
             (() -> {
                 Unity.ui.partsEditor.show(blueprint.exportFull(),
-                (data)->{
-                    this.configure(data);
-                },
+                        this::configure,
                 PartsEditorDialog.unitInfoViewer,
                 part->part.visible && part.fitsIntoGrid(blueprint.w,blueprint.h));
             }));
@@ -227,6 +236,9 @@ public class ModularUnitAssembler extends PayloadBlock{
             var t = UnityUnitTypes.modularUnitSmall.create(team);
             ModularConstruct.cache.put(t,blueprint.createConstruct(true));
             ((ModularUnitc) t).constructdata(ModularConstruct.cache.get(t).compressedData);
+            if (commandPos != null) {
+                t.command().commandPosition(commandPos);
+            }
             payload = new UnitPayload(t);
             payVector.setZero();
             Events.fire(new UnitCreateEvent(payload.unit, this));
@@ -408,6 +420,7 @@ public class ModularUnitAssembler extends PayloadBlock{
             for(int i = 0;i<currentlyConstructing.size;i++){
                 currentlyConstructing.get(i).write(write);
             }
+            TypeIO.writeVecNullable(write, commandPos);
         }
 
         @Override
@@ -422,8 +435,11 @@ public class ModularUnitAssembler extends PayloadBlock{
             }
             int clen = read.i();
             for(int i =0;i<clen;i++){
-                currentlyConstructing.add(new ModuleConstructing(read,revision));
-           }
+                currentlyConstructing.add(new ModuleConstructing(read));
+            }
+            if(revision >= 2){
+                commandPos = TypeIO.readVecNullable(read);
+            }
         }
 
         public boolean isSandbox(){
