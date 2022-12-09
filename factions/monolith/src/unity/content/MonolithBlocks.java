@@ -159,7 +159,13 @@ public final class MonolithBlocks{
                 overloadScale = 0.4f;
             }};
 
-            soulConnectorConfigs.add(new DistanceConnectorType<>(SoulGraph::new, 8));
+            soulConnectorConfigs.add(
+                new DistanceConnectorType<>(SoulGraph::new, 8),
+                new FixedConnectorType<>(SoulGraph::new, 1, 1, 1, 1){{
+                    priority = -100;
+                    allowSamePriority = false;
+                }}
+            );
         }});
     }
 }

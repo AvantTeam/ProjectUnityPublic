@@ -21,6 +21,9 @@ import static mindustry.Vars.*;
 @SuppressWarnings("unchecked")
 public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T>{
     public int[] connectionIndices;
+    /** Higher value becomes n2, lower becomes n1. */
+    public int priority;
+    public boolean allowSamePriority = true;
 
     public FixedConnectorType(Prov<T> newGraph, int... connectionIndices){
         super(newGraph);
@@ -29,7 +32,7 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
 
     @Override
     public FixedConnector<T> create(GraphNodeI<T> node){
-        return new FixedConnector<>(node.as(), newGraph.get(), connectionIndices);
+        return new FixedConnector<>(node.as(), newGraph.get(), this);
     }
 
     @Override
@@ -58,13 +61,18 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
     }
 
     public static class FixedConnector<T extends Graph<T>> extends GraphConnector<T>{
-        int[] connectionIndices;
+        protected int[] connectionIndices;
+        protected int priority;
+        protected boolean allowSamePriority;
+
         public ConnectionPort<T>[] connectionPoints;
         public Boolf2<ConnectionPort<T>, ConnectionPort<T>> portCompatibility;
 
-        public FixedConnector(GraphNode<T> node, T graph, int... connections){
+        public FixedConnector(GraphNode<T> node, T graph, FixedConnectorType<T> type){
             super(node, graph);
-            connectionIndices = connections;
+            connectionIndices = type.connectionIndices;
+            priority = type.priority;
+            allowSamePriority = type.allowSamePriority;
         }
 
         @Override
@@ -101,12 +109,19 @@ public class FixedConnectorType<T extends Graph<T>> extends GraphConnectorType<T
                     if(extnode == null) continue;
                     for(var extconnector : extnode.connectors){
                         if(!(extconnector instanceof FixedConnector fixed)) continue;
+                        if(priority == fixed.priority && (!allowSamePriority || !fixed.allowSamePriority)) continue;
+
                         var edge = fixed.tryConnect(port.relpos.cpy().add(port.dir), this);
                         if(edge != null){
                             port.edge = edge;
                             if(!connections.contains(edge)) connections.add(edge);
                         }
 
+                        if(priority > fixed.priority){
+                            edge.setN2(this);
+                        }else if(fixed.priority > priority){
+                            edge.setN1(this);
+                        }
                     }
                 }
 
