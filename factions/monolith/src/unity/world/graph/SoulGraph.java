@@ -29,22 +29,24 @@ public class SoulGraph extends Graph<SoulGraph> implements SoulGraphI<SoulGraph>
 
         for(int i = 0; i < 3; i++){
             for(var v : vertices){
-                if(v.connections.size == 0) continue;
+                SoulNode node = v.node();
+                if(v.connections.size == 0 || !node.canTransfer) continue;
 
                 int count = 0;
                 for(var e : v.connections){
-                    if(e.n2 == v) count++;
+                    if(e.n2 == v && e.n1.<SoulNode>node().canReceive) count++;
                 }
 
                 if(count == 0) continue;
-                SoulNode node = v.node();
 
                 float transferAmount = (node.amount - node.resistance - node.consumption()) / count;
                 if(transferAmount <= 0f) continue;
 
                 for(var e : v.connections){
-                    if(e.n2 != v) continue;
-                    e.n1.<SoulNode>node().amount += transferAmount;
+                    SoulNode dst = e.n1.node();
+                    if(e.n2 != v || !dst.canReceive) continue;
+
+                    dst.amount += transferAmount;
                 }
 
                 transferAmount *= count;

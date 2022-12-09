@@ -2,7 +2,6 @@ package unity.world.graph.nodes;
 
 import arc.*;
 import arc.scene.ui.layout.*;
-import arc.struct.*;
 import arc.util.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -26,6 +25,9 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
     
     public float overloadDump = 0.8f;
     public float overloadScale = 0.4f;
+
+    public boolean canReceive = true;
+    public boolean canTransfer = true;
 
     @Override
     public void setStats(Stats stats){
@@ -56,6 +58,9 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         public float overloadDump;
         public float overloadScale;
 
+        public boolean canReceive;
+        public boolean canTransfer;
+
         public float prodEfficiency;
         public float amount, transferred;
         public float visualAmount, visualTransferred;
@@ -69,33 +74,26 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
             criticalLimit = type.criticalLimit;
             overloadDump = type.overloadDump;
             overloadScale = type.overloadScale;
+            canReceive = type.canReceive;
+            canTransfer = type.canTransfer;
 
             cons = build.block.findConsumer(c -> c instanceof ConsumeSoul);
         }
 
         @Override
         public float consumption(){
-            return cons == null ? 0f : cons.amount;
+            return cons == null ? 0f : cons.amount * build().edelta();
         }
 
         @Override
         public void displayBars(Table table){
-            Seq<Segment> segments = Seq.with(
-                new Segment(() -> MonolithPal.monolithLighter, 0f),
-                new Segment(() -> Pal.redLight, (consumption() + safeLimit) / criticalLimit),
-                new Segment(() -> Pal.removeBack, (consumption() + absoluteLimit) / criticalLimit)
-            );
-
-            if(consumption() > 0f) segments.insert(1, new Segment(
-                () -> MonolithPal.monolithLight,
-                consumption() / criticalLimit
-            ));
-
             table.row();
             table.add(new SegmentBar(
                 () -> Core.bundle.get("category.unity-soul"),
                 () -> amount / criticalLimit,
-                segments.toArray(Segment.class)
+                new Segment(() -> MonolithPal.monolithLighter, 0f),
+                new Segment(() -> Pal.redLight, safeLimit / criticalLimit),
+                new Segment(() -> Pal.removeBack, absoluteLimit / criticalLimit)
             ));
         }
 
@@ -111,6 +109,10 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         public float overloadDump(){ return overloadDump; }
         @Override
         public float overloadScale(){ return overloadScale; }
+        @Override
+        public float canReceive(){ return canReceive; }
+        @Override
+        public float canTransfer(){ return canTransfer; }
         @Override
         public float amount(){ return amount; }
         @Override

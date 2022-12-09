@@ -26,6 +26,9 @@ public interface SoulNodeTypeI<T extends SoulGraphI<T>> extends GraphNodeTypeI<T
         float overloadDump();
         float overloadScale();
 
+        boolean canReceive();
+        boolean canTransfer();
+
         float prodEfficiency();
         void prodEfficiency(float prodEfficiency);
 

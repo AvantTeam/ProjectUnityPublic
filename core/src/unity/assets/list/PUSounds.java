@@ -2,7 +2,7 @@ package unity.assets.list;
 
 import arc.audio.*;
 
-import static mindustry.Vars.tree;
+import static mindustry.Vars.*;
 
 /** Lists all {@link Sound}s the mod has to load. */
 public final class PUSounds{

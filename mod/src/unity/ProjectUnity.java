@@ -66,6 +66,8 @@ public class ProjectUnity extends ProjectUnityI{
         }));
 
         Events.on(ContentInitEvent.class, e -> Core.app.post(() -> {
+            PUIcon.load();
+            
             Faction.load();
             Graphs.load();
         }));
