@@ -39,34 +39,38 @@ public class GraphProcessor extends BaseProcessor{
     protected OrderedMap<String, GraphEntry> entries = new OrderedMap<>();
 
     /** (Modify as needed!) Fields that are present in implementations of GraphBlock. */
-    protected Seq<FieldSpec> blockFields;
+    protected ObjectMap<String, Seq<FieldSpec>> blockFields;
     /** (Modify as needed!) Fields that are present in implementations of GraphBuild. */
-    protected Seq<FieldSpec> buildFields;
+    protected ObjectMap<String, Seq<FieldSpec>> buildFields;
     /**
      * (Modify as needed!) Boilerplate methods that are overriden to interop with the graph system in implementations
      * of GraphBlock.
      */
-    protected Seq<Implement> blockImpls;
+    protected ObjectMap<String, Seq<Implement>> blockImpls;
     /**
      * (Modify as needed!) Boilerplate methods that are overriden to interop with the graph system in implementations
      * of GraphBuild.
      */
-    protected Seq<Implement> buildImpls;
+    protected ObjectMap<String, Seq<Implement>> buildImpls;
 
     {
         rounds = 1;
     }
 
     protected void initImpls(){
-        blockFields = Seq.with();
+        blockFields = ObjectMap.of(
+        "Graph", Seq.with()
+        );
 
-        buildFields = Seq.with(
+        buildFields = ObjectMap.of(
+        "Graph", Seq.with(
             FieldSpec.builder(TypeName.INT, "prevTileRotation").initializer("-1").build(),
             FieldSpec.builder(TypeName.BOOLEAN, "placed").initializer("false").build(),
             FieldSpec.builder(TypeName.BOOLEAN, "graphInitialized").initializer("false").build()
-        );
+        ));
 
-        blockImpls = Seq.with(
+        blockImpls = ObjectMap.of(
+        "Graph", Seq.with(
             new Implement((method, callSuper, entries) -> {
                 callSuper.get(null, null);
                 method.addStatement("setGraphStats(stats)");
@@ -94,9 +98,10 @@ public class GraphProcessor extends BaseProcessor{
                 }
             }, "eachConnectorType", TypeName.VOID, true,
             paramSpec(ClassName.get("unity.func", "IntObjc"), paramSpec(spec(connectorTypeBase), subSpec(spec(Object.class)))), "cons")
-        );
+        ));
 
-        buildImpls = Seq.with(
+        buildImpls = ObjectMap.of(
+        "Graph", Seq.with(
             new Implement((method, callSuper, entries) -> {
                 callSuper.get(null, "b");
                 method.addStatement("if(b instanceof $T build) build.initGraph()", graphEntBase);
@@ -222,7 +227,7 @@ public class GraphProcessor extends BaseProcessor{
                         .addStatement("for(var conn : $LConnectorConfigs) $LNode.addConnector(conn.create($LNode))", entry, entry, entry);
                 }
             }, "initGraphNodes", TypeName.VOID, true)
-        );
+        ));
     }
 
     @Override
@@ -492,10 +497,29 @@ public class GraphProcessor extends BaseProcessor{
                 target.addMethod(methBuilder.build());
             };
 
-            blockFields.each(builder::addField);
-            buildFields.each(buildBuilder::addField);
-            blockImpls.each(impl -> implementor.get(impl, builder));
-            buildImpls.each(impl -> implementor.get(impl, buildBuilder));
+            for(var e : blockFields.entries()){
+                if(e.key.equals("Graph") || props.containsKey(e.key)){
+                    e.value.each(builder::addField);
+                }
+            }
+
+            for(var e : buildFields.entries()){
+                if(e.key.equals("Graph") || props.containsKey(e.key)){
+                    e.value.each(buildBuilder::addField);
+                }
+            }
+
+            for(var e : blockImpls.entries()){
+                if(e.key.equals("Graph") || props.containsKey(e.key)){
+                    e.value.each(impl -> implementor.get(impl, builder));
+                }
+            }
+
+            for(var e : buildImpls.entries()){
+                if(e.key.equals("Graph") || props.containsKey(e.key)){
+                    e.value.each(impl -> implementor.get(impl, buildBuilder));
+                }
+            }
 
             write(packageName, builder.addType(buildBuilder.build()), null);
         }
