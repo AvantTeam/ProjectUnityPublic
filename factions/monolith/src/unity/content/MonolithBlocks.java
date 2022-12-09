@@ -12,6 +12,7 @@ import unity.world.blocks.power.*;
 import unity.world.graph.*;
 import unity.world.graph.connectors.*;
 import unity.world.graph.nodes.*;
+import unity.world.graph.prop.*;
 
 import static mindustry.type.ItemStack.*;
 import static unity.content.MonolithAttributes.*;
@@ -146,6 +147,10 @@ public final class MonolithBlocks{
             requirements(Category.power, with(Items.copper, 1));
 
             solid = true;
+
+            soulProp = new SoulTransmitterProps(this){{
+
+            }};
 
             soulNodeConfig = new SoulNodeType(){{
                 production = 0f;

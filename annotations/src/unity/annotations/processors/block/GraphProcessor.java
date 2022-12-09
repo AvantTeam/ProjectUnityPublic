@@ -35,7 +35,7 @@ public class GraphProcessor extends BaseProcessor{
     protected ClassSymbol graphBlockBase, graphEntBase;
     protected ClassSymbol graphBase;
     protected ClassSymbol nodeTypeBase, nodeBase;
-    protected ClassSymbol connectorTypeBase;
+    protected ClassSymbol connectorTypeBase, connectorBase;
     protected OrderedMap<String, GraphEntry> entries = new OrderedMap<>();
 
     /** (Modify as needed!) Fields that are present in implementations of GraphBlock. */
@@ -241,10 +241,44 @@ public class GraphProcessor extends BaseProcessor{
                         .addStatement("$LNode = $LNodeConfig.create(this)", entry, entry)
                         .addStatement("for(var conn : $LConnectorConfigs) $LNode.addConnector(conn.create($LNode))", entry, entry, entry);
                 }
-            }, "initGraphNodes", TypeName.VOID, true)
+            }, "initGraphNodes", TypeName.VOID, true),
+
+            new Implement((method, callSuper, ret, entries) -> {}, "onGraphInit", TypeName.VOID, true),
+            new Implement((method, callSuper, ret, entries) -> {}, "onConnectionChanged", TypeName.VOID, true,
+            paramSpec(spec(connectorBase), subSpec(spec(Object.class))), "connector"),
+
+            new Implement((method, callSuper, ret, entries) -> method
+                .addStatement("$T.super.connectToGraph()", graphEntBase),
+            "connectToGraph", TypeName.VOID, true),
+            new Implement((method, callSuper, ret, entries) -> method
+                .addStatement("$T.super.disconnectFromGraph()", graphEntBase),
+            "disconnectFromGraph", TypeName.VOID, true),
+            new Implement((method, callSuper, ret, entries) -> method
+                .addStatement("$T.super.onRotate()", graphEntBase),
+            "onRotate", TypeName.VOID, true),
+
+            new Implement((method, callSuper, ret, entries) -> method
+                .addStatement("$T.super.displayGraphBars(table)", graphEntBase),
+            "displayGraphBars", TypeName.VOID, true,
+            spec(Table.class), "table"),
+
+            new Implement((method, callSuper, ret, entries) -> method
+                .addStatement("$T.super.updateGraphs()", graphEntBase),
+            "updateGraphs", TypeName.VOID, true),
+
+            new Implement((method, callSuper, ret, entries) -> method
+                .addStatement("$T.super.writeGraphs(write)", graphEntBase),
+            "writeGraphs", TypeName.VOID, true,
+            spec(Writes.class), "write"),
+
+            new Implement((method, callSuper, ret, entries) -> method
+                .addStatement("$T.super.readGraphs(read)", graphEntBase),
+            "readGraphs", TypeName.VOID, true,
+            spec(Reads.class), "read")
         ),
         "Soul", Seq.with(
             new Implement((method, callSuper, ret, entries) -> {
+                callSuper.get(null, null);
                 method.addStatement("soulPropEnt = soulProp.create(this)");
             }, "onGraphInit", TypeName.VOID, true),
 
@@ -301,6 +335,12 @@ public class GraphProcessor extends BaseProcessor{
         for(var t : this.<ClassSymbol>with(GraphConnectorBase.class)){
             if(connectorTypeBase == null){
                 connectorTypeBase = t;
+                for(var s : t.getEnclosedElements()){
+                    if(s.getKind() == INTERFACE && name(s).equals("GraphConnectorI")){
+                        connectorBase = (ClassSymbol)s;
+                        break;
+                    }
+                } if(connectorBase == null) throw new IllegalStateException("GraphConnectorI not found");
             }else{
                 throw new IllegalStateException("Only one type may be annotated with @GraphConnectorBase");
             }

@@ -110,6 +110,8 @@ public class SoulTransmitter extends SoulBlock{
 
         @Override
         public void onGraphInit(){
+            super.onGraphInit();
+
             connector = graphConnector(Graphs.soul, DistanceConnector.class);
             if(connector == null) throw new IllegalStateException("No distance connector set up.");
         }

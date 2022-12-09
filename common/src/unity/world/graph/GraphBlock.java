@@ -82,11 +82,11 @@ public interface GraphBlock{
 
         void initGraph();
         void initGraphNodes();
-        default void onGraphInit(){}
+        void onGraphInit();
 
         boolean graphInitialized();
 
-        default void onConnectionChanged(GraphConnectorI<?> connector){}
+        void onConnectionChanged(GraphConnectorI<?> connector);
 
         void eachNode(IntObjc<GraphNodeI<?>> cons);
 

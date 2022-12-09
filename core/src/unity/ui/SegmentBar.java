@@ -126,13 +126,6 @@ public class SegmentBar extends Bar{
         float topWidth = width * value;
         float minWidth = Core.atlas.find("bar-top").width;
 
-        if(topWidth > minWidth){
-            drawTop(top, width, topWidth);
-        }else if(ScissorStack.push(scissor.set(x, y, topWidth, height))){
-            drawTop(top, width, minWidth);
-            ScissorStack.pop();
-        }
-
         for(int i = 1; i < segments.length; i++){
             float fraction = segments[i].fraction;
 
@@ -144,6 +137,14 @@ public class SegmentBar extends Bar{
                 x + width * fraction, y + height,
                 false
             );
+        }
+
+        Draw.reset();
+        if(topWidth > minWidth){
+            drawTop(top, width, topWidth);
+        }else if(ScissorStack.push(scissor.set(x, y, topWidth, height))){
+            drawTop(top, width, minWidth);
+            ScissorStack.pop();
         }
 
         Draw.reset();
