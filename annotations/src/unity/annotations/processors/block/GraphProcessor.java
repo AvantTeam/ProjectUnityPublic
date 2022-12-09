@@ -61,14 +61,17 @@ public class GraphProcessor extends BaseProcessor{
         blockFields = ObjectMap.of(
         "Graph", Seq.with(),
         "Soul", Seq.with(
-            
+            FieldSpec.builder(ClassName.get("unity.world.graph.prop", "SoulProps"), "soulProp", PUBLIC).build()
         ));
 
         buildFields = ObjectMap.of(
         "Graph", Seq.with(
-            FieldSpec.builder(TypeName.INT, "prevTileRotation").initializer("-1").build(),
-            FieldSpec.builder(TypeName.BOOLEAN, "placed").initializer("false").build(),
-            FieldSpec.builder(TypeName.BOOLEAN, "graphInitialized").initializer("false").build()
+            FieldSpec.builder(TypeName.INT, "prevTileRotation", PROTECTED).initializer("-1").build(),
+            FieldSpec.builder(TypeName.BOOLEAN, "placed", PROTECTED).initializer("false").build(),
+            FieldSpec.builder(TypeName.BOOLEAN, "graphInitialized", PROTECTED).initializer("false").build()
+        ),
+        "Soul", Seq.with(
+            FieldSpec.builder(ClassName.get("unity.world.graph.prop", "SoulProps", "SoulPropsEntity"), "soulPropEnt", PUBLIC).build()
         ));
 
         blockImpls = ObjectMap.of(
@@ -100,6 +103,17 @@ public class GraphProcessor extends BaseProcessor{
                 }
             }, "eachConnectorType", TypeName.VOID, true,
             paramSpec(ClassName.get("unity.func", "IntObjc"), paramSpec(spec(connectorTypeBase), subSpec(spec(Object.class)))), "cons")
+        ),
+        "Soul", Seq.with(
+            new Implement((method, callSuper, ret, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("soulProp.init()");
+            }, "init", TypeName.VOID, true),
+
+            new Implement((method, callSuper, ret, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("soulProp.load()");
+            }, "load", TypeName.VOID, true)
         ));
 
         buildImpls = ObjectMap.of(
@@ -228,6 +242,21 @@ public class GraphProcessor extends BaseProcessor{
                         .addStatement("for(var conn : $LConnectorConfigs) $LNode.addConnector(conn.create($LNode))", entry, entry, entry);
                 }
             }, "initGraphNodes", TypeName.VOID, true)
+        ),
+        "Soul", Seq.with(
+            new Implement((method, callSuper, ret, entries) -> {
+                method.addStatement("soulPropEnt = soulProp.create(this)");
+            }, "onGraphInit", TypeName.VOID, true),
+
+            new Implement((method, callSuper, ret, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("soulPropEnt.draw()");
+            }, "draw", TypeName.VOID, true),
+
+            new Implement((method, callSuper, ret, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("soulPropEnt.update()");
+            }, "updateTile", TypeName.VOID, true)
         ));
     }
 
@@ -474,17 +503,21 @@ public class GraphProcessor extends BaseProcessor{
 
             Cons2<TypeSpec.Builder, ObjectMap<String, Seq<Implement>>> implementor = (target, list) -> {
                 ObjectMap<String, MethodSpec.Builder> methods = new ObjectMap<>();
-                for(var is : list.values()) is.each(i -> {
-                    if(!methods.containsKey(i.desc())){
-                        MethodSpec.Builder methBuilder = MethodSpec.methodBuilder(i.name)
-                            .addAnnotation(spec(Override.class))
-                            .addModifiers(i.isPublic ? PUBLIC : PROTECTED)
-                            .returns(i.ret);
+                for(var e : list.entries()){
+                    if(e.key.equals("Graph") || props.containsKey(e.key)){
+                        e.value.each(i -> {
+                            if(!methods.containsKey(i.desc())){
+                                MethodSpec.Builder methBuilder = MethodSpec.methodBuilder(i.name)
+                                    .addAnnotation(spec(Override.class))
+                                    .addModifiers(i.isPublic ? PUBLIC : PROTECTED)
+                                    .returns(i.ret);
 
-                        for(var arg : i.args) methBuilder.addParameter(arg.type, arg.name);
-                        methods.put(i.desc(), methBuilder);
+                                for(var arg : i.args) methBuilder.addParameter(arg.type, arg.name);
+                                methods.put(i.desc(), methBuilder);
+                            }
+                        });
                     }
-                });
+                }
 
                 Cons4<Implement, MethodSpec.Builder, TypeName, String> callSuper = (impl, methBuilder, type, str) -> {
                     StringBuilder stat = new StringBuilder("super.")
@@ -539,8 +572,8 @@ public class GraphProcessor extends BaseProcessor{
                     }
                 });
 
-                for(var e : list){
-                    if(e.key.equals("Graph")) continue;
+                for(var e : list.entries()){
+                    if(e.key.equals("Graph") || !props.containsKey(e.key)) continue;
 
                     String blockName = e.key.toLowerCase();
                     e.value.each(i -> {
