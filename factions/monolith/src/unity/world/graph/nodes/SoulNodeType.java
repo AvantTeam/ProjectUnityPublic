@@ -110,9 +110,9 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         @Override
         public float overloadScale(){ return overloadScale; }
         @Override
-        public float canReceive(){ return canReceive; }
+        public boolean canReceive(){ return canReceive; }
         @Override
-        public float canTransfer(){ return canTransfer; }
+        public boolean canTransfer(){ return canTransfer; }
         @Override
         public float amount(){ return amount; }
         @Override
