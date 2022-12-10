@@ -34,7 +34,7 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
     public Effect smokeEffect = MonolithFx.overloadSmoke;
 
     public float production = 0f;
-    public float resistance = 0.04f;
+    public float resistance = 1f / 60f;
     public float maxThroughput = 4f;
 
     public float safeLimit = 30f;
@@ -79,8 +79,6 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         public float amount, transferred;
         public float visualAmount, visualTransferred;
 
-        public float totalTransferred;
-
         public <E extends Building & GraphBuild> SoulNode(E build){
             super(build);
             cons = build.block.findConsumer(c -> c instanceof ConsumeSoul);
@@ -89,7 +87,7 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         @Override
         public void preUpdate(){
             transferred = 0f;
-            amount += production * prodEfficiency * Time.delta;
+            amount += production * prodEfficiency * build().delta();
         }
 
         @Override
@@ -97,19 +95,23 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
             var build = build();
             var block = build.block;
 
+            float delta = build.delta();
             if(amount > safeLimit){
-                amount = Math.max(safeLimit, amount - overloadDump * Time.delta);
+                amount = Math.max(safeLimit, amount - overloadDump * delta);
             }
 
             if(amount > absoluteLimit){
-                float over = amount - absoluteLimit;
+                float over = (amount - absoluteLimit) / Time.delta;
                 build.damageContinuous(over * overloadScale);
             }
 
-            /*if(amount > criticalLimit){
-                build.kill();
-                return;
-            }*/
+            if(amount > criticalLimit){
+                float excess = amount - criticalLimit;
+                amount -= excess;
+
+                excess /= Time.delta;
+                //TODO do something with the critical excess
+            }
 
             if(amount > safeLimit){
                 float chance =
@@ -124,9 +126,8 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
                 }
             }
 
-            visualAmount = Mathf.lerpDelta(visualAmount, amount, 0.1f);
-            visualTransferred = Mathf.lerpDelta(visualTransferred, transferred / Time.delta, 0.1f);
-            totalTransferred += visualTransferred * Time.delta;
+            visualAmount = Mathf.lerpDelta(visualAmount, amount, 0.07f);
+            visualTransferred = Mathf.lerpDelta(visualTransferred, transferred / Time.delta, 0.07f);
         }
 
         @Override
@@ -154,7 +155,7 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         public void displayBars(Table table){
             table.row();
             table.add(new SegmentBar(
-                () -> Core.bundle.get("category.unity-soul"),
+                () -> Core.bundle.get("bar.unity-soul"),
                 () -> amount / criticalLimit,
                 new Segment(() -> MonolithPal.monolithLighter, 0f),
                 new Segment(() -> Pal.redLight, safeLimit / criticalLimit),

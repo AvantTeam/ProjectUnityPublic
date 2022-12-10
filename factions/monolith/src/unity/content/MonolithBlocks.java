@@ -147,9 +147,9 @@ public final class MonolithBlocks{
 
             solid = true;
 
-            soulNodeConfig = new SoulNodeType(){{
+            soulNodeConfig = new SoulTransmitterNodeType(){{
                 production = 0f;
-                resistance = 0.04f;
+                resistance = 1f / 60f;
                 maxThroughput = 4f;
 
                 safeLimit = 30f;

@@ -32,6 +32,9 @@ public class GraphEdge<T extends GraphI<T>>{
             var conn = n1;
             n1 = current;
             n2 = conn;
+
+            n1.sideChanged(this, false);
+            n2.sideChanged(this, true);
         }
     }
 
@@ -40,6 +43,9 @@ public class GraphEdge<T extends GraphI<T>>{
             var conn = n2;
             n2 = current;
             n1 = conn;
+
+            n1.sideChanged(this, false);
+            n2.sideChanged(this, true);
         }
     }
 

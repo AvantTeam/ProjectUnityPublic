@@ -5,6 +5,7 @@ import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.struct.*;
 import arc.util.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -14,6 +15,7 @@ import unity.gen.graph.*;
 import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
 import unity.world.graph.connectors.DistanceConnectorType.*;
+import unity.world.graph.connectors.DistanceConnectorType.DistanceConnector.*;
 
 import static mindustry.Vars.*;
 
@@ -40,11 +42,23 @@ public class SoulTransmitter extends SoulBlock{
             }
         });
 
-        config(Point2[].class, (SoulTransmitterBuild b, Point2[] connections) -> {
+        config(IntSeq.class, (SoulTransmitterBuild b, IntSeq connections) -> {
             b.connector.disconnect();
-            for(Point2 p : connections){
-                int pos = Point2.pack(p.x + b.tileX(), p.y + b.tileY());
-                configurations.get(Integer.class).get(b, pos);
+            for(int i = 0; i < connections.size; i += 2){
+                int pos = connections.get(i);
+
+                DistanceConnector<SoulGraph> other;
+                if(
+                    !(world.build(b.tileX() + Point2.x(pos), b.tileY() + Point2.y(pos)) instanceof GraphBuild o) ||
+                    (other = o.graphConnector(Graphs.soul, DistanceConnector.class)) == null ||
+                    !linkValid(b, o.as())
+                ) return;
+
+                if(connections.get(i + 1) == 1){
+                    b.connector.connectTo(other);
+                }else{
+                    other.connectTo(b.connector);
+                }
             }
         });
     }
@@ -128,7 +142,7 @@ public class SoulTransmitter extends SoulBlock{
         @Override
         public void drawConfigure(){
             for(var e : connector.connections){
-                Building other = e.other(connector).node().build();
+                var other = e.other(connector).node().build();
                 Tmp.v1.set(other.x, other.y).sub(x, y).limit(block.size * tilesize / 2f + 1.5f);
                 float sx = x + Tmp.v1.x, sy = y + Tmp.v1.y;
                 float ex = other.x, ey = other.y;
@@ -186,13 +200,18 @@ public class SoulTransmitter extends SoulBlock{
         }
 
         @Override
-        public Point2[] config(){
-            Point2[] out = new Point2[connector.maxConnections];
-            for(int i = 0; i < out.length; i++){
-                out[i] = connector.connection[i] == null ? new Point2() : connector.connection[i].cpy();
+        public IntSeq config(){
+            IntSeq seq = new IntSeq();
+            for(var conn : connector.distConnections){
+                if(conn == null) continue;
+
+                var p2 = conn.relpos;
+                if(p2.x == 0 || p2.y == 0) continue;
+
+                seq.add(p2.pack(), conn.isN2 ? 1 : 0);
             }
 
-            return out;
+            return seq;
         }
     }
 }

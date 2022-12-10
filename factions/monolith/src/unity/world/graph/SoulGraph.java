@@ -1,7 +1,6 @@
 package unity.world.graph;
 
 import arc.math.*;
-import arc.util.*;
 import unity.gen.graph.*;
 import unity.world.graph.connectors.*;
 import unity.world.graph.nodes.SoulNodeType.*;
@@ -26,6 +25,8 @@ public class SoulGraph extends Graph<SoulGraph> implements SoulGraphI<SoulGraph>
                 SoulNode n = node.as();
                 if(!n.canTransfer()) continue;
 
+                float delta = n.build().delta();
+
                 int total = 0;
                 for(var v : n.connectors){
                     for(var e : v.connections){
@@ -35,10 +36,10 @@ public class SoulGraph extends Graph<SoulGraph> implements SoulGraphI<SoulGraph>
 
                 if(total == 0) continue;
 
-                float resist = n.resistance() * Time.delta;
+                float resist = n.resistance() * delta;
                 float transferAmount = Math.min(
                     n.amount - resist - n.consumption(),
-                    n.maxThroughput() * Time.delta - n.transferred
+                    n.maxThroughput() * delta - n.transferred
                 );
 
                 if(transferAmount <= 0f) continue;

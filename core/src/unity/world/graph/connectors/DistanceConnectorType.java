@@ -29,19 +29,23 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
 
     public static class DistanceConnector<T extends Graph<T>> extends GraphConnector<T>{
         public int maxConnections;
-        public Point2[] connection; // Xelo: connection?
+        public Connection[] distConnections;
         int validConnections = 0;
 
         public DistanceConnector(GraphNode<T> node, T graph, DistanceConnectorType<T> type){
             super(node, graph, type);
             maxConnections = type.connections;
-            connection = new Point2[maxConnections];
+            distConnections = new Connection[maxConnections];
             disconnectWhenRotate = false;
         }
 
         public Point2 first(){
-            for(Point2 p2 : connection){
-                if(p2 == null || (p2.x == 0 && p2.y == 0)) continue;
+            for(var conn : distConnections){
+                if(conn == null) continue;
+
+                var p2 = conn.relpos;
+                if(p2.x == 0 && p2.y == 0) continue;
+
                 return p2;
             }
 
@@ -50,8 +54,12 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
 
         public void refreshValidConnections(){
             validConnections = 0;
-            for(Point2 p2 : connection){
-                if(p2 == null || (p2.x == 0 && p2.y == 0)) continue;
+            for(var conn : distConnections){
+                if(conn == null) continue;
+
+                var p2 = conn.relpos;
+                if(p2.x == 0 && p2.y == 0) continue;
+
                 validConnections++;
             }
         }
@@ -62,9 +70,9 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
 
         public void resize(int size){
             maxConnections = size;
-            Point2[] newconnection = new Point2[maxConnections];
-            System.arraycopy(connection, 0, newconnection, 0, Math.min(connection.length, size));
-            connection = newconnection;
+            var newconnection = new Connection[maxConnections];
+            System.arraycopy(distConnections, 0, newconnection, 0, Math.min(distConnections.length, size));
+            distConnections = newconnection;
             refreshValidConnections();
         }
 
@@ -75,7 +83,7 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
             var edge = other.tryConnect(new Point2(cur.x - ext.x, cur.y - ext.y), this);
             if(edge != null){
                 if(!connections.contains(edge)) connections.add(edge);
-                addConnection(other);
+                addConnection(edge, other);
             }
         }
 
@@ -87,27 +95,57 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
         @Override
         public void recalcNeighbors(){
             connections.clear();
-            for(Point2 p2 : connection){
-                if(p2 == null || (p2.x == 0 && p2.y == 0)) continue;
+            for(var conn : distConnections){
+                if(conn == null) continue;
+
+                var p2 = conn.relpos;
+                if(p2.x == 0 && p2.y == 0) continue;
+
                 connectTo(p2.x, p2.y);
             }
 
             refreshValidConnections();
         }
 
-        protected boolean addConnection(DistanceConnector<T> other){
+        @Override
+        public void sideChanged(GraphEdge<T> edge, boolean n2){
+            DistanceConnector<T> other = edge.other(this);
+
+            var conn = getConnection(other);
+            if(conn != null) conn.isN2 = n2;
+        }
+
+        protected Connection getConnection(DistanceConnector<T> other){
+            Tile ext = other.node.build().tile;
+            Tile cur = node.build().tile;
+
+            for(var conn : distConnections){
+                if(conn == null) continue;
+
+                var p2 = conn.relpos;
+                if(p2.x == ext.x - cur.x && p2.y == ext.y - cur.y) return conn;
+            }
+
+            return null;
+        }
+
+        protected boolean addConnection(@Nullable GraphEdge<T> edge, DistanceConnector<T> other){
             Tile ext = other.node.build().tile;
             Tile cur = node.build().tile;
             Point2 relpos = new Point2(ext.x - cur.x, ext.y - cur.y);
-            for(Point2 point2 : connection){
-                if(point2 != null && (point2.x == relpos.x && point2.y == relpos.y)){
+            for(var conn : distConnections){
+                if(conn == null) continue;
+
+                var p2 = conn.relpos;
+                if(p2 != null && (p2.x == relpos.x && p2.y == relpos.y)){
+                    if(edge != null) edge.setN2(conn.isN2 ? this : edge.other(this)); // Glenn: just in case
                     return true; // Xelo: it exists already!
                 }
             }
 
-            for(int i = 0; i < connection.length; i++){
-                if(connection[i] == null || (connection[i].x == 0 && connection[i].y == 0)){
-                    connection[i] = relpos;
+            for(int i = 0; i < distConnections.length; i++){
+                if(distConnections[i] == null || (distConnections[i].relpos.x == 0 && distConnections[i].relpos.y == 0)){
+                    distConnections[i] = new Connection(relpos, edge == null ? false : edge.n2 == this);
                     refreshValidConnections();
                     return true;
                 }
@@ -120,12 +158,14 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
             Tile ext = other.node.build().tile;
             Tile cur = node.build().tile;
             Point2 relpos = new Point2(ext.x - cur.x, ext.y - cur.y);
-            for(int i = 0; i < connection.length; i++){
-                Point2 point2 = connection[i];
-                if(point2 != null && (point2.x == relpos.x && point2.y == relpos.y)){
-                    connection[i] = null;
+            for(int i = 0; i < distConnections.length; i++){
+                var conn = distConnections[i];
+                if(conn == null) continue;
+
+                Point2 p2 = conn.relpos;
+                if(p2.x == relpos.x && p2.y == relpos.y){
+                    distConnections[i] = null;
                     refreshValidConnections();
-                    Log.info("disconnected from:" + point2);
                     return;
                 }
             }
@@ -146,7 +186,7 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
                     var edge = extdist.tryConnect(new Point2(-rx, -ry), this);
                     if(edge != null){
                         if(!connections.contains(edge)) connections.add(edge);
-                        addConnection(extdist);
+                        addConnection(edge, extdist);
                     }
                 }
             }
@@ -163,7 +203,6 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
 
             if(toRemove == null) return;
 
-            Log.info("disconnecting edge." + toRemove);
             removeConnection(other);
             other.removeConnection(this);
             graph.removeEdge(toRemove);
@@ -171,8 +210,6 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
 
         @Override
         public void disconnect(){
-            Log.info("disconnecting.");
-
             while(!connections.isEmpty()) disconnectTo(connections.first().other(this));
             super.disconnect();
         }
@@ -185,24 +222,59 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
         @Override
         public GraphEdge<T> tryConnect(Point2 pt, GraphConnectorI<T> extconn){
             if(!priorityCompatible(extconn)) return null;
-            if(addConnection(extconn.as())) return addEdge(extconn);
+
+            var conn = getConnection(extconn.as());
+            boolean exists = conn != null, n2 = exists && conn.isN2;
+
+            if(addConnection(null, extconn.as())){
+                var edge = addEdge(extconn);
+                // Glenn: if the connection already exists it must be from save files, so override no matter what
+                if(exists) edge.setN2(n2 ? this : extconn);
+
+                return edge;
+            }
+
             return null;
         }
 
         @Override
         public void write(Writes write){
             for(int i = 0; i < maxConnections; i++){
-                write.i(connection[i] == null ? 0 : connection[i].pack());
+                var conn = distConnections[i];
+                if(conn == null || (conn.relpos.x == 0 && conn.relpos.y == 0)){
+                    write.bool(false);
+                }else{
+                    write.bool(true);
+                    write.i(conn.relpos.pack());
+                    write.bool(conn.isN2);
+                }
             }
         }
 
         @Override
         public void read(Reads read){
             for(int i = 0; i < maxConnections; i++){
-                connection[i] = Point2.unpack(read.i());
+                boolean exists = read.bool();
+                if(!exists){
+                    distConnections[i] = null;
+                }else{
+                    int packed = read.i();
+                    boolean n2 = read.bool();
+                    distConnections[i] = new Connection(Point2.unpack(packed), n2);
+                }
             }
 
             refreshValidConnections();
+        }
+
+        public static class Connection{
+            public Point2 relpos;
+            public boolean isN2;
+
+            public Connection(Point2 relpos, boolean isN2){
+                this.relpos = relpos;
+                this.isN2 = isN2;
+            }
         }
     }
 }

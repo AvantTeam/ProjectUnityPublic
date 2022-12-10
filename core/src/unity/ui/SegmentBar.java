@@ -17,7 +17,7 @@ import mindustry.ui.*;
 
 /** @author GlennFolker */
 public class SegmentBar extends Bar{
-    protected static Rect scissor = new Rect();
+    protected static Rect scissor = new Rect(), minScissor = new Rect();
 
     protected CharSequence name;
     protected Floatp fraction;
@@ -142,7 +142,7 @@ public class SegmentBar extends Bar{
         Draw.reset();
         if(topWidth > minWidth){
             drawTop(top, width, topWidth);
-        }else if(ScissorStack.push(scissor.set(x, y, topWidth, height))){
+        }else if(ScissorStack.push(minScissor.set(x, y, topWidth, height))){
             drawTop(top, width, minWidth);
             ScissorStack.pop();
         }

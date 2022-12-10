@@ -55,9 +55,10 @@ public interface GraphConnectorTypeI<T extends GraphI<T>>{
         void disconnect();
 
         GraphEdge<T> addEdge(GraphConnectorI<T> ext);
-        void removeEdge(GraphEdge<T> ge);
+        void removeEdge(GraphEdge<T> edge);
 
         void connectionChanged();
+        default void sideChanged(GraphEdge<T> edge, boolean n2){}
 
         default void write(Writes write){}
         default void read(Reads read){}
