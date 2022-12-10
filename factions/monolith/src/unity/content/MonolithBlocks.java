@@ -12,7 +12,6 @@ import unity.world.blocks.power.*;
 import unity.world.graph.*;
 import unity.world.graph.connectors.*;
 import unity.world.graph.nodes.*;
-import unity.world.graph.prop.*;
 
 import static mindustry.type.ItemStack.*;
 import static unity.content.MonolithAttributes.*;
@@ -148,20 +147,17 @@ public final class MonolithBlocks{
 
             solid = true;
 
-            soulProp = new SoulTransmitterProps(this){{
-
-            }};
-
             soulNodeConfig = new SoulNodeType(){{
                 production = 0f;
                 resistance = 0.04f;
+                maxThroughput = 4f;
 
                 safeLimit = 30f;
                 absoluteLimit = 42f;
                 criticalLimit = 48f;
 
                 overloadDump = 0.8f;
-                overloadScale = 0.4f;
+                overloadScale = 0.1f;
             }};
 
             soulConnectorConfigs.add(

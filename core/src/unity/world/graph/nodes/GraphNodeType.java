@@ -51,11 +51,6 @@ public abstract class GraphNodeType<T extends Graph<T>> implements GraphNodeType
         }
 
         @Override
-        public void update(){
-
-        }
-
-        @Override
         public void addSelf(){
             onConnect();
         }

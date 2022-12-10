@@ -45,12 +45,24 @@ public interface GraphBlock{
     void eachNodeType(IntObjc<GraphNodeTypeI<?>> cons);
     void eachConnectorType(IntObjc<GraphConnectorTypeI<?>> cons);
 
+    default void initGraphBlock(){
+        eachNodeType((flag, node) -> node.init(as()));
+    }
+
+    default void loadGraphBlock(){
+        eachNodeType((flag, node) -> node.load(as()));
+    }
+
     default void setGraphStats(Stats stats){
         eachNodeType((flag, node) -> node.setStats(stats));
     }
 
     default void drawConnectionPoints(BuildPlan req, Eachable<BuildPlan> list){
         eachConnectorType((flag, conn) -> conn.drawConnectionPoint(req, list));
+    }
+
+    default <E extends Block & GraphBlock> E as(){
+        return (E)this;
     }
 
     static Point2 getConnectSidePos(int index, int size, int rotation){
@@ -113,7 +125,11 @@ public interface GraphBlock{
             eachNode((flag, node) -> node.displayBars(table));
         }
 
-        default void updateGraphs(){
+        default void drawGraph(){
+            eachNode((flag, node) -> node.draw());
+        }
+
+        default void updateGraph(){
             if(prevRotation() == -1){
                 connectToGraph();
                 prevRotation(rotation());
@@ -125,11 +141,16 @@ public interface GraphBlock{
             }
 
             eachNode((flag, node) -> {
-                // Xelo: change later.
+                /*// Xelo: change later.
                 node.update();
                 for(var conn : node.connectors()){
                     conn.graph().update();
-                }
+                }*/
+
+                // Glenn: probably update the graph first, because the flow needs to be done before the nodes update
+                //        node preUpdate() should modify flow-related values, then graph update(), then node update()
+                node.connectors().each(c -> c.graph().update());
+                node.update();
             });
         }
 

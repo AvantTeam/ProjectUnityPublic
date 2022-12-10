@@ -7,6 +7,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import unity.world.graph.connectors.GraphConnectorType.*;
+import unity.world.graph.nodes.GraphNodeType.*;
 
 /**
  * @author Xelo
@@ -20,6 +21,7 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
     public OrderedSet<GraphConnector<T>> vertices = new OrderedSet<>();
     public LongMap<GraphEdge<T>> edges = new LongMap<>();
 
+    protected OrderedSet<GraphNode<T>> nodes = new OrderedSet<>();
     protected OrderedSet<GraphConnector<T>> floodTemp = new OrderedSet<>();
 
     {
@@ -37,6 +39,11 @@ public abstract class Graph<T extends Graph<T>> implements GraphI<T>{
     public void update(){
         if(Core.graphics.getFrameId() == lastFrameUpdated) return;
         lastFrameUpdated = Core.graphics.getFrameId();
+
+        nodes.clear();
+        for(var conn : vertices){
+            if(nodes.add(conn.node)) conn.node.preUpdate();
+        }
 
         onUpdate();
         if(authoritative && lastFrameUpdated > authoritativeUntil) authoritative = false;

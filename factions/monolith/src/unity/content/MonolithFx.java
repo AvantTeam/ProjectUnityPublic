@@ -315,6 +315,14 @@ public final class MonolithFx{
             v1.trns(rand.random(360f), rand.random(len)).add(e.x, e.y);
             Fill.circle(v1.x, v1.y, rand.random(0.8f, 2f) + smooth.apply(e.fslope()) * 0.9f);
         }
+    }),
+
+    overloadSmoke = new Effect(14f, e -> {
+        color(monolithLight, Color.lightGray, Color.gray, e.finpow());
+        randLenVectors(e.id, 3, e.fin() * 6.4f, (x, y) -> {
+            float size = 1f + e.fout() * 5f;
+            Fill.circle(e.x + x, e.y + y, size / 2f);
+        });
     });
 
     private MonolithFx(){

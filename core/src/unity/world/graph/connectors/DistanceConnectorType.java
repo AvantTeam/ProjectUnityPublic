@@ -24,7 +24,7 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
 
     @Override
     public DistanceConnector<T> create(GraphNodeI<T> node){
-        return new DistanceConnector<>(connections, node.as(), newGraph.get());
+        return new DistanceConnector<>(node.as(), newGraph.get(), this);
     }
 
     public static class DistanceConnector<T extends Graph<T>> extends GraphConnector<T>{
@@ -32,15 +32,9 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
         public Point2[] connection; // Xelo: connection?
         int validConnections = 0;
 
-        public DistanceConnector(GraphNode<T> node, T graph){
-            super(node, graph);
-            connection = new Point2[maxConnections];
-            disconnectWhenRotate = false;
-        }
-
-        public DistanceConnector(int connections, GraphNode<T> node, T graph){
-            super(node, graph);
-            maxConnections = connections;
+        public DistanceConnector(GraphNode<T> node, T graph, DistanceConnectorType<T> type){
+            super(node, graph, type);
+            maxConnections = type.connections;
             connection = new Point2[maxConnections];
             disconnectWhenRotate = false;
         }
@@ -190,6 +184,7 @@ public class DistanceConnectorType<T extends Graph<T>> extends GraphConnectorTyp
 
         @Override
         public GraphEdge<T> tryConnect(Point2 pt, GraphConnectorI<T> extconn){
+            if(!priorityCompatible(extconn)) return null;
             if(addConnection(extconn.as())) return addEdge(extconn);
             return null;
         }

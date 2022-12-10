@@ -16,6 +16,10 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
     public final Prov<T> newGraph;
     public final int graphType;
 
+    /** Higher value becomes n2, lower becomes n1. */
+    public int priority;
+    public boolean allowSamePriority = true;
+
     protected GraphConnectorType(Prov<T> newGraph){
         this.newGraph = newGraph;
         graphType = newGraph.get().type();
@@ -39,26 +43,31 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
 
         public boolean disconnectWhenRotate = true;
 
-        protected GraphConnector(GraphNode<T> node, T graph){
+        protected GraphConnectorType<T> type;
+
+        protected GraphConnector(GraphNode<T> node, T graph, GraphConnectorType<T> type){
             this.node = node;
+            this.type = type;
             graph.addVertex(this);
 
             id = lastId++;
         }
 
         @Override
-        public int id(){
-            return id;
-        }
+        public int id(){ return id; }
+        @Override
+        public int priority(){ return type.priority; }
+        @Override
+        public boolean allowSamePriority() { return type.allowSamePriority; }
 
         @Override
-        public T graph(){
-            return graph;
-        }
+        public T graph(){ return graph; }
+        @Override
+        public <E extends GraphNodeI<T>> E node(){ return node.as(); }
 
         @Override
-        public <E extends GraphNodeI<T>> E node(){
-            return node.as();
+        public boolean priorityCompatible(GraphConnectorI<T> other){
+            return priority() != other.priority() || (allowSamePriority() && other.allowSamePriority());
         }
 
         @Override
@@ -112,6 +121,12 @@ public abstract class GraphConnectorType<T extends Graph<T>> implements GraphCon
             GraphEdge<T> edge = new GraphEdge<>(this, ext);
             graph.addEdge(edge);
             connections.add(edge);
+
+            if(edge.n1.priority() > edge.n2.priority()){
+                edge.setN2(edge.n1);
+            }else if(edge.n2.priority() < edge.n1.priority()){
+                edge.setN1(edge.n2);
+            }
 
             connectionChanged();
             return edge;

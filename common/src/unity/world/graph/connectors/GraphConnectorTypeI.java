@@ -31,6 +31,10 @@ public interface GraphConnectorTypeI<T extends GraphI<T>>{
 
     public interface GraphConnectorI<T extends GraphI<T>>{
         int id();
+        int priority();
+        boolean allowSamePriority();
+
+        boolean priorityCompatible(GraphConnectorI<T> other);
 
         T graph();
         <E extends GraphNodeI<T>> E node();

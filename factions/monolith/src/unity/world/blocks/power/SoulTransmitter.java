@@ -117,22 +117,6 @@ public class SoulTransmitter extends SoulBlock{
         }
 
         @Override
-        public void draw(){
-            Lines.stroke(2f, Tmp.c1.set(Color.white).a(soulNode.visualTransferred() / soulNode.absoluteLimit()));
-            for(var e : connector.connections){
-                if(e.n2 != connector) continue;
-
-                var target = e.n1.node().build();
-                Lines.line(x, y, target.x, target.y);
-            }
-
-            Draw.alpha(soulNode.visualAmount() / soulNode.absoluteLimit());
-            Fill.circle(x, y, 4f);
-
-            Draw.reset();
-        }
-
-        @Override
         public void drawSelect(){
             super.drawSelect();
 

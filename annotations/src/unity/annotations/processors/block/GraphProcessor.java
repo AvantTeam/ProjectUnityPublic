@@ -59,23 +59,28 @@ public class GraphProcessor extends BaseProcessor{
 
     protected void initImpls(){
         blockFields = ObjectMap.of(
-        "Graph", Seq.with(),
-        "Soul", Seq.with(
-            FieldSpec.builder(ClassName.get("unity.world.graph.prop", "SoulProps"), "soulProp", PUBLIC).build()
-        ));
+        "Graph", Seq.with()
+        );
 
         buildFields = ObjectMap.of(
         "Graph", Seq.with(
             FieldSpec.builder(TypeName.INT, "prevTileRotation", PROTECTED).initializer("-1").build(),
             FieldSpec.builder(TypeName.BOOLEAN, "placed", PROTECTED).initializer("false").build(),
             FieldSpec.builder(TypeName.BOOLEAN, "graphInitialized", PROTECTED).initializer("false").build()
-        ),
-        "Soul", Seq.with(
-            FieldSpec.builder(ClassName.get("unity.world.graph.prop", "SoulProps", "SoulPropsEntity"), "soulPropEnt", PUBLIC).build()
         ));
 
         blockImpls = ObjectMap.of(
         "Graph", Seq.with(
+            new Implement((method, callSuper, ret, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("initGraphBlock()");
+            }, "init", TypeName.VOID, true),
+
+            new Implement((method, callSuper, ret, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("loadGraphBlock()");
+            }, "load", TypeName.VOID, true),
+
             new Implement((method, callSuper, ret, entries) -> {
                 callSuper.get(null, null);
                 method.addStatement("setGraphStats(stats)");
@@ -103,17 +108,6 @@ public class GraphProcessor extends BaseProcessor{
                 }
             }, "eachConnectorType", TypeName.VOID, true,
             paramSpec(ClassName.get("unity.func", "IntObjc"), paramSpec(spec(connectorTypeBase), subSpec(spec(Object.class)))), "cons")
-        ),
-        "Soul", Seq.with(
-            new Implement((method, callSuper, ret, entries) -> {
-                callSuper.get(null, null);
-                method.addStatement("soulProp.init()");
-            }, "init", TypeName.VOID, true),
-
-            new Implement((method, callSuper, ret, entries) -> {
-                callSuper.get(null, null);
-                method.addStatement("soulProp.load()");
-            }, "load", TypeName.VOID, true)
         ));
 
         buildImpls = ObjectMap.of(
@@ -159,6 +153,11 @@ public class GraphProcessor extends BaseProcessor{
             }, "onDestroyed", TypeName.VOID, true),
 
             new Implement((method, callSuper, ret, entries) -> {
+                callSuper.get(null, null);
+                method.addStatement("drawGraph()");
+            }, "draw", TypeName.VOID, true),
+
+            new Implement((method, callSuper, ret, entries) -> {
                 method
                     .beginControlFlow("if(!placed)")
                         .addStatement("placed = true")
@@ -166,8 +165,7 @@ public class GraphProcessor extends BaseProcessor{
                     .endControlFlow();
 
                 callSuper.get(null, null);
-
-                method.addStatement("updateGraphs()");
+                method.addStatement("updateGraph()");
             }, "updateTile", TypeName.VOID, true),
 
             new Implement((method, callSuper, ret, entries) -> {
@@ -263,8 +261,8 @@ public class GraphProcessor extends BaseProcessor{
             spec(Table.class), "table"),
 
             new Implement((method, callSuper, ret, entries) -> method
-                .addStatement("$T.super.updateGraphs()", graphEntBase),
-            "updateGraphs", TypeName.VOID, true),
+                .addStatement("$T.super.updateGraph()", graphEntBase),
+            "updateGraph", TypeName.VOID, true),
 
             new Implement((method, callSuper, ret, entries) -> method
                 .addStatement("$T.super.writeGraphs(write)", graphEntBase),
@@ -275,22 +273,6 @@ public class GraphProcessor extends BaseProcessor{
                 .addStatement("$T.super.readGraphs(read)", graphEntBase),
             "readGraphs", TypeName.VOID, true,
             spec(Reads.class), "read")
-        ),
-        "Soul", Seq.with(
-            new Implement((method, callSuper, ret, entries) -> {
-                callSuper.get(null, null);
-                method.addStatement("soulPropEnt = soulProp.create(this)");
-            }, "onGraphInit", TypeName.VOID, true),
-
-            new Implement((method, callSuper, ret, entries) -> {
-                callSuper.get(null, null);
-                method.addStatement("soulPropEnt.draw()");
-            }, "draw", TypeName.VOID, true),
-
-            new Implement((method, callSuper, ret, entries) -> {
-                callSuper.get(null, null);
-                method.addStatement("soulPropEnt.update()");
-            }, "updateTile", TypeName.VOID, true)
         ));
     }
 

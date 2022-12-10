@@ -20,6 +20,9 @@ import unity.world.graph.connectors.GraphConnectorTypeI.*;
 public interface GraphNodeTypeI<T extends GraphI<T>>{
     <E extends Building & GraphBuild> GraphNodeI<T> create(E build);
 
+    default <E extends Block & GraphBlock> void init(E block){}
+    default <E extends Block & GraphBlock> void load(E block){}
+
     default void setStats(Stats stats){}
 
     default <N extends GraphNodeTypeI<? extends T>> N as(){
@@ -27,7 +30,9 @@ public interface GraphNodeTypeI<T extends GraphI<T>>{
     }
 
     interface GraphNodeI<T extends GraphI<T>>{
-        void update();
+        default void preUpdate(){}
+        default void update(){}
+        default void draw(){}
 
         void addSelf();
         void removeSelf();

@@ -19,6 +19,7 @@ public interface SoulNodeTypeI<T extends SoulGraphI<T>> extends GraphNodeTypeI<T
         float production();
         float consumption();
         float resistance();
+        float maxThroughput();
 
         float safeLimit();
         float absoluteLimit();

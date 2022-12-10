@@ -103,11 +103,14 @@ public class HeatNodeType extends GraphNodeType<HeatGraph> implements HeatNodeTy
         }
 
         @Override
-        public void update(){
-            // Xelo: graph handles all heat transmission.
+        public void preUpdate(){
             heatEnergy += (ambientTemp - temperature()) * emissiveness * Time.delta / 60f;
             if(heatProducer) generateHeat();
+        }
 
+        @Override
+        public void update(){
+            // Xelo: graph handles all heat transmission.
             if(temperature() > maxTemp){
                 Puddles.deposit(build().tile, Liquids.slag, 9);
                 build().damage(((temperature()-maxTemp)/maxTemp)*Time.delta*10f);
