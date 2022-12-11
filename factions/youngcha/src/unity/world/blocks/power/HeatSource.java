@@ -39,8 +39,8 @@ public class HeatSource extends HeatBlock{
 
         @Override
         public void updateTile(){
-            super.updateTile();
             heatNode.temperature(targetTemp);
+            super.updateTile();
         }
 
         @Override

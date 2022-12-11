@@ -173,6 +173,7 @@ public final class MonolithBlocks{
             requirements(Category.power, with(Items.copper, 1));
 
             solid = true;
+            laserRange = 20f;
 
             soulNodeConfig = new SoulNodeType(){{
                 production = 240f / 60f;

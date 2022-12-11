@@ -5,12 +5,14 @@ import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.math.geom.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.entities.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.meta.*;
 import unity.content.*;
@@ -18,7 +20,9 @@ import unity.content.MonolithFx.*;
 import unity.gen.graph.*;
 import unity.ui.*;
 import unity.ui.SegmentBar.*;
+import unity.ui.SegmentBar.Segment;
 import unity.util.*;
+import unity.world.blocks.power.*;
 import unity.world.consumers.*;
 import unity.world.graph.*;
 import unity.world.graph.GraphBlock.*;
@@ -69,6 +73,26 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
     }
 
     @Override
+    public <E extends Block & GraphBlock> void apply(E block){
+        block.configurable = true;
+        block.config(Integer.class, (build, value) -> {
+            DistanceConnector<SoulGraph> conn, other;
+            if(
+                !(build instanceof GraphBuild b) ||
+                !(world.build(value) instanceof GraphBuild o) ||
+                (conn = b.graphConnector(Graphs.soul, DistanceConnector.class)) == null ||
+                (other = o.graphConnector(Graphs.soul, DistanceConnector.class)) == null
+            ) return;
+
+            if(conn.isConnected(other)){
+                conn.disconnectTo(other);
+            }else if(linkValid(b.as(), o.as())){
+                conn.connectTo(other);
+            }
+        });
+    }
+
+    @Override
     public <E extends Block & GraphBlock> void load(E block){
         heatRegion = Core.atlas.find(block.name + "-heat");
         soulRegion = Core.atlas.find(block.name + "-soul");
@@ -93,6 +117,60 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         return new SoulNode(build);
     }
 
+    public static <E extends Building & GraphBuild> boolean linkValid(E tile, E link){
+        return linkValid(tile, link, true);
+    }
+
+    public static <E extends Building & GraphBuild> boolean linkValid(E tile, E link, boolean checkMax){
+        if(tile == link || link == null || tile.team != link.team) return false;
+
+        DistanceConnector<SoulGraph>
+            tileConn = tile.graphConnector(Graphs.soul, DistanceConnector.class),
+            linkConn = link.graphConnector(Graphs.soul, DistanceConnector.class);
+        if(tileConn == null || linkConn == null) return false;
+
+        float range = Float.NEGATIVE_INFINITY;
+        if(tile.block instanceof SoulTransmitter tr) range = Math.max(range, tr.laserRange);
+        if(link.block instanceof SoulTransmitter tr) range = Math.max(range, tr.laserRange);
+        if(range == Float.NEGATIVE_INFINITY) return false;
+
+        return
+            overlaps(tile, link, range * tilesize) &&
+            !checkMax ||
+            tileConn.validConnections() < tileConn.maxConnections ||
+            linkConn.validConnections() < linkConn.maxConnections;
+    }
+
+    protected static boolean overlaps(float srcx, float srcy, Tile other, Block otherBlock, float range){
+        return Intersector.overlaps(
+            Tmp.cr1.set(srcx, srcy, range),
+            Tmp.r1.setCentered(
+                other.worldx() + otherBlock.offset, other.worldy() + otherBlock.offset,
+                otherBlock.size * tilesize, otherBlock.size * tilesize
+            )
+        );
+    }
+
+    protected static boolean overlaps(float srcx, float srcy, Tile other, float range){
+        return Intersector.overlaps(Tmp.cr1.set(srcx, srcy, range), other.getHitbox(Tmp.r1));
+    }
+
+    protected static boolean overlaps(Building src, Building other, float range){
+        return overlaps(src.x, src.y, other.tile(), range);
+    }
+
+    protected static boolean overlaps(Tile src, Tile other, float range){
+        return overlaps(src.drawx(), src.drawy(), other, range);
+    }
+
+    /*public static boolean overlaps(@Nullable Tile src, @Nullable Tile other){
+        if(src == null || other == null) return true;
+        return Intersector.overlaps(
+            Tmp.cr1.set(src.worldx() + src.block.offset, src.worldy() + src.block.offset, laserRange * tilesize),
+            Tmp.r1.setSize(size * tilesize).setCenter(other.worldx() + offset, other.worldy() + offset)
+        );
+    }*/
+
     public class SoulNode extends GraphNode<SoulGraph> implements SoulNodeI<SoulGraph>{
         public @Nullable ConsumeSoul cons;
 
@@ -100,6 +178,7 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         public float amount, transferred;
         public float visualAmount, visualTransferred;
 
+        public float produced;
         public float transmitPower, totalTransmit;
         public float on;
 
@@ -127,7 +206,13 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         @Override
         public void preUpdate(){
             transferred = 0f;
-            amount += production * prodEfficiency * build().delta();
+
+            if(production > 0){
+                float prod = production * prodEfficiency * build().delta();
+                amount += prod;
+
+                produced = prod / Time.delta;
+            }
         }
 
         @Override
@@ -243,6 +328,70 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
             Draw.z(z);
         }
 
+        public void drawConfigure(){
+            var build = build();
+
+            DistanceConnector<SoulGraph> conn = build.graphConnector(Graphs.soul, DistanceConnector.class);
+            if(conn == null) return;
+
+            for(var e : conn.connections){
+                var other = e.other(conn).node().build();
+                Tmp.v1.set(other.x, other.y).sub(build.x, build.y).limit(build.block.size * tilesize / 2f + 1.5f);
+                float sx = build.x + Tmp.v1.x, sy = build.y + Tmp.v1.y;
+                float ex = other.x, ey = other.y;
+
+                Color color = e.n2 == conn ? Pal.accent : Pal.place;
+                float angle = e.n2 == conn
+                ? Angles.angle(sx, sy, ex, ey)
+                : Angles.angle(ex, ey, sx, sy);
+
+                float in = (Time.time % 72f) / 72f;
+                if(e.n2 == conn){
+                    Tmp.v1
+                        .set(ex, ey).sub(sx, sy)
+                        .scl(Interp.smoother.apply(in))
+                        .add(sx, sy);
+                }else{
+                    Tmp.v1
+                        .set(sx, sy).sub(ex, ey)
+                        .scl(Interp.smoother.apply(in))
+                        .add(ex, ey);
+                }
+
+                float vx = Tmp.v1.x, vy = Tmp.v1.y;
+                float radius = Interp.pow5Out.apply(Mathf.slope(in)) * 3f;
+
+                Lines.stroke(3f, Pal.gray);
+                Lines.line(sx, sy, ex, ey);
+                Fill.poly(vx, vy, 3, radius + 2f, angle);
+
+                Lines.stroke(1f, color);
+                Lines.line(sx, sy, ex, ey);
+                Fill.poly(vx, vy, 3, radius, angle);
+
+                Draw.reset();
+            }
+        }
+
+        public boolean onConfigureBuildTapped(Building other){
+            var build = build();
+
+            DistanceConnector<SoulGraph> conn = build.graphConnector(Graphs.soul, DistanceConnector.class);
+            if(conn == null) return true;
+
+            if(other instanceof GraphBuild && linkValid(build, (Building & GraphBuild)other)){
+                build.configure(other.pos());
+                return false;
+            }
+
+            if(build == other){
+                if(conn.validConnections() > 0) conn.disconnect();
+                return false;
+            }
+
+            return true;
+        }
+
         @Override
         public float consumption(){
             return cons == null ? 0f : cons.amount * build().edelta();
@@ -250,9 +399,19 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
 
         @Override
         public void displayBars(Table table){
-            table.row();
-            table.add(new SegmentBar(
-                () -> Core.bundle.get("bar.unity-soul"),
+            DistanceConnector<SoulGraph> conn = build().graphConnector(Graphs.soul, DistanceConnector.class);
+            if(conn == null) return;
+
+            table.row().add(new Bar(
+                () -> Core.bundle.format("bar.powerlines", conn.validConnections(), conn.maxConnections),
+                () -> Pal.items,
+                () -> (float)conn.validConnections() / conn.maxConnections
+            ));
+
+            table.row().add(new SegmentBar(
+                production > 0f
+                    ? () -> { return Core.bundle.formatFloat("bar.unity-soul-produce", produced * 60f, 2); }
+                    : () -> { return Core.bundle.get("bar.unity-soul"); },
                 () -> amount / criticalLimit,
                 new Segment(() -> monolithLighter, 0f),
                 new Segment(() -> Pal.redLight, safeLimit / criticalLimit),

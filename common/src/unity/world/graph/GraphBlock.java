@@ -45,6 +45,10 @@ public interface GraphBlock{
     void eachNodeType(IntObjc<GraphNodeTypeI<?>> cons);
     void eachConnectorType(IntObjc<GraphConnectorTypeI<?>> cons);
 
+    default void applyGraphBlock(){
+        eachNodeType((flag, node) -> node.apply(as()));
+    }
+
     default void initGraphBlock(){
         eachNodeType((flag, node) -> node.init(as()));
     }
@@ -154,11 +158,11 @@ public interface GraphBlock{
             });
         }
 
-        default void writeGraphs(Writes write){
+        default void writeGraph(Writes write){
             eachNode((flag, node) -> node.write(write));
         }
 
-        default void readGraphs(Reads read){
+        default void readGraph(Reads read){
             eachNode((flag, node) -> node.read(read));
         }
     }

@@ -72,6 +72,7 @@ public class GraphProcessor extends BaseProcessor{
         blockImpls = ObjectMap.of(
         "Graph", Seq.with(
             new Implement((method, callSuper, ret, entries) -> {
+                method.addStatement("applyGraphBlock()");
                 callSuper.get(null, null);
                 method.addStatement("initGraphBlock()");
             }, "init", TypeName.VOID, true),
@@ -189,13 +190,13 @@ public class GraphProcessor extends BaseProcessor{
 
             new Implement((method, callSuper, ret, entries) -> {
                 callSuper.get(null, null);
-                method.addStatement("writeGraphs(write)");
+                method.addStatement("writeGraph(write)");
             }, "write", TypeName.VOID, true,
             spec(Writes.class), "write"),
 
             new Implement((method, callSuper, ret, entries) -> {
                 callSuper.get(null, null);
-                method.addStatement("readGraphs(read)");
+                method.addStatement("readGraph(read)");
             }, "read", TypeName.VOID, true,
             spec(Reads.class), "read",
             TypeName.BYTE, "revision"),
@@ -261,17 +262,20 @@ public class GraphProcessor extends BaseProcessor{
             spec(Table.class), "table"),
 
             new Implement((method, callSuper, ret, entries) -> method
+                .addStatement("$T.super.drawGraph()", graphEntBase),
+            "drawGraph", TypeName.VOID, true),
+            new Implement((method, callSuper, ret, entries) -> method
                 .addStatement("$T.super.updateGraph()", graphEntBase),
             "updateGraph", TypeName.VOID, true),
 
             new Implement((method, callSuper, ret, entries) -> method
-                .addStatement("$T.super.writeGraphs(write)", graphEntBase),
-            "writeGraphs", TypeName.VOID, true,
+                .addStatement("$T.super.writeGraph(write)", graphEntBase),
+            "writeGraph", TypeName.VOID, true,
             spec(Writes.class), "write"),
 
             new Implement((method, callSuper, ret, entries) -> method
-                .addStatement("$T.super.readGraphs(read)", graphEntBase),
-            "readGraphs", TypeName.VOID, true,
+                .addStatement("$T.super.readGraph(read)", graphEntBase),
+            "readGraph", TypeName.VOID, true,
             spec(Reads.class), "read")
         ));
     }
