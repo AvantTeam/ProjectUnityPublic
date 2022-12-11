@@ -37,7 +37,7 @@ public class SoulTransmitter extends SoulBlock{
 
             if(b.connector.isConnected(other)){
                 b.connector.disconnectTo(other);
-            }else if(linkValid(b, o.as())){
+            }else if(linkValid(b, (Building & GraphBuild)o)){
                 b.connector.connectTo(other);
             }
         });
@@ -51,7 +51,7 @@ public class SoulTransmitter extends SoulBlock{
                 if(
                     !(world.build(b.tileX() + Point2.x(pos), b.tileY() + Point2.y(pos)) instanceof GraphBuild o) ||
                     (other = o.graphConnector(Graphs.soul, DistanceConnector.class)) == null ||
-                    !linkValid(b, o.as())
+                    !linkValid(b, (Building & GraphBuild)o)
                 ) return;
 
                 if(connections.get(i + 1) == 1){
@@ -186,7 +186,7 @@ public class SoulTransmitter extends SoulBlock{
 
         @Override
         public boolean onConfigureBuildTapped(Building other){
-            if(other instanceof GraphBuild && linkValid(this, other.as())){
+            if(other instanceof GraphBuild && linkValid(this, (Building & GraphBuild)other)){
                 configure(other.pos());
                 return false;
             }

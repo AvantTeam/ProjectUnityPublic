@@ -34,7 +34,7 @@ public final class MonolithBlocks{
 
     erodedSlateWall, infusedErodedSlateWall, archaicErodedSlateWall, sharpSlateWall, infusedSharpSlateWall, archaicSharpSlateWall,
 
-    soulTransmitter;
+    soulTransmitter, soulSource;
 
     private MonolithBlocks(){
         throw new AssertionError();
@@ -147,23 +147,49 @@ public final class MonolithBlocks{
 
             solid = true;
 
-            soulNodeConfig = new SoulTransmitterNodeType(){{
+            soulNodeConfig = new SoulNodeType(){{
                 production = 0f;
                 resistance = 1f / 60f;
-                maxThroughput = 4f;
+                maxThroughput = 30f / 60f;
 
                 safeLimit = 30f;
                 absoluteLimit = 42f;
                 criticalLimit = 48f;
 
-                overloadDump = 0.8f;
-                overloadScale = 0.1f;
+                overloadDump = 24f / 60f;
+                overloadScale = 6f / 60f;
             }};
 
             soulConnectorConfigs.add(
                 new DistanceConnectorType<>(SoulGraph::new, 8),
                 new FixedConnectorType<>(SoulGraph::new, 1, 1, 1, 1){{
                     priority = -100;
+                    allowSamePriority = false;
+                }}
+            );
+        }});
+
+        soulSource = register(Faction.monolith, new SoulSource("soul-source"){{
+            requirements(Category.power, with(Items.copper, 1));
+
+            solid = true;
+
+            soulNodeConfig = new SoulNodeType(){{
+                production = 240f / 60f;
+                resistance = 0f;
+                maxThroughput = 48f / 60f;
+
+                safeLimit = 1200f;
+                absoluteLimit = 1600f;
+                criticalLimit = 2000f;
+
+                overloadDump = 1200f / 60f;
+                overloadScale = 6f / 60f;
+            }};
+
+            soulConnectorConfigs.add(
+                new DistanceConnectorType<>(SoulGraph::new, 64){{
+                    priority = 100;
                     allowSamePriority = false;
                 }}
             );
