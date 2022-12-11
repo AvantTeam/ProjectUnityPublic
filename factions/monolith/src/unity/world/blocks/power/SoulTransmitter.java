@@ -21,6 +21,12 @@ public class SoulTransmitter extends SoulBlock{
     }
 
     @Override
+    public void init(){
+        super.init();
+        clipSize = Math.max(clipSize, laserRange * tilesize + 12f);
+    }
+
+    @Override
     public void drawPlace(int x, int y, int rotation, boolean valid){
         super.drawPlace(x, y, rotation, valid);
 

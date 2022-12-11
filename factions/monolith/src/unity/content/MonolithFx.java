@@ -326,59 +326,9 @@ public final class MonolithFx{
             float size = 1f + e.fout() * 5f;
             Fill.circle(e.x + x, e.y + y, size / 2f);
         });
-    }),
-
-    nodeTransfer = new PUEffect(() -> {
-        class State extends EffectState{
-            @Override
-            public void draw(){
-                float prev = lifetime;
-                float prevIn = time / prev;
-                lifetime = effect.render(id, color, time, lifetime, rotation, x, y, data);
-                time = lifetime * prevIn;
-            }
-        }
-        return Pools.obtain(State.class, State::new);
-    }, 60f, e -> {
-        if(
-            !(e.data instanceof TransferData data) ||
-            !data.node.build().isValid() ||
-            !data.from.isConnected(data.to) ||
-            data.node.on <= 0.01f
-        ){
-            e.lifetime = 0f;
-            return;
-        }
-
-        float prev = e.lifetime;
-        float prevIn = e.time / prev;
-        e.lifetime = (60f / data.node.transmitPower) * (data.fromPos.dst(data.toPos) / (8f * tilesize));
-        e.time = e.lifetime * prevIn;
-
-        v1.set(data.toPos).sub(data.fromPos).scl(e.fin()).add(data.fromPos);
-
-        color(monolithLight, data.node.on);
-        Fill.circle(v1.x, v1.y, 2f);
-    }).layer(Layer.power + 0.03f);
+    });
 
     private MonolithFx(){
         throw new AssertionError();
-    }
-
-    public static class TransferData{
-        public SoulNode node;
-        public DistanceConnector<SoulGraph> from, to;
-        public Vec2 fromPos = new Vec2(), toPos = new Vec2();
-
-        public TransferData(
-            SoulNode node, DistanceConnector<SoulGraph> from, DistanceConnector<SoulGraph> to,
-            float fromX, float fromY, float toX, float toY
-        ){
-            this.node = node;
-            this.from = from;
-            this.to = to;
-            fromPos.set(fromX, fromY);
-            toPos.set(toX, toY);
-        }
     }
 }

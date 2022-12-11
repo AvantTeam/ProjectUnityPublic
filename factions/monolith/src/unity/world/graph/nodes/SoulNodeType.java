@@ -36,6 +36,16 @@ import static unity.graphics.MonolithPal.*;
 /** @author GlennFolker */
 @SuppressWarnings("unchecked")
 public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTypeI<SoulGraph>{
+    protected static final Rand rand = new Rand();
+
+    public static final float laserWidth = 2f, laserWidthInner = 1f;
+    public static final Color laserColor = monolithLighter.cpy().a(0.5f), laserColorInner = Color.white.cpy().a(0.67f);
+    public static final float lineWidthMin = 0.6f, lineWidthMax = 1.2f, lineLenMin = 2.4f, lineLenMax = 3.6f;
+    public static final Color lineColorA = monolithMid.cpy().lerp(monolithLight, 0.5f), lineColorB = monolithLighter;
+    public static final float blobRadMin = 0.3f, blobRadMax = 0.6f;
+    public static final Color blobColorA = monolithMid, blobColorB = monolithLight.cpy().lerp(monolithLighter, 0.5f);
+    public static final float fade = 1.5f, matterAlphaMin = 0.33f;
+
     public Color coolColor = new Color(1f, 1f, 1f, 0f);
     public Color hotColor = new Color(0xff9575a3);
     public float criticalStart = 0.33f;
@@ -44,15 +54,6 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
 
     public Effect smokeEffect = MonolithFx.overloadSmoke;
     public float smokeChance = 0.14f;
-
-    public float laserWidth = 2f, laserWidthInner = 1f;
-    public Color laserColor = monolithLight.cpy().a(0.5f), laserColorInner = monolithLighter.cpy().a(0.67f);
-    public Effect transferEffect = MonolithFx.nodeTransfer;
-    public float transferEffectInterval = 8f;
-
-    public Color trailColor = monolithLighter;
-    public Func2<GraphBuild, SoulNode, Trail> trailType = (build, node) -> new Trail(6);
-    public float trailInterval = 60f;
 
     public float production = 0f;
     public float resistance = 1f / 60f;
@@ -67,10 +68,6 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
 
     public boolean canReceive = true;
     public boolean canTransfer = true;
-
-    public <E extends GraphBuild> void trailType(Func2<E, SoulNode, Trail> trailType){
-        this.trailType = (Func2<GraphBuild, SoulNode, Trail>)trailType;
-    }
 
     @Override
     public <E extends Block & GraphBlock> void apply(E block){
@@ -163,14 +160,6 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
         return overlaps(src.drawx(), src.drawy(), other, range);
     }
 
-    /*public static boolean overlaps(@Nullable Tile src, @Nullable Tile other){
-        if(src == null || other == null) return true;
-        return Intersector.overlaps(
-            Tmp.cr1.set(src.worldx() + src.block.offset, src.worldy() + src.block.offset, laserRange * tilesize),
-            Tmp.r1.setSize(size * tilesize).setCenter(other.worldx() + offset, other.worldy() + offset)
-        );
-    }*/
-
     public class SoulNode extends GraphNode<SoulGraph> implements SoulNodeI<SoulGraph>{
         public @Nullable ConsumeSoul cons;
 
@@ -180,7 +169,7 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
 
         public float produced;
         public float transmitPower, totalTransmit;
-        public float on;
+        public float beamAlpha, matterAlpha;
 
         public float lastEffect;
 
@@ -260,28 +249,10 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
                 visualTransferred = Mathf.lerpDelta(visualTransferred, (transferred / count) / Time.delta, 0.07f);
             }
 
-            transmitPower = Mathf.log(2.4f, visualTransferred + 1f);
+            transmitPower = Mathf.log(1.5f, visualTransferred + 1f);
             totalTransmit += transmitPower * Time.delta;
-            on = Mathf.approachDelta(on, transferred > 0f ? 1f : 0f, 0.07f);
-
-            DistanceConnector<SoulGraph> conn = build.graphConnector(Graphs.soul, DistanceConnector.class);
-            if(conn == null) return;
-
-            if(totalTransmit - lastEffect >= transferEffectInterval){
-                lastEffect = totalTransmit;
-                for(var e : conn.connections){
-                    if(e.n2 != conn) continue;
-                    var other = e.other(conn).node().build();
-
-                    Tmp.v1.set(other).sub(build).setLength(block.size * tilesize / 2f - 1.5f);
-                    float sx = build.x + Tmp.v1.x, sy = build.y + Tmp.v1.y;
-
-                    Tmp.v1.set(build).sub(other).setLength(other.block.size * tilesize / 2f - 1.5f);
-                    float ex = other.x + Tmp.v1.x, ey = other.y + Tmp.v1.y;
-
-                    transferEffect.at(sx, sy, 0f, new TransferData(this, e.n2.as(), e.n1.as(), sx, sy, ex, ey));
-                }
-            }
+            beamAlpha = Mathf.approachDelta(beamAlpha, transferred > 0f ? 1f : 0f, 0.07f);
+            matterAlpha = Mathf.approachDelta(matterAlpha, transferred > 0f ? 1f : matterAlphaMin, 0.016f);
         }
 
         @Override
@@ -307,21 +278,93 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
                 if(e.n2 != conn) continue;
                 var other = e.other(conn).node().build();
 
-                Tmp.v1.set(other).sub(build).setLength(build.block.size * tilesize / 2f - 1.5f);
+                Tmp.v1.set(other).sub(build).setLength(build.block.size * tilesize / 2f - fade);
                 float sx = build.x + Tmp.v1.x, sy = build.y + Tmp.v1.y;
 
-                Tmp.v1.set(build).sub(other).setLength(other.block.size * tilesize / 2f - 1.5f);
+                Tmp.v1.set(build).sub(other).setLength(other.block.size * tilesize / 2f - fade);
                 float ex = other.x + Tmp.v1.x, ey = other.y + Tmp.v1.y;
 
                 Draw.z(Layer.power + 0.01f);
                 Lines.stroke(laserWidth, laserColor);
-                Draw.alpha(0.33f + 0.67f * on);
+                Draw.alpha((0.4f + 0.6f * beamAlpha) * laserColor.a);
                 DrawUtils.line(sx, sy, ex, ey);
 
                 Draw.z(Layer.power + 0.02f);
                 Lines.stroke(laserWidthInner, laserColorInner);
-                Draw.alpha(0.3f + 0.67f * on);
+                Draw.alpha((0.4f + 0.6f * beamAlpha) * laserColorInner.a);
                 DrawUtils.line(sx, sy, ex, ey);
+
+                float angle = Angles.angle(sx, sy, ex, ey);
+                float dst = Mathf.dst(sx, sy, ex, ey);
+                float dstScl = dst / tilesize;
+                float alphaScale = Mathf.curve(matterAlpha, matterAlphaMin, 1f);
+
+                float lines = dstScl * 2.4f;
+                for(int i = 0, len = Mathf.ceilPositive(lines); i < len; i++){
+                    rand.setSeed(e.id + i);
+
+                    float lifetime = (24f + rand.range(4f)) * dstScl;
+                    float time = (totalTransmit + (lifetime / lines) * i + rand.range(dstScl)) % lifetime;
+                    float in = time / lifetime;
+
+                    float width = rand.random(lineWidthMin, lineWidthMax);
+                    float length = rand.random(lineLenMin, lineLenMax) * Interp.smoother.apply(Interp.pow2Out.apply(alphaScale));
+                    float off = dst * in;
+                    float alpha = off <= fade
+                        ? (off / fade)
+                        : off >= (dst - fade)
+                            ? (dst - off) / fade
+                            : 1f;
+
+                    Tmp.v1.trns(angle - 90f, rand.range(laserWidth / 2f + 1.2f), off).add(sx, sy);
+                    float lx = Tmp.v1.x, ly = Tmp.v1.y;
+
+                    Lines.stroke(width, Tmp.c1.set(lineColorA).lerp(lineColorB, rand.nextFloat()));
+                    Draw.alpha(matterAlpha * alpha);
+
+                    Draw.z(Layer.power + 0.015f + rand.range(0.015f));
+                    DrawUtils.lineAngleCenter(lx, ly, angle, length);
+
+                    Draw.z(Layer.power + 0.04f);
+                    Lines.stroke(Lines.getStroke() + 3.6f);
+                    Draw.color(Draw.getColor(), Color.black, 0.9f);
+                    Draw.alpha(Draw.getColor().a * alphaScale);
+                    Draw.blend(Blending.additive);
+                    DrawUtils.lineAngleCenter(Core.atlas.find("circle-mid"), Core.atlas.find("unity-circle-end"), lx, ly, angle, length);
+                    Draw.blend();
+                }
+
+                float blobs = dstScl * 3.6f;
+                for(int i = 0, len = Mathf.ceilPositive(blobs); i < len; i++){
+                    rand.setSeed(e.id - i - 1);
+
+                    float lifetime = (18f + rand.range(6f)) * dstScl;
+                    float time = (totalTransmit + (lifetime / blobs) * i + rand.range(dstScl)) % lifetime;
+                    float in = time / lifetime;
+
+                    float rad = rand.random(blobRadMin, blobRadMax);
+                    float off = dst * in;
+                    float alpha = off <= fade
+                        ? (off / fade)
+                        : off >= (dst - fade)
+                            ? (dst - off) / fade
+                            : 1f;
+
+                    Tmp.v1.trns(angle - 90f, rand.range(laserWidth / 2f + 1.6f), off).add(sx, sy);
+                    float bx = Tmp.v1.x, by = Tmp.v1.y;
+
+                    Draw.color(Tmp.c1.set(blobColorA).lerp(blobColorB, rand.nextFloat()));
+                    Draw.alpha(alpha * matterAlpha * Interp.pow2In.apply(alphaScale));
+                    Draw.z(Layer.power + 0.015f + rand.range(0.015f));
+                    Fill.circle(bx, by, rad);
+
+                    Draw.z(Layer.power + 0.04f);
+                    Draw.color(Draw.getColor(), Color.black, 0.9f);
+                    Draw.alpha(Draw.getColor().a * alphaScale);
+                    Draw.blend(Blending.additive);
+                    Draw.rect(Core.atlas.find("circle-shadow"), bx, by, rad * 2f + 3.6f, rad * 2f + 3.6f);
+                    Draw.blend();
+                }
             }
 
             Draw.reset();

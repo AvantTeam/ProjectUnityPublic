@@ -115,6 +115,16 @@ public final class DrawUtils{
         line(atlas.white(), end, end, x1, y1, x2, y2);
     }
 
+    public static void lineAngleCenter(float x, float y, float angle, float length){
+        vec1.trnsExact(angle, length);
+        line(x - vec1.x / 2f, y - vec1.y / 2f, x + vec1.x / 2f, y + vec1.y / 2f);
+    }
+
+    public static void lineAngleCenter(TextureRegion line, TextureRegion end, float x, float y, float angle, float length){
+        vec1.trnsExact(angle, length);
+        line(line, end, end, x - vec1.x / 2f, y - vec1.y / 2f, x + vec1.x / 2f, y + vec1.y / 2f);
+    }
+
     public static void line(TextureRegion line, TextureRegion end, float x1, float y1, float x2, float y2){
         line(line, end, end, x1, y1, x2, y2);
     }
