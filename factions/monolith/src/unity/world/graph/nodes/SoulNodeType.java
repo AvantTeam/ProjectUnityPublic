@@ -303,7 +303,7 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
                 for(int i = 0, len = Mathf.ceilPositive(lines); i < len; i++){
                     rand.setSeed(e.id + i);
 
-                    float lifetime = (24f + rand.range(4f)) * dstScl;
+                    float lifetime = (18f + rand.range(6f)) * dstScl;
                     float time = (totalTransmit + (lifetime / lines) * i + rand.range(dstScl)) % lifetime;
                     float in = time / lifetime;
 
@@ -342,7 +342,7 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
                 for(int i = 0, len = Mathf.ceilPositive(blobs); i < len; i++){
                     rand.setSeed(e.id - i - 1);
 
-                    float lifetime = (18f + rand.range(6f)) * dstScl;
+                    float lifetime = (24f + rand.range(4f)) * dstScl;
                     float time = (totalTransmit + (lifetime / blobs) * i + rand.range(dstScl)) % lifetime;
                     float in = time / lifetime;
 
