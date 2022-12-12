@@ -330,7 +330,11 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
                     Draw.color(Draw.getColor(), Color.black, 0.9f);
                     Draw.alpha(Draw.getColor().a * alphaScale);
                     Draw.blend(Blending.additive);
-                    DrawUtils.lineAngleCenter(Core.atlas.find("circle-mid"), Core.atlas.find("unity-circle-end"), lx, ly, angle, length);
+                    DrawUtils.lineAngleCenter(
+                        Core.atlas.find("circle-mid"), Core.atlas.find("unity-circle-end"),
+                        lx, ly, angle, length
+                    );
+
                     Draw.blend();
                 }
 
@@ -342,7 +346,7 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
                     float time = (totalTransmit + (lifetime / blobs) * i + rand.range(dstScl)) % lifetime;
                     float in = time / lifetime;
 
-                    float rad = rand.random(blobRadMin, blobRadMax);
+                    float width = rand.random(blobRadMin, blobRadMax) * 2f;
                     float off = dst * in;
                     float alpha = off <= fade
                         ? (off / fade)
@@ -356,13 +360,20 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
                     Draw.color(Tmp.c1.set(blobColorA).lerp(blobColorB, rand.nextFloat()));
                     Draw.alpha(alpha * matterAlpha * Interp.pow2In.apply(alphaScale));
                     Draw.z(Layer.power + 0.015f + rand.range(0.015f));
-                    Fill.circle(bx, by, rad);
+
+                    Draw.rect(Core.atlas.find("hcircle"), bx, by, width, width, angle);
+                    Drawf.tri(bx, by, width, width * 2f, angle + 180f);
 
                     Draw.z(Layer.power + 0.04f);
+                    Lines.stroke(width + 3.6f);
                     Draw.color(Draw.getColor(), Color.black, 0.9f);
                     Draw.alpha(Draw.getColor().a * alphaScale);
                     Draw.blend(Blending.additive);
-                    Draw.rect(Core.atlas.find("circle-shadow"), bx, by, rad * 2f + 3.6f, rad * 2f + 3.6f);
+                    DrawUtils.lineAngleCenter(
+                        Core.atlas.find("circle-mid"), Core.atlas.find("unity-circle-end"),
+                        bx, by, angle + 180f, width * 1.75f
+                    );
+
                     Draw.blend();
                 }
             }
