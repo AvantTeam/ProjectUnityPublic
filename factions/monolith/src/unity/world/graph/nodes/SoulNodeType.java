@@ -42,7 +42,7 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
     public static final Color laserColor = monolithLighter.cpy().a(0.5f), laserColorInner = Color.white.cpy().a(0.67f);
     public static final float lineWidthMin = 0.6f, lineWidthMax = 1.2f, lineLenMin = 2.4f, lineLenMax = 3.6f;
     public static final Color lineColorA = monolithMid.cpy().lerp(monolithLight, 0.5f), lineColorB = monolithLighter;
-    public static final float blobRadMin = 0.3f, blobRadMax = 0.6f;
+    public static final float blobRadMin = 0.5f, blobRadMax = 0.8f;
     public static final Color blobColorA = monolithMid, blobColorB = monolithLight.cpy().lerp(monolithLighter, 0.5f);
     public static final float fade = 1.5f, matterAlphaMin = 0.33f;
 
@@ -342,11 +342,11 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
                 for(int i = 0, len = Mathf.ceilPositive(blobs); i < len; i++){
                     rand.setSeed(e.id - i - 1);
 
-                    float lifetime = (24f + rand.range(4f)) * dstScl;
+                    float lifetime = (27f + rand.range(4f)) * dstScl;
                     float time = (totalTransmit + (lifetime / blobs) * i + rand.range(dstScl)) % lifetime;
                     float in = time / lifetime;
 
-                    float width = rand.random(blobRadMin, blobRadMax) * 2f;
+                    float rad = rand.random(blobRadMin, blobRadMax);
                     float off = dst * in;
                     float alpha = off <= fade
                         ? (off / fade)
@@ -361,18 +361,13 @@ public class SoulNodeType extends GraphNodeType<SoulGraph> implements SoulNodeTy
                     Draw.alpha(alpha * matterAlpha * Interp.pow2In.apply(alphaScale));
                     Draw.z(Layer.power + 0.015f + rand.range(0.015f));
 
-                    Draw.rect(Core.atlas.find("hcircle"), bx, by, width, width, angle);
-                    Drawf.tri(bx, by, width, width * 2f, angle + 180f);
+                    Fill.circle(bx, by, rad);
 
                     Draw.z(Layer.power + 0.04f);
-                    Lines.stroke(width + 3.6f);
                     Draw.color(Draw.getColor(), Color.black, 0.9f);
                     Draw.alpha(Draw.getColor().a * alphaScale);
                     Draw.blend(Blending.additive);
-                    DrawUtils.lineAngleCenter(
-                        Core.atlas.find("circle-mid"), Core.atlas.find("unity-circle-end"),
-                        bx, by, angle + 180f, width * 1.75f
-                    );
+                    Draw.rect(Core.atlas.find("circle-shadow"), bx, by, rad * 2f + 3.6f, rad * 2f + 3.6f);
 
                     Draw.blend();
                 }
