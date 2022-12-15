@@ -9,8 +9,8 @@ public class PUStatUnit{
     torque = new StatUnit("unity-torque"),
 
     soulUnit = new StatUnit("unity-soul-unit"),
-    soulSecond = new StatUnit("unity-soul-second"),
-    soulPer = new StatUnit("unity-soul-per", false),
+    soulPerSecond = new StatUnit("unity-soul-per-second"),
+    perSoulPerSecond = new StatUnit("unity-per-soul-per-second", false),
 
     celcius = new StatUnit("unity-celcius", false);
 }

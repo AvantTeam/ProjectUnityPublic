@@ -25,5 +25,7 @@ public class PUStat{
     soulAbsLimit = new Stat("unity-soul-abs-limit", PUStatCat.soul),
     soulCritLimit = new Stat("unity-soul-crit-limit", PUStatCat.soul),
     soulOverDump = new Stat("unity-soul-over-dump", PUStatCat.soul),
-    soulOverScale = new Stat("unity-soul-over-scale", PUStatCat.soul);
+    soulOverScale = new Stat("unity-soul-over-scale", PUStatCat.soul),
+    soulRange = new Stat("unity-soul-range", PUStatCat.soul),
+    soulConnections = new Stat("unity-soul-connections", PUStatCat.soul);
 }

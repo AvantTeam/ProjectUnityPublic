@@ -16,6 +16,11 @@ public interface SoulNodeTypeI<T extends SoulGraphI<T>> extends GraphNodeTypeI<T
     <E extends Building & GraphBuild> SoulNodeI<T> create(E build);
 
     public interface SoulNodeI<T extends SoulGraphI<T>> extends GraphNodeI<T>{
+        default void drawConfigure(){}
+        default boolean onConfigureBuildTapped(Building other){
+            return true;
+        }
+
         float production();
         float consumption();
         float resistance();

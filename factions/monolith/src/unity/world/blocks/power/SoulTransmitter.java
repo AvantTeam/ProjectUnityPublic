@@ -6,8 +6,12 @@ import arc.math.*;
 import arc.util.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.world.meta.*;
 import unity.gen.graph.*;
+import unity.world.graph.*;
+import unity.world.graph.connectors.*;
 import unity.world.graph.nodes.SoulNodeType.*;
+import unity.world.meta.*;
 
 import static mindustry.Vars.*;
 
@@ -24,6 +28,17 @@ public class SoulTransmitter extends SoulBlock{
     public void init(){
         super.init();
         clipSize = Math.max(clipSize, laserRange * tilesize + 12f);
+    }
+
+    @Override
+    public void setStats(){
+        super.setStats();
+
+        var conn = (DistanceConnectorType<SoulGraph>)soulConnectorConfigs.find(DistanceConnectorType.class::isInstance);
+        if(conn == null) return;
+
+        stats.add(PUStat.soulRange, laserRange, StatUnit.blocks);
+        stats.add(PUStat.soulConnections, conn.connections, StatUnit.none);
     }
 
     @Override
@@ -47,7 +62,7 @@ public class SoulTransmitter extends SoulBlock{
 
         @Override
         public void drawConfigure(){
-            ((SoulNode)soulNode).drawConfigure();
+            soulNode.drawConfigure();
 
             Lines.stroke(1f, Pal.accent);
             Drawf.circles(x, y, laserRange * tilesize);
@@ -57,7 +72,7 @@ public class SoulTransmitter extends SoulBlock{
 
         @Override
         public boolean onConfigureBuildTapped(Building other){
-            return ((SoulNode)soulNode).onConfigureBuildTapped(other);
+            return soulNode.onConfigureBuildTapped(other);
         }
     }
 }

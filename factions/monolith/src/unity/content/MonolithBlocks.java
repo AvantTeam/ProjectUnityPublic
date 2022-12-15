@@ -147,7 +147,7 @@ public final class MonolithBlocks{
 
             solid = true;
 
-            soulNodeConfig = new SoulNodeType(){{
+            soulNodeConfig = new SoulTransmitterNodeType(){{
                 production = 0f;
                 resistance = 1f / 60f;
                 maxThroughput = 30f / 60f;
@@ -175,7 +175,7 @@ public final class MonolithBlocks{
             solid = true;
             laserRange = 20f;
 
-            soulNodeConfig = new SoulNodeType(){{
+            soulNodeConfig = new SoulTransmitterNodeType(){{
                 production = 240f / 60f;
                 resistance = 0f;
                 maxThroughput = 48f / 60f;
