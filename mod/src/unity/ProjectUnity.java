@@ -85,13 +85,13 @@ public class ProjectUnity extends ProjectUnityI{
             final Reads read = new Reads(null);
 
             @Override
-            public void write(DataOutput stream) throws IOException{
+            public void write(DataOutput stream){
                 write.output = stream;
                 worldState.write(write);
             }
 
             @Override
-            public void read(DataInput stream) throws IOException{
+            public void read(DataInput stream){
                 read.input = stream;
                 worldState.read(read);
             }

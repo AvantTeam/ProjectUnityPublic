@@ -32,13 +32,14 @@ file("$rootDir/local.properties").with{
             for(def e : map) ext."$e.key" = e.value
         }
     }
+    return
 }
 
 allprojects{
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
 
-    group = 'com.github.GlennFolker'
+    group = 'com.github.AvantTeam'
     version = modVersion
 
     ext{
@@ -68,13 +69,13 @@ allprojects{
         spritesRawDir = file("$assetsRawDir/sprites")
 
         // `-Pmod.dev` will initiate a developer build. Default is `false`.
-        devBuild = project.hasProperty('mod.dev') && Boolean.parseBoolean(project.property('mod.dev'))
+        devBuild = project.hasProperty('mod.dev') && Boolean.parseBoolean(project.property('mod.dev') as String)
         // `-Pmod.deprecation` will log usages of deprecated API. Default is `false`.
-        showDeprecate = project.hasProperty('mod.deprecation') && Boolean.parseBoolean(project.property('mod.deprecation'))
+        showDeprecate = project.hasProperty('mod.deprecation') && Boolean.parseBoolean(project.property('mod.deprecation') as String)
         // `-Pmod.unchecked` will log usages of unchecked operations. Default is `false`.
-        showUnchecked = project.hasProperty('mod.unchecked') && Boolean.parseBoolean(project.property('mod.unchecked'))
+        showUnchecked = project.hasProperty('mod.unchecked') && Boolean.parseBoolean(project.property('mod.unchecked') as String)
         // `-Pmod.listfiles` will log all files that are to be compiled. Default is `false`.
-        listFiles = project.hasProperty('mod.listfiles') && Boolean.parseBoolean(project.property('mod.listfiles'))
+        listFiles = project.hasProperty('mod.listfiles') && Boolean.parseBoolean(project.property('mod.listfiles') as String)
     }
 
     repositories{
@@ -84,7 +85,9 @@ allprojects{
         maven{url 'https://jitpack.io'}
     }
 
-    task sourcesJar(type: Jar, dependsOn: classes){
+    tasks.register('sourcesJar', Jar){
+        dependsOn classes
+
         archiveClassifier = 'sources'
         from sourceSets.main.allSource
     }
@@ -110,7 +113,7 @@ allprojects{
         }
     }
 
-    tasks.withType(JavaCompile){
+    tasks.withType(JavaCompile).configureEach{
         options.incremental = true
         options.encoding = 'UTF-8'
 
@@ -126,7 +129,7 @@ allprojects{
 
 configure([project(':annotations'), project(':downgrader')]){
     sourceCompatibility = compilerVersion
-    tasks.withType(JavaCompile){
+    tasks.withType(JavaCompile).configureEach{
         sourceCompatibility = compilerVersion
         targetCompatibility = 8
 
@@ -136,11 +139,11 @@ configure([project(':annotations'), project(':downgrader')]){
     }
 }
 
-configure([project(':core'), project(':mod'), project(':tools')] + project(':factions').subprojects){
+configure([project(':core'), project(':mod'), project(':plugin'), project(':tools')] + project(':factions').subprojects){
     sourceCompatibility = compilerVersion
-    tasks.withType(JavaCompile){
+    tasks.withType(JavaCompile).configureEach{
         sourceCompatibility = compilerVersion
-        options.release = 8
+        options.release.set 8
     }
 }
 
