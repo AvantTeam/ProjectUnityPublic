@@ -70,7 +70,7 @@ public class CrucibleSource extends GenericGraphBlock{
 
         @Override
         public Integer config(){
-            return config.id;
+            return config == null ? 0 : config.id;
         }
 
         @Override

@@ -243,6 +243,11 @@ public class Annotations{
     @Retention(RetentionPolicy.SOURCE)
     public @interface SyncLocal{}
 
+    /** Indicates that a field should not be synced to clients (but may still be non-transient) */
+    @Target({ElementType.FIELD})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NoSync{}
+
     /** Indicates that the field annotated with this came from another component class */
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.SOURCE)

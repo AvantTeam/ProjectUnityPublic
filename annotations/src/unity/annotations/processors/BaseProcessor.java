@@ -216,8 +216,7 @@ public abstract class BaseProcessor extends AbstractProcessor{
     }
 
     public String descString(ExecutableElement m){
-        String params = Arrays.toString(m.getParameters().toArray());
-        params = params.substring(1, params.length() - 1);
+        String params = Seq.with(m.getParameters()).toString(", ", e -> e.getEnclosingElement().asType() + " " + e.getSimpleName());
 
         return m.getEnclosingElement().toString() + "#" + simpleName(m) + "(" + params + ")";
     }
